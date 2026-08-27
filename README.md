@@ -119,11 +119,16 @@ uv --cache-dir .uv-cache sync --locked --all-groups --check
 
 The project-local cache flag works around a Windows cache-path problem on the original development machine. It is safe to use elsewhere, and `.uv-cache/` is ignored by Git.
 
+## Documentation
+
+- [`docs/planning/phase1/mcp_traffic_analysis_research_protocol.md`](docs/planning/phase1/mcp_traffic_analysis_research_protocol.md) — complete research design and experimental campaigns.
+- [`docs/phase1a_measurement_core.md`](docs/phase1a_measurement_core.md) — Phase 1A measurement boundary and usage.
+- [`docs/CODE_FLOW.md`](docs/CODE_FLOW.md) — module responsibilities, runtime paths, trace lifecycle, and failure flow.
+- [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md) — completed work, validation evidence, limitations, and roadmap.
+
 ## Current status
 
 The application-layer research protocol and the first model-free measurement slice are implemented. Phase 1A uses FastMCP's in-memory transport to validate correlation, ordering, timing, storage, concurrency, and failure classification before measuring real transport bytes.
-
-Read the complete protocol in [`docs/planning/phase1/mcp_traffic_analysis_research_protocol.md`](docs/planning/phase1/mcp_traffic_analysis_research_protocol.md).
 
 Run one deterministic trial:
 
@@ -135,4 +140,4 @@ Available scenarios are `list_tools`, `echo`, `sleep`, `backend_exception`, `too
 
 Phase 1A does not load `.env` and does not call a model. Request arguments, payload bodies, exception messages, credentials, and environment variables are not recorded. Because in-memory transport bypasses wire serialization, byte fields are deliberately null rather than estimated.
 
-Read [`docs/phase1a_measurement_core.md`](docs/phase1a_measurement_core.md) for the measurement boundary and trace interpretation. Phase 1B will add `stdio`, actual JSON-RPC and frame byte counts, and the complete 200-trial recorder-validation campaign.
+Phase 1B will add `stdio`, actual JSON-RPC and frame byte counts, and the complete 200-trial recorder-validation campaign.
