@@ -1,5 +1,16 @@
 import { expect, test } from '@playwright/test'
 
+test('runs a concrete Phase 4 task without model cost', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.getByTestId('behavior-workbench')).toBeVisible()
+  await expect(page.getByText('Simulated incoming incident ticket')).toBeVisible()
+  await page.getByLabel('Task structure').selectOption('recovery')
+  await page.getByRole('button', { name: 'Run task' }).click()
+  await expect(page.getByText(/Scripted structural validation/)).toBeVisible()
+  await expect(page.getByText('Five-call oracle')).toBeVisible()
+  await expect(page.getByText('expected rejection')).toBeVisible()
+})
+
 test('runs a successful trace and exposes measured statistics', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByTestId('app-ready')).toBeVisible()
@@ -61,6 +72,7 @@ test('renders a scored incident agent trace without spending API credit', async 
     }
   })
   await page.goto('/')
+  await page.getByRole('button', { name: 'Incident Agent' }).click()
   await page.getByRole('button', { name: 'Run real agent' }).click()
   await expect(page.getByText('checkout deployment defect')).toBeVisible()
   await expect(page.getByText('3 ordered MCP calls')).toBeVisible()

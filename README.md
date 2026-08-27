@@ -6,7 +6,7 @@ An empirical performance study of agentic AI systems.
 
 This repository is a laboratory for measuring how an AI agent communicates and behaves while using Model Context Protocol (MCP) tools.
 
-The current experiment gives a real AI agent one of three controlled, synthetic IT incidents. The agent investigates the incident through MCP tools, attempts a simulated remediation, and returns a structured answer. The system records the execution trace and scores it against known ground truth.
+The current experiment gives a real AI agent one of three concrete, synthetic IT incident tickets. Each ticket can be implemented as a sequential, conditional-branching, or recovery task. The agent investigates through MCP tools, attempts a simulated remediation, and returns a structured answer. The system records the execution trace and scores it against known ground truth.
 
 The IT incident application is the experimental setting. The main subject is the agent’s performance:
 
@@ -129,6 +129,7 @@ All remediation is simulated. No real infrastructure is restarted, rolled back, 
 | Phase 1 | Can MCP events, timing, ordering, concurrency, and failures be recorded correctly? | Complete |
 | Phase 2 | Can exact `stdio` frame bytes and controlled latency effects be measured statistically? | Complete |
 | Phase 3 | What does a real model-driven agent execution trace look like? | Complete |
+| Phase 4 | How does hidden task structure change MCP work and stochastic trace variability? | Implemented; live campaigns are explicit |
 | Later | What happens under controlled arrival rates, contention, queues, and network transport? | Not implemented |
 
 Phase 1 and Phase 2 deliberately used no model. They established the measurement system before agent behavior was introduced.
@@ -184,13 +185,30 @@ Start the production workbench:
 npm run demo
 ```
 
-Open `http://127.0.0.1:8000` and choose one of the three surfaces:
+Open `http://127.0.0.1:8000` and choose one of the four surfaces:
 
+- **Behavior study** — compare concrete tickets under sequential, branching, and recovery structures;
 - **Incident Agent** — run and inspect one real agent observation;
 - **Statistical study** — inspect the controlled Phase 2 experiment;
 - **Phase 1 traces** — inspect deterministic recorder and failure scenarios.
 
 The full paid campaign is intentionally not launched from the browser.
+
+## Run the Phase 4 task-structure study
+
+Validate the complete 27-run pilot design without model cost:
+
+```powershell
+uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.behavior.campaigns task-structure-pilot-check --stage pilot --mode deterministic
+```
+
+The live pilot uses the same command without `--mode deterministic`. The separate 90-run main study uses `task-structure-main-v1 --stage main`. Add `--resume` after an interruption or `--analyze-only` to rebuild derived outputs without model calls.
+
+The number 90 is the complete balanced design:
+
+$$
+3\ \text{task structures}\times3\ \text{incident tickets}\times10\ \text{independent runs per cell}=90.
+$$
 
 ## Run the repeated incident campaign
 
@@ -239,6 +257,7 @@ Calls within one run are nested measurements. The independent experimental unit 
 
 ```text
 frontend/src/components/IncidentWorkbench.tsx  primary Phase 3 UI
+frontend/src/components/BehaviorWorkbench.tsx  Phase 4 experiment and analysis UI
 src/mcp_traffic_analysis/api/app.py            HTTP API
 src/mcp_traffic_analysis/incidents/runner.py   one complete agent experiment
 src/mcp_traffic_analysis/incidents/server.py   ten MCP tools
@@ -246,6 +265,7 @@ src/mcp_traffic_analysis/incidents/world.py    synthetic incidents and truth
 src/mcp_traffic_analysis/transport/stdio_relay.py
                                                 exact frame recorder
 src/mcp_traffic_analysis/agent_campaigns.py    repeated campaign and analysis
+src/mcp_traffic_analysis/behavior/             Phase 4 design, traces, models, campaigns
 ```
 
 Read [`docs/CODE_FLOW.md`](docs/CODE_FLOW.md) for a plain-language walkthrough followed by the detailed technical reference.
@@ -270,6 +290,9 @@ Automated agent tests use a deterministic credit-free path. Browser tests do not
 - [`docs/CODE_FLOW.md`](docs/CODE_FLOW.md) — start here for what happens during one run.
 - [`docs/WORKBENCH_GUIDE.md`](docs/WORKBENCH_GUIDE.md) — how to read the UI and statistics.
 - [`docs/phase3_it_incident_agent.md`](docs/phase3_it_incident_agent.md) — frozen Phase 3 protocol and measurement boundary.
+- [`docs/phase4_task_structure.md`](docs/phase4_task_structure.md) — plain-language Phase 4 methods, commands, and interpretation.
+- [`docs/planning/phase4_task_structure_plan.md`](docs/planning/phase4_task_structure_plan.md) — frozen concrete-task design and statistical plan.
+- [`docs/results/phase4_task_structure_pilot_results.md`](docs/results/phase4_task_structure_pilot_results.md) — corrected 27-run pilot, invalid-v1 audit, and frozen main-study model rule.
 - [`docs/results/phase3_incident_pilot_results.md`](docs/results/phase3_incident_pilot_results.md) — corrected pilot results and invalid-pilot audit.
 - [`docs/phase2_statistical_baseline.md`](docs/phase2_statistical_baseline.md) — controlled factorial design and models.
 - [`docs/results/phase2_baseline_results.md`](docs/results/phase2_baseline_results.md) — completed 960-run Phase 2 result memo.
@@ -288,6 +311,8 @@ The current implementation does not support claims about:
 - autonomy-level effects;
 - multi-agent orchestration;
 - production incident-response reliability.
+
+Phase 4 does measure empirical trace distributions, transition frequencies, edit distance from an oracle, and path entropy. These are descriptive stochastic summaries; they do not yet establish a Markov or queueing model.
 
 Those require new experimental phases. They will not be inferred from measurements that do not observe them.
 

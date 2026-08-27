@@ -14,7 +14,7 @@ export default defineConfig({
   webServer: [
     {
       command:
-        'uv --cache-dir ../.uv-cache run --project .. python -m mcp_traffic_analysis.demo --artifact-root ../artifacts/e2e --campaign-root ../artifacts/e2e-campaigns --api-only --port 8001',
+        'uv --cache-dir ../.uv-cache run --project .. python -m mcp_traffic_analysis.demo --artifact-root ../artifacts/e2e --campaign-root ../artifacts/e2e-campaigns --agent-root ../artifacts/e2e-agent --behavior-root ../artifacts/e2e-behavior --api-only --port 8001',
       url: 'http://127.0.0.1:8001/api/health',
       name: 'FastAPI',
       timeout: 120_000,

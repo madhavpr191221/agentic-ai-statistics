@@ -2,6 +2,18 @@
 
 This guide explains what each part of the Phase 1A UI measures. The workbench is currently a **measurement-calibration tool**, not an agent benchmark and not yet a queueing experiment.
 
+## Phase 4 Behavior study
+
+The **Behavior study** is the primary Phase 4 surface. It shows a concrete incoming incident ticket and crosses that ticket with one hidden structure: sequential, conditional branching, or recovery.
+
+The left controls run one condition. **Scripted validation** follows the known oracle without model cost and must not be interpreted as a latency, token, or byte observation. **Real model measurement** records the stochastic agent, exact stdio frames, model usage, tool calls, actions, and score.
+
+The observed path is shown beside the five-call oracle. `Excess calls` is defined only for successful runs. A recovery run's first rejected action is labeled `expected rejection`; it is part of the task rather than a reliability failure.
+
+The saved-campaign section reports count-model effect ratios, an MCP-call ECDF, condition success and entropy, and empirical transition probabilities. A call ratio above one means more expected calls than sequential structure after accounting for task and randomized block. Entropy and transitions are descriptive and do not establish a Markov model.
+
+Read [`phase4_task_structure.md`](phase4_task_structure.md) before interpreting a Phase 4 campaign.
+
 ## The example: 10 controlled output calls
 
 Suppose the experiment settings are:

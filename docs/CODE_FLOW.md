@@ -909,6 +909,130 @@ uv run python -m mcp_traffic_analysis.agent_campaigns incident-pilot-v2 --analyz
 
 The full 30-run campaign is CLI-only. This prevents a browser click from silently launching a paid repeated experiment.
 
+## Phase 4 concrete-task flow
+
+Phase 4 reuses the Phase 3 agent and measured stdio boundary. It does not introduce another agent framework. Its new experimental factor is the hidden task graph.
+
+```text
+BehaviorWorkbench.tsx
+        ↓  ticket + selected structure
+api/app.py  /api/behavior/runs
+        ↓
+incidents/runner.py
+        ├── same model and prompt policy as Phase 3
+        ├── same measured stdio relay
+        ├── task-structure state initialization
+        └── oracle comparison and artifact writing
+        ↓
+incidents/server.py
+        ↓
+incidents/world.py
+        ├── sequential prerequisite graph
+        ├── conditional evidence branch
+        └── expected rejection and recovery gate
+        ↓
+behavior/traces.py      edit distance, classifications, entropy, transitions
+behavior/campaigns.py   frozen 27-run or 90-run balanced schedule
+behavior/analysis.py    run-level count and secondary models
+```
+
+### What the agent sees
+
+The agent sees only the concrete incoming message. For example:
+
+> Customers are reporting that checkout started failing after this morning's production release. Investigate the cause, gather supporting evidence, and take the safest action needed to restore checkout.
+
+It does not see the words `sequential`, `branching`, `recovery`, or the oracle sequence. Those belong to the experimental world and analysis layer.
+
+### One live run
+
+```mermaid
+sequenceDiagram
+    participant UI as BehaviorWorkbench
+    participant API as FastAPI
+    participant Run as run_incident
+    participant Model as GPT-5.6 Sol
+    participant Relay as stdio_relay
+    participant MCP as incident server
+    participant World as task graph
+
+    UI->>API: POST scenario, structure, live
+    API->>Run: fresh run and session
+    Run->>Model: fixed human-readable ticket
+    loop Until terminal output
+        Model->>Relay: MCP request frame
+        Relay->>MCP: unchanged bytes
+        MCP->>World: observe or act
+        World-->>MCP: state-dependent response
+        MCP-->>Relay: MCP response frame
+        Relay-->>Model: unchanged bytes
+    end
+    Run->>Run: score result and classify trace
+    Run-->>API: IncidentRunDetail + BehaviorMetadata
+    API-->>UI: persisted measured observation
+```
+
+`BehaviorMetadata` contains the incoming message, structure, oracle and observed sequences, oracle distance, excess calls, expected and unexpected rejections, call classifications, execution mode, and Phase 4 byte availability. Phase 3 artifacts remain valid because this field is optional.
+
+### Scripted validation is not live measurement
+
+The deterministic path directly executes the five known world operations. It validates reachability, gating, state transitions, scoring, and trace calculations. It does not cross the model or stdio relay. Therefore `execution_mode` is `scripted_validation`, and its Phase 4 request and response byte fields are `null`.
+
+Live mode sets `execution_mode` to `live_measurement` and uses exact relay-observed frame bytes. The UI renders these two modes differently.
+
+### Matched five-call oracles
+
+| Structure | Oracle |
+|---|---|
+| Sequential | alert, metrics, prescribed evidence, runbook, action |
+| Branching | alert, metrics, selected evidence branch, runbook, action |
+| Recovery | alert, cause evidence, expected rejected action, runbook, retry |
+
+The scenario-specific evidence call is `get_recent_changes` for checkout, `search_logs` for the image worker, and `get_dependencies` for orders. The recovery action appears twice by design.
+
+### Campaign and analysis flow
+
+```mermaid
+flowchart LR
+    A[Freeze campaign manifest] --> B[Randomize nine cells within each block]
+    B --> C[Create fresh run and MCP session]
+    C --> D[Persist terminal artifact]
+    D --> E{More scheduled runs?}
+    E -->|yes| C
+    E -->|no| F[Build run call action trace transition tables]
+    F --> G[Fit count and secondary models]
+    G --> H[Write analysis.json CSV and Parquet]
+    H --> I[Behavior Study reads saved results]
+```
+
+Run identifiers are deterministic functions of campaign, block, task, and structure. Resume mode skips only runs with a complete `detail.json`, preventing duplicate observations. Pilot and main campaigns live in separate directories and carry different `study_stage` values.
+
+The primary model is
+
+$$
+\operatorname{E}(N_{\mathrm{MCP},r}\mid X_r)=\mu_r,
+$$
+
+$$
+\log(\mu_r)=\beta_0+\beta_B I(\text{branching}_r)+\beta_R I(\text{recovery}_r)+\gamma_{\text{task}(r)}+\delta_{\text{block}(r)}.
+$$
+
+The primary estimator is a Poisson log-mean GLM with HC3 robust covariance. A negative-binomial sensitivity model is fitted only when Pearson dispersion exceeds 1.25. Positive latency, byte, token, and cost outcomes use log-linear HC3 models. If a dataset has no call-count variation, the analysis says that the model is unavailable instead of emitting a meaningless coefficient table.
+
+### Phase 4 API
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/behavior/conditions` | List the nine concrete task/structure cells and their oracles. |
+| `POST /api/behavior/runs` | Run one scripted or live behavior condition. |
+| `GET /api/behavior/runs` | List saved standalone Phase 4 runs. |
+| `GET /api/behavior/runs/{run_id}` | Read one saved run. |
+| `GET /api/behavior/campaigns` | List saved campaign analyses. |
+| `GET /api/behavior/campaigns/{campaign_id}` | Read one analysis. |
+| `GET /api/behavior/campaigns/{campaign_id}/tables/{table}` | Download an allow-listed CSV or Parquet table. |
+
+The browser can launch one run. It cannot launch a repeated paid campaign.
+
 ### Phase 3 validation map
 
 | Invariant | Validation path |

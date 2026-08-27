@@ -19,23 +19,31 @@ from dotenv import load_dotenv
 from openai import AsyncOpenAI
 from openai.types.shared import Reasoning
 
+from mcp_traffic_analysis.behavior.traces import classify_trace, normalized_oracle_distance
 from mcp_traffic_analysis.incidents.models import (
     ActionRecord,
     AgentEvent,
+    BehaviorMetadata,
     IncidentResult,
     IncidentRunDetail,
     IncidentRunMeasurement,
     IncidentScenario,
     ModelCallMeasurement,
+    TaskStructure,
 )
 from mcp_traffic_analysis.incidents.world import (
+    ACTION_TOOL,
+    INCOMING_MESSAGES,
     SCENARIOS,
     apply_action,
     evidence,
     initial_state,
     load_state,
+    observe,
+    oracle_sequence,
     save_state,
     score,
+    score_behavior,
 )
 from mcp_traffic_analysis.measurement.transport_models import FrameDirection, TransportFrame
 
@@ -152,6 +160,35 @@ def _deterministic_result(scenario: IncidentScenario, state_path: Path) -> Incid
     )
 
 
+def _required_action(scenario: IncidentScenario, state_path: Path) -> ActionRecord:
+    definition = SCENARIOS[scenario]
+    return apply_action(state_path, definition.required_action, definition.required_target)
+
+
+def _deterministic_behavior_result(
+    scenario: IncidentScenario, structure: TaskStructure, state_path: Path
+) -> tuple[IncidentResult, list[str]]:
+    sequence = oracle_sequence(scenario, structure)
+    for tool_name in sequence:
+        if tool_name == ACTION_TOOL[scenario]:
+            _required_action(scenario, state_path)
+        else:
+            observe(state_path, tool_name)
+    definition = SCENARIOS[scenario]
+    state = load_state(state_path)
+    return (
+        IncidentResult(
+            incident_id=scenario.value,
+            diagnosis=definition.hidden_cause,
+            evidence_ids=list(dict.fromkeys(state["evidence_seen"])),
+            selected_action=definition.required_action,
+            action_target=definition.required_target,
+            resolution_summary="Synthetic incident resolved through the oracle path.",
+        ),
+        sequence,
+    )
+
+
 async def run_incident(
     *,
     scenario: IncidentScenario,
@@ -160,6 +197,7 @@ async def run_incident(
     run_id: UUID | None = None,
     execution_order: int | None = None,
     block: int | None = None,
+    task_structure: TaskStructure | None = None,
 ) -> IncidentRunDetail:
     load_dotenv()
     run_id = run_id or uuid4()
@@ -168,14 +206,20 @@ async def run_incident(
     run_directory.mkdir(parents=True, exist_ok=False)
     state_path, frames_path = run_directory / "world_state.json", run_directory / "frames.jsonl"
     mcp_events_path = run_directory / "mcp_events.jsonl"
-    save_state(state_path, initial_state(scenario))
+    save_state(state_path, initial_state(scenario, task_structure))
     hooks = MeasurementHooks()
     result: IncidentResult | None = None
     failure_type: str | None = None
     failure_detail: str | None = None
     started = time.perf_counter_ns()
+    scripted_sequence: list[str] = []
     if mode == "deterministic":
-        result = _deterministic_result(scenario, state_path)
+        if task_structure:
+            result, scripted_sequence = _deterministic_behavior_result(
+                scenario, task_structure, state_path
+            )
+        else:
+            result = _deterministic_result(scenario, state_path)
     else:
         if not os.getenv("OPENAI_API_KEY"):
             raise RuntimeError(
@@ -231,11 +275,20 @@ async def run_incident(
                 run = await asyncio.wait_for(
                     Runner.run(
                         agent,
-                        f"Investigate incident {scenario.value}. Alert: {definition.alert}",
+                        (
+                            INCOMING_MESSAGES[scenario]
+                            if task_structure
+                            else f"Investigate incident {scenario.value}. Alert: {definition.alert}"
+                        ),
                         max_turns=12,
                         hooks=hooks,
                         run_config=RunConfig(
-                            tracing_disabled=True, workflow_name="phase3-incident-agent"
+                            tracing_disabled=True,
+                            workflow_name=(
+                                "phase4-task-structure"
+                                if task_structure
+                                else "phase3-incident-agent"
+                            ),
                         ),
                     ),
                     timeout=300,
@@ -252,7 +305,7 @@ async def run_incident(
     total_ms = (time.perf_counter_ns() - started) / 1_000_000
     state = load_state(state_path)
     actions = [ActionRecord.model_validate(item) for item in state["actions"]]
-    score_card = score(state, result)
+    score_card = score_behavior(state, result) if task_structure else score(state, result)
     frames = _frames(frames_path)
     mcp_events = (
         [json.loads(line) for line in mcp_events_path.read_text(encoding="utf-8").splitlines()]
@@ -272,9 +325,17 @@ async def run_incident(
         + cached * CACHED_INPUT_USD_PER_MILLION
         + output * OUTPUT_USD_PER_MILLION
     ) / 1_000_000
-    tool_sequence = [str(item["tool_name"]) for item in mcp_events]
+    tool_sequence = (
+        scripted_sequence
+        if mode == "deterministic" and task_structure
+        else [str(item["tool_name"]) for item in mcp_events]
+    )
     sdk_tool_sequence = [item.tool_name or "unknown" for item in tool_events]
-    correlation_consistent = sdk_tool_sequence == tool_sequence
+    correlation_consistent = (
+        True
+        if mode == "deterministic" and task_structure
+        else sdk_tool_sequence == tool_sequence
+    )
     measurement = IncidentRunMeasurement(
         run_id=run_id,
         scenario_id=scenario,
@@ -308,6 +369,50 @@ async def run_incident(
         ),
         estimated_cost_usd=cost,
     )
+    behavior: BehaviorMetadata | None = None
+    if task_structure:
+        oracle = oracle_sequence(scenario, task_structure)
+        trace_steps = classify_trace(tool_sequence, oracle, actions)
+        behavior = BehaviorMetadata(
+            task_structure=task_structure,
+            incoming_message=INCOMING_MESSAGES[scenario],
+            oracle_sequence=oracle,
+            observed_sequence=tool_sequence,
+            oracle_call_count=len(oracle),
+            excess_mcp_calls=(
+                len(tool_sequence) - len(oracle) if score_card.task_success else None
+            ),
+            normalized_oracle_distance=normalized_oracle_distance(tool_sequence, oracle),
+            expected_rejections=sum(action.expected_rejection for action in actions),
+            unexpected_rejections=sum(
+                not action.accepted and not action.expected_rejection and not action.prohibited
+                for action in actions
+            ),
+            trace_steps=trace_steps,
+            execution_mode=(
+                "scripted_validation" if mode == "deterministic" else "live_measurement"
+            ),
+            request_frame_bytes=(
+                None
+                if mode == "deterministic"
+                else sum(
+                    frame.frame_bytes
+                    for frame in frames
+                    if frame.direction is FrameDirection.CLIENT_TO_SERVER
+                )
+            ),
+            response_frame_bytes=(
+                None
+                if mode == "deterministic"
+                else sum(
+                    frame.frame_bytes
+                    for frame in frames
+                    if frame.direction is FrameDirection.SERVER_TO_CLIENT
+                )
+            ),
+            block=block,
+            execution_order=execution_order,
+        )
     detail = IncidentRunDetail(
         run_id=run_id,
         scenario_id=scenario,
@@ -318,9 +423,10 @@ async def run_incident(
         score=score_card,
         actions=actions,
         agent_events=hooks.events,
+        behavior=behavior,
     )
     manifest = {
-        "schema_version": "3.0.0",
+        "schema_version": "4.0.0" if task_structure else "3.0.0",
         "run_id": str(run_id),
         "scenario_id": scenario.value,
         "created_at_utc": created.isoformat(),
@@ -328,6 +434,8 @@ async def run_incident(
         "mode": mode,
         "execution_order": execution_order,
         "block": block,
+        "task_structure": task_structure.value if task_structure else None,
+        "incoming_message": INCOMING_MESSAGES[scenario] if task_structure else None,
         "transport": "stdio",
         "model_settings": {
             "reasoning_effort": "low",
