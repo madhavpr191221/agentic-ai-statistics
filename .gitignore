@@ -1,0 +1,28 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.coverage
+htmlcov/
+.hypothesis/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv
+
+# Local tooling and secrets
+.uv-cache/
+.env
+.env.*
+!.env.example
+
+# Generated experiment artifacts
+data/raw/
+data/processed/
+results/
+artifacts/
