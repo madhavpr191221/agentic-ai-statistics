@@ -86,13 +86,16 @@ Queueing theory will supply baseline models for relating arrival rate, service t
 - Python 3.13
 - [uv](https://docs.astral.sh/uv/) for Python and dependency management
 - FastMCP for MCP clients and servers
+- FastAPI for the local experiment and analysis API
+- React, TypeScript, and Vite for the primary research workbench
+- Plotly for interactive empirical distributions and trace views
 - OpenAI Agents SDK for the initial agent runtime
 - NumPy, pandas, SciPy, and statsmodels for statistical analysis
 - PyArrow for analysis-ready experiment tables
 - NetworkX for trace-graph analysis
 - Matplotlib and seaborn for research figures
 
-Google ADK, notebook tooling, dashboards, databases, and packet capture are deliberately deferred until an experiment requires them. Statistical analyses will initially be implemented as ordinary Python modules and scripts.
+Google ADK, notebook tooling, external dashboard infrastructure, databases, and packet capture are deliberately deferred until an experiment requires them. The local scientific UI is part of every completed phase; statistical calculations live in tested Python modules rather than browser-only code.
 
 ## Project setup
 
@@ -101,6 +104,7 @@ Install the pinned Python version and create the default development environment
 ```powershell
 uv --cache-dir .uv-cache python install 3.13
 uv --cache-dir .uv-cache sync --locked
+npm install
 ```
 
 Add the statistical analysis dependencies to the environment when needed:
@@ -119,10 +123,34 @@ uv --cache-dir .uv-cache sync --locked --all-groups --check
 
 The project-local cache flag works around a Windows cache-path problem on the original development machine. It is safe to use elsewhere, and `.uv-cache/` is ignored by Git.
 
+## Documentation
+
+- [`docs/planning/phase1/mcp_traffic_analysis_research_protocol.md`](docs/planning/phase1/mcp_traffic_analysis_research_protocol.md) — complete research design and experimental campaigns.
+- [`docs/phase1a_measurement_core.md`](docs/phase1a_measurement_core.md) — Phase 1A measurement boundary and usage.
+- [`docs/CODE_FLOW.md`](docs/CODE_FLOW.md) — module responsibilities, runtime paths, trace lifecycle, and failure flow.
+- [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md) — completed work, validation evidence, limitations, and roadmap.
+- [`docs/DEMO_WORKFLOW.md`](docs/DEMO_WORKFLOW.md) — UI usage, phase acceptance, and the permanent `demo` branch workflow.
+
 ## Current status
 
-The application-layer research protocol is complete. The recorder, deterministic MCP fixture, and experimental harness have not yet been implemented.
+The application-layer research protocol and the first model-free measurement slice are implemented. Phase 1A uses FastMCP's in-memory transport to validate correlation, ordering, timing, storage, concurrency, and failure classification before measuring real transport bytes.
 
-Read the complete protocol in [`docs/planning/phase1/mcp_traffic_analysis_research_protocol.md`](docs/planning/phase1/mcp_traffic_analysis_research_protocol.md).
+Run the primary React/TypeScript workbench:
 
-The first implementation milestone is a trustworthy protocol-level recorder and deterministic MCP fixture. It must reconstruct requests, responses, notifications, backend spans, byte counts, errors, and causal relationships before a real agent is introduced.
+```powershell
+npm run demo
+```
+
+Then open `http://127.0.0.1:8000`. The UI runs experiments, browses persisted traces, compares selected runs, and displays descriptive summaries, ECDFs, reproducible histograms, box plots, timelines, failures, and raw events.
+
+Run one deterministic trial:
+
+```powershell
+uv --cache-dir .uv-cache run python -m mcp_traffic_analysis.fixtures.runner echo
+```
+
+Available scenarios are `list_tools`, `echo`, `sleep`, `backend_exception`, `tool_error`, `timeout`, `nonexistent_tool`, `concurrent`, and `cancellation`. Each run creates an ignored directory under `artifacts/phase1a/` containing a versioned `manifest.json` and append-only `events.jsonl`.
+
+Phase 1A does not load `.env` and does not call a model. Request arguments, payload bodies, exception messages, credentials, and environment variables are not recorded. Because in-memory transport bypasses wire serialization, byte fields are deliberately null rather than estimated.
+
+Phase 1B will add `stdio`, actual JSON-RPC and frame byte counts, and the complete 200-trial recorder-validation campaign.

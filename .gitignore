@@ -26,3 +26,11 @@ data/raw/
 data/processed/
 results/
 artifacts/
+
+# Frontend-generated files
+node_modules/
+frontend/dist/
+frontend/coverage/
+frontend/test-results/
+frontend/playwright-report/
+*.tsbuildinfo
