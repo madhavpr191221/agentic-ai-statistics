@@ -164,3 +164,11 @@ The safe conclusion is:
 > The recorder captured ten successful tool calls and two discovery requests, preserved their ordering and timing, and revealed that the observed method classes had different latency profiles in this calibration run.
 
 The run does **not** establish a population latency distribution, heavy tails, queueing behavior, or agent performance. Those require repeated runs, controlled experimental conditions, and later phases with real transport and agent instrumentation.
+
+## Incident Agent screen
+
+**Task success** is an objective all-or-nothing score, not a model opinion. **Total latency** is user-to-result elapsed time. **Model / MCP calls** counts model decisions and tool invocations. **Estimated cost** applies the dated token prices stored in the manifest.
+
+The decomposition separates model time, client-observed MCP tool RTT, and a residual orchestration term. Server-handler time is nested inside the MCP RTT and shown separately. Tool chips are chronological. Request and response bytes are exact newline-delimited stdio JSON-RPC frame lengths. The score panel exposes every success condition, including the permanent failure caused by a prohibited action attempt.
+
+One run is a case study. The 30-run campaign supports descriptive variability, but ten observations per scenario do not justify strong tail or causal claims.

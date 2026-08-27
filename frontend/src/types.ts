@@ -277,3 +277,30 @@ export interface CampaignDetail {
   }
   analysis: Phase2Analysis | null
 }
+
+export type IncidentScenarioId = 'checkout_failures' | 'image_worker_degradation' | 'orders_api_outage'
+
+export interface IncidentScenarioDescriptor { id: IncidentScenarioId; label: string; alert: string }
+export interface IncidentScore {
+  diagnosis_correct: boolean; required_evidence_present: boolean; correct_remediation_executed: boolean
+  no_prohibited_action_attempted: boolean; final_state_resolved: boolean; task_success: boolean
+}
+export interface IncidentMeasurement {
+  status: 'success' | 'failure'; failure_type: string | null; total_latency_ms: number
+  model_latency_ms: number; mcp_latency_ms: number; server_handler_latency_ms: number; orchestration_latency_ms: number
+  decomposition_consistent: boolean; correlation_consistent: boolean; model_call_count: number; mcp_call_count: number
+  tool_sequence: string[]; input_tokens: number; cached_input_tokens: number; output_tokens: number
+  total_tokens: number; request_frame_bytes: number; response_frame_bytes: number; estimated_cost_usd: number
+}
+export interface IncidentRunDetail {
+  run_id: string; scenario_id: IncidentScenarioId; created_at_utc: string; model_id: string
+  measurement: IncidentMeasurement
+  result: null | { incident_id: string; diagnosis: string; evidence_ids: string[]; selected_action: string; action_target: string; resolution_summary: string }
+  score: IncidentScore
+  actions: Array<{ sequence: number; action: string; target: string; accepted: boolean; prohibited: boolean; result: string }>
+  agent_events: Array<{ sequence: number; event: string; elapsed_ms: number | null; tool_name: string | null }>
+}
+export interface IncidentCampaignSummary {
+  campaign_id: string; created_at_utc: string; n_runs: number; successes: number
+  success_rate: number; success_rate_wilson_95: [number, number]; total_estimated_cost_usd: number
+}

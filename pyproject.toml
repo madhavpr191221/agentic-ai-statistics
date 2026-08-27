@@ -1,6 +1,6 @@
 [project]
 name = "mcp-traffic-analysis"
-version = "0.2.0"
+version = "0.3.0"
 description = "Empirical performance analysis of agentic AI systems and MCP communication"
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
@@ -8,10 +8,13 @@ dependencies = [
     "fastapi>=0.116,<1",
     "fastmcp==3.2.4",
     "numpy>=2,<3",
+    # Newer releases require a usage field that openai-agents 0.7.0 does not populate.
+    "openai==2.40.0",
     "openai-agents==0.7.0",
     "pandas>=2,<4",
     "psutil>=7,<8",
     "pydantic>=2.12,<3",
+    "python-dotenv>=1,<2",
     "uvicorn>=0.35,<1",
 ]
 

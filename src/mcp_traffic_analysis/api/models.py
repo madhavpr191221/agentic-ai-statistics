@@ -24,6 +24,7 @@ class HealthResponse(ApiModel):
     status: Literal["ok"] = "ok"
     phase: str = "2"
     measurement_boundary: str = "application_and_stdio_transport"
+    agent_available: bool = False
 
 
 class ScenarioDescriptor(ApiModel):
