@@ -9,6 +9,10 @@ import type {
   CampaignSummary,
   Phase2RunParameters,
   Phase2RunResponse,
+  IncidentRunDetail,
+  IncidentScenarioDescriptor,
+  IncidentScenarioId,
+  IncidentCampaignSummary,
 } from './types'
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
@@ -53,4 +57,9 @@ export const api = {
     (await request<{ campaigns: CampaignSummary[] }>('/api/campaigns')).campaigns,
   getCampaign: (campaignId: string) =>
     request<CampaignDetail>(`/api/campaigns/${campaignId}`),
+  listIncidentScenarios: () => request<IncidentScenarioDescriptor[]>('/api/agent/scenarios'),
+  listIncidentRuns: () => request<IncidentRunDetail[]>('/api/agent/runs'),
+  createIncidentRun: (scenario: IncidentScenarioId, mode: 'live' | 'deterministic' = 'live') =>
+    request<IncidentRunDetail>('/api/agent/runs', { method: 'POST', body: JSON.stringify({ scenario, mode }) }),
+  listIncidentCampaigns: () => request<IncidentCampaignSummary[]>('/api/agent/campaigns'),
 }

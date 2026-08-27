@@ -4,7 +4,7 @@ This is the living implementation record for MCP Traffic Analysis. It summarizes
 
 Status date: **2026-08-27**
 
-Completed phase branch: **`phase/02-statistical-baseline`**
+Active phase branch: **`phase/03-it-incident-agent`**
 
 Cumulative tested branch: **`demo`**
 
@@ -16,7 +16,16 @@ The project studies the statistical performance of agentic AI systems through me
 
 The immediate methodological rule is:
 
-> Do not introduce a language model until the measurement system agrees with deterministic ground truth.
+> Introduce the language model only after the measurement system agrees with deterministic ground truth.
+
+### Phase 3 measured IT-incident agent
+
+- Three resettable incident families with known causes, evidence, correct actions, and prohibited actions.
+- Ten local MCP tools for observation, simulated remediation, escalation, and updates.
+- One GPT-5.6 Sol agent with low reasoning, structured output, sequential tool calls, disabled retries, and bounded execution.
+- Exact stdio JSON-RPC frames, model/tool hooks, tokens, cost, latency decomposition, action ledgers, and objective scoring.
+- A 30-run randomized complete-block campaign with Wilson intervals and trace-sequence variability.
+- A React **Incident Agent** surface; automated tests use a credit-free deterministic path.
 
 ## Completed work
 
@@ -86,12 +95,12 @@ flowchart LR
     Raw --> API[FastAPI analysis API]
     API --> UI[React TypeScript workbench]
 
-    Agent[Hosted AI agent] -. not connected yet .-> Client
+    Agent[GPT-5.6 Sol incident agent] --> Client
     Stdio[stdio relay and frame recorder] --> Server
     Network[HTTP TLS TCP IP] -. later phases .-> Server
 ```
 
-No hosted model is used. `.env` is ignored by Git, is not loaded by the runner, and was not read while implementing Phase 1A.
+Phase 1 and Phase 2 remain model-free. Phase 3 loads the ignored `.env` only at the live agent entry point; API keys are never written to artifacts or returned by the API.
 
 ## What works now
 

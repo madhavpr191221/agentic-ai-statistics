@@ -1,6 +1,6 @@
 # Code Flow
 
-This document explains the implemented Phase 1A recorder and Phase 2 statistical baseline. It covers the model-free measurement core, real `stdio` protocol-frame boundary, campaign analysis, FastAPI application, and React/TypeScript workbench.
+This document explains the Phase 1 recorder, Phase 2 statistical baseline, and Phase 3 measured incident agent. It covers the deterministic measurement core, real `stdio` frame boundary, real-agent correlation, campaign analysis, FastAPI application, and React/TypeScript workbench.
 
 The code has one deliberate boundary: it observes normalized MCP activity inside FastMCP, but it does not yet observe serialized JSON-RPC bytes or transport frames.
 
@@ -350,3 +350,22 @@ flowchart LR
 For `stdio`, the child server uses standard input and output exclusively for MCP frames. The relay pumps each complete frame unchanged, records its actual byte length including line ending, computes a checksum, and maps JSON-RPC IDs back to the call metadata. Server diagnostic output is captured separately in `server.stderr.log`, so it cannot corrupt the protocol stream.
 
 The campaign CLI is the authority for a full 960-run collection. It writes `progress.json` after each run and can resume an interrupted collection. At completion, `analysis.phase2_models` derives run-level medians, call-level records, HC3 OLS estimates, a random-run-intercept mixed model, and a within-condition run bootstrap. The UI reads those saved artifacts and can make a small calibration run; it does not silently launch the scientific campaign in a browser request.
+
+## Phase 3 real-agent flow
+
+```mermaid
+flowchart LR
+    UI[Incident Agent UI] --> API[FastAPI endpoint]
+    API --> Runner[incident runner]
+    Runner --> Model[GPT-5.6 Sol]
+    Runner --> Relay[stdio relay]
+    Relay --> MCP[incident FastMCP server]
+    MCP --> World[resettable world]
+    Relay --> Frames[frames.jsonl]
+    MCP --> Events[mcp_events.jsonl]
+    Runner --> Score[objective scorer]
+    Score --> Detail[run artifacts]
+    Detail --> UI
+```
+
+`incidents.world` owns ground truth and state transitions. `incidents.server` exposes evidence and simulated-action tools. `incidents.runner` owns the model run, hooks, byte correlation, decomposition, cost estimate, and terminal artifacts. `agent_campaigns` freezes and summarizes the 30-run pilot.

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from statistics import median
 from typing import Literal
@@ -36,6 +37,10 @@ from mcp_traffic_analysis.api.repository import (
 from mcp_traffic_analysis.api.trace_analysis import analyze_records, summarize_record
 from mcp_traffic_analysis.experiments.condition_runner import run_condition
 from mcp_traffic_analysis.fixtures.runner import Scenario, run_fixture
+from mcp_traffic_analysis.incidents.models import IncidentRunDetail, IncidentRunRequest
+from mcp_traffic_analysis.incidents.repository import IncidentRepository
+from mcp_traffic_analysis.incidents.runner import run_incident
+from mcp_traffic_analysis.incidents.world import SCENARIOS as INCIDENT_SCENARIOS
 from mcp_traffic_analysis.measurement.transport_models import CallMeasurement, RunMeasurement
 
 SCENARIOS = [
@@ -100,18 +105,22 @@ def create_app(
     *,
     artifact_root: Path = Path("artifacts/phase1a"),
     campaign_root: Path = Path("artifacts/phase2"),
+    agent_root: Path = Path("artifacts/phase3"),
     frontend_dist: Path = Path("frontend/dist"),
     serve_frontend: bool = True,
 ) -> FastAPI:
     repository = ArtifactRepository(artifact_root)
     campaigns_repository = CampaignRepository(campaign_root)
+    incident_repository = IncidentRepository(agent_root)
+    agent_available = bool(os.getenv("OPENAI_API_KEY") or Path(".env").is_file())
     api = FastAPI(
         title="MCP Traffic Analysis",
-        version="0.2.0",
+        version="0.3.0",
         description="Local API for deterministic MCP performance experiments.",
     )
     api.state.repository = repository
     api.state.campaign_repository = campaigns_repository
+    api.state.incident_repository = incident_repository
     api.add_middleware(
         CORSMiddleware,
         allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
@@ -128,7 +137,71 @@ def create_app(
 
     @api.get("/api/health", response_model=HealthResponse)
     async def health() -> HealthResponse:
-        return HealthResponse()
+        return HealthResponse(agent_available=agent_available)
+
+    @api.get("/api/agent/scenarios")
+    async def agent_scenarios() -> list[dict[str, object]]:
+        return [
+            {"id": item.id.value, "label": item.label, "alert": item.alert}
+            for item in INCIDENT_SCENARIOS.values()
+        ]
+
+    @api.post("/api/agent/runs", response_model=IncidentRunDetail, status_code=201)
+    async def create_agent_run(request: IncidentRunRequest) -> IncidentRunDetail:
+        if request.mode == "live" and not agent_available:
+            raise HTTPException(
+                status_code=503,
+                detail="OPENAI_API_KEY is missing. Add it to .env and restart the API.",
+            )
+        try:
+            return await run_incident(
+                scenario=request.scenario, output_root=incident_repository.root, mode=request.mode
+            )
+        except RuntimeError as error:
+            raise HTTPException(status_code=503, detail=str(error)) from error
+
+    @api.get("/api/agent/runs", response_model=list[IncidentRunDetail])
+    async def list_agent_runs() -> list[IncidentRunDetail]:
+        return incident_repository.list_runs()
+
+    @api.get("/api/agent/runs/{run_id}", response_model=IncidentRunDetail)
+    async def get_agent_run(run_id: UUID) -> IncidentRunDetail:
+        try:
+            return incident_repository.get(run_id)
+        except KeyError as error:
+            raise HTTPException(status_code=404, detail="agent run not found") from error
+
+    @api.get("/api/agent/campaigns")
+    async def list_agent_campaigns() -> list[dict[str, object]]:
+        return incident_repository.list_campaigns()
+
+    @api.get("/api/agent/campaigns/{campaign_id}")
+    async def get_agent_campaign(campaign_id: str) -> dict[str, object]:
+        try:
+            return incident_repository.campaign(campaign_id)
+        except KeyError as error:
+            raise HTTPException(status_code=404, detail="agent campaign not found") from error
+
+    @api.get("/api/agent/campaigns/{campaign_id}/tables/{table_name}")
+    async def agent_campaign_table(
+        campaign_id: str,
+        table_name: Literal[
+            "runs.csv",
+            "runs.parquet",
+            "model_calls.csv",
+            "model_calls.parquet",
+            "mcp_calls.csv",
+            "mcp_calls.parquet",
+            "actions.csv",
+            "actions.parquet",
+            "traces.csv",
+            "traces.parquet",
+        ],
+    ) -> FileResponse:
+        path = incident_repository.root / f"campaign-{campaign_id}" / "tables" / table_name
+        if not path.is_file():
+            raise HTTPException(status_code=404, detail="agent campaign table not found")
+        return FileResponse(path, filename=table_name)
 
     @api.get("/api/scenarios", response_model=list[ScenarioDescriptor])
     async def scenarios() -> list[ScenarioDescriptor]:

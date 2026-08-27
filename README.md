@@ -136,6 +136,12 @@ The project-local cache flag works around a Windows cache-path problem on the or
 
 ## Current status
 
+Phase 3 now adds a real GPT-5.6 Sol IT-incident agent over a deterministic local MCP world. It records model time, ordered MCP calls, exact stdio frame bytes, action safety, objective task success, tokens, and estimated cost. See [`docs/phase3_it_incident_agent.md`](docs/phase3_it_incident_agent.md).
+
+The corrected 30-run result memo is [`docs/results/phase3_incident_pilot_results.md`](docs/results/phase3_incident_pilot_results.md). It also documents the invalid first calibration and why it was rerun rather than silently rescored.
+
+Run `npm run demo`, open `http://127.0.0.1:8000`, and choose **Incident Agent**. Real runs require `OPENAI_API_KEY` in the ignored `.env` file.
+
 The application-layer research protocol, Phase 1A recorder validation, and the Phase 2 controlled statistical baseline are implemented. Phase 2 uses a deterministic MCP tool to measure the effect of transport, payload size, service time, and concurrency; it records actual `stdio` JSON-RPC frame bytes and produces reproducible analysis tables and model diagnostics.
 
 Run the primary React/TypeScript workbench:

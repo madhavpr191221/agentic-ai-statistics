@@ -50,6 +50,8 @@ npm run demo
 
 Open `http://127.0.0.1:8000`. The production frontend is built first and served by FastAPI. Artifacts are written below `artifacts/phase1a/`.
 
+Choose **Incident Agent** for Phase 3. A UI run uses one real hosted model and writes below `artifacts/phase3/`; every remediation remains synthetic. The full 30-run campaign stays in the CLI so a browser click cannot accidentally launch it.
+
 For UI and API hot reload:
 
 ```powershell
