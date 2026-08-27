@@ -39,9 +39,9 @@ N_{\mathrm{call}}=7{,}680
 \quad\text{call-level measurements}.
 $$
 
-The eight calls within one run share a session and startup state. They are therefore related measurements, not eight independent replications. For the main analysis, we summarize each run by its median call latency, \(\widetilde L_r\), and use one value per run. This gives the primary model 960 experimental units instead of an artificially inflated sample size of 7,680. We call runs independent **by experimental design** because each run starts a fresh session; possible time dependence on the same machine remains a limitation to diagnose rather than something the design can guarantee away.
+The eight calls within one run share a session and startup state. They are therefore related measurements, not eight independent replications. For the main analysis, we summarize each run by its median call latency, $\widetilde L_r$, and use one value per run. This gives the primary model 960 experimental units instead of an artificially inflated sample size of 7,680. We call runs independent **by experimental design** because each run starts a fresh session; possible time dependence on the same machine remains a limitation to diagnose rather than something the design can guarantee away.
 
-The main model asks how the typical latency of run \(r\) changes with transport \(T_r\), payload \(P_r\), programmed service time \(S_r\), and concurrency \(C_r\):
+The main model asks how the typical latency of run $r$ changes with transport $T_r$, payload $P_r$, programmed service time $S_r$, and concurrency $C_r$:
 
 $$
 \log\!\left(\widetilde L_r\right)
@@ -57,21 +57,21 @@ $$
 
 In this equation:
 
-- \(\widetilde L_r\) is the median of the eight client-observed call latencies in run \(r\);
-- \(\log\) is the natural logarithm;
-- \(\beta_0\) is the expected log-latency of the reference condition;
-- \(\beta_T,\beta_P,\beta_S,\beta_C\) are reference-coded factor contrasts;
-- \(\beta_{TP}\) and \(\beta_{TC}\) are interaction contrasts; and
-- \(\varepsilon_r\) is the part of run \(r\)'s log-latency not explained by the included factors.
+- $\widetilde L_r$ is the median of the eight client-observed call latencies in run $r$;
+- $\log$ is the natural logarithm;
+- $\beta_0$ is the expected log-latency of the reference condition;
+- $\beta_T,\beta_P,\beta_S,\beta_C$ are reference-coded factor contrasts;
+- $\beta_{TP}$ and $\beta_{TC}$ are interaction contrasts; and
+- $\varepsilon_r$ is the part of run $r$'s log-latency not explained by the included factors.
 
-The reference condition is `in_memory`, 64-byte payload, 0 ms programmed service time, and concurrency 1. Payload and service time are treated as categorical experimental factors here, so symbols such as \(\beta_P\) represent several contrasts against a reference level, not one continuous slope.
+The reference condition is `in_memory`, 64-byte payload, 0 ms programmed service time, and concurrency 1. Payload and service time are treated as categorical experimental factors here, so symbols such as $\beta_P$ represent several contrasts against a reference level, not one continuous slope.
 
 The two interaction terms ask questions that main effects cannot answer alone:
 
-- \(\beta_{TP}\): does the effect of payload size differ between `in_memory` and `stdio`?
-- \(\beta_{TC}\): does the effect of concurrency differ between `in_memory` and `stdio`?
+- $\beta_{TP}$: does the effect of payload size differ between `in_memory` and `stdio`?
+- $\beta_{TC}$: does the effect of concurrency differ between `in_memory` and `stdio`?
 
-We use a logarithm because latency is positive and comparisons such as “twice as long” are usually more meaningful than fixed additive differences. After fitting the model, exponentiating a coefficient gives a conditional latency ratio. For example, if a coefficient were \(\log 2\), the associated contrast would correspond to \(e^{\log 2}=2\): twice the typical latency, holding the other modeled factors fixed. We fit this run-level equation by ordinary least squares and use HC3 heteroskedasticity-robust standard errors for its coefficient intervals.
+We use a logarithm because latency is positive and comparisons such as “twice as long” are usually more meaningful than fixed additive differences. After fitting the model, exponentiating a coefficient gives a conditional latency ratio. For example, if a coefficient were $\log 2$, the associated contrast would correspond to $e^{\log 2}=2$: twice the typical latency, holding the other modeled factors fixed. We fit this run-level equation by ordinary least squares and use HC3 heteroskedasticity-robust standard errors for its coefficient intervals.
 
 Finally, `stdio` is not an Internet connection. It is a local subprocess boundary. We record genuine serialized JSON-RPC frames there—request and response bytes, line endings, hashes, and protocol IDs—but we do not record TCP/IP packets, Internet round-trip time, or a production queue. Phase 2 is therefore a calibrated starting point: it tests the measurement and statistical workflow before we use it on agent behaviour or queueing experiments.
 
@@ -191,7 +191,7 @@ $$
 \qquad b_r \sim \mathcal N(0, \tau^2).
 $$
 
-The random intercept (b_r) represents persistent run-to-run differences. The reported intra-class correlation is
+The random intercept $b_r$ represents persistent run-to-run differences. The reported intra-class correlation is
 
 $$
 \mathrm{ICC} = \frac{\tau^2}{\tau^2 + \sigma^2}.
