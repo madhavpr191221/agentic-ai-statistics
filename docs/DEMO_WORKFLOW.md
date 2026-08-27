@@ -33,6 +33,8 @@ Phase 1A provides a local React/TypeScript research workbench backed by FastAPI.
 
 The UI does not claim that nested calls are independent, that the observed event window is total agent latency, or that in-memory Python objects reveal wire bytes.
 
+For a field-by-field interpretation of the metrics, ECDF, histogram, box plot, grouped method table, timeline, and event stream, read [`WORKBENCH_GUIDE.md`](WORKBENCH_GUIDE.md).
+
 ## Run the workbench
 
 ```powershell

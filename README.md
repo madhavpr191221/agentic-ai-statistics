@@ -130,6 +130,7 @@ The project-local cache flag works around a Windows cache-path problem on the or
 - [`docs/CODE_FLOW.md`](docs/CODE_FLOW.md) — module responsibilities, runtime paths, trace lifecycle, and failure flow.
 - [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md) — completed work, validation evidence, limitations, and roadmap.
 - [`docs/DEMO_WORKFLOW.md`](docs/DEMO_WORKFLOW.md) — UI usage, phase acceptance, and the permanent `demo` branch workflow.
+- [`docs/WORKBENCH_GUIDE.md`](docs/WORKBENCH_GUIDE.md) — plain-English interpretation of every metric and statistical plot in the UI.
 
 ## Current status
 

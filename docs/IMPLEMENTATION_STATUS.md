@@ -204,6 +204,7 @@ npm run test:e2e
 - [`planning/phase1/mcp_traffic_analysis_research_protocol.md`](planning/phase1/mcp_traffic_analysis_research_protocol.md): full research design.
 - [`../README.md`](../README.md): project orientation and setup.
 - [`DEMO_WORKFLOW.md`](DEMO_WORKFLOW.md): UI operation, acceptance tests, and branch workflow.
+- [`WORKBENCH_GUIDE.md`](WORKBENCH_GUIDE.md): statistical interpretation of the workbench and its measurement limits.
 
 ## Roadmap
 
