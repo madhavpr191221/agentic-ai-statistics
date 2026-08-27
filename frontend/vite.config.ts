@@ -9,7 +9,10 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8000',
+        // A dedicated target keeps browser tests isolated from a locally
+        // running workbench, while the normal developer experience remains
+        // unchanged on port 8000.
+        target: process.env.VITE_API_PROXY_TARGET ?? 'http://127.0.0.1:8000',
         changeOrigin: true,
       },
     },

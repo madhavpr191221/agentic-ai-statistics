@@ -146,3 +146,134 @@ export interface RunParameters {
   repeat: number
   seed: number
 }
+
+export interface Phase2RunParameters {
+  transport: 'in_memory' | 'stdio'
+  payload_target_bytes: number
+  service_time_ms: number
+  concurrency: number
+  calls_per_run: number
+  seed: number
+}
+
+export interface CallMeasurement {
+  run_id: string
+  condition_id: string
+  call_id: string
+  call_index: number
+  batch_index: number
+  transport: 'in_memory' | 'stdio'
+  payload_target_bytes: number
+  service_time_ms: number
+  concurrency: number
+  is_first_call: boolean
+  client_roundtrip_ms: number
+  outcome: string
+  error_type: string | null
+  request_payload_bytes: number | null
+  request_frame_bytes: number | null
+  response_payload_bytes: number | null
+  response_frame_bytes: number | null
+  server_handler_ms: number | null
+}
+
+export interface Phase2RunResponse {
+  run_id: string
+  condition_id: string
+  transport: 'in_memory' | 'stdio'
+  session_start_ms: number
+  run_elapsed_ms: number
+  median_client_roundtrip_ms: number
+  median_server_handler_ms: number | null
+  median_nonhandler_residual_ms: number | null
+  total_request_frame_bytes: number | null
+  total_response_frame_bytes: number | null
+  calls: CallMeasurement[]
+}
+
+export interface CampaignSummary {
+  campaign_id: string
+  design_name: string
+  status: string
+  planned_runs: number
+  completed_runs: number
+  created_at_utc: string
+}
+
+export interface ModelCoefficient {
+  term: string
+  estimate: number
+  standard_error: number
+  ci_low: number
+  ci_high: number
+  p_value: number
+  latency_ratio: number
+}
+
+export interface ConditionSummary {
+  transport: string
+  payload_target_bytes: number
+  service_time_ms: number
+  concurrency: number
+  n_runs: number
+  n_calls: number
+  median_ms: number
+  median_ci_low: number
+  median_ci_high: number
+  p90_ms: number
+  p95_ms: number
+  p95_ci_low: number
+  p95_ci_high: number
+  iqr_ms: number
+}
+
+export interface Phase2Analysis {
+  experimental_unit: string
+  primary_model: {
+    model_type: string
+    formula: string
+    n_runs: number
+    r_squared: number
+    adjusted_r_squared: number
+    coefficients: ModelCoefficient[]
+  }
+  mixed_model: {
+    formula: string
+    converged: boolean
+    coefficients?: ModelCoefficient[]
+    between_run_variance?: number
+    within_run_variance?: number
+    icc?: number
+    error_type?: string
+  }
+  byte_model: unknown
+  condition_summaries: ConditionSummary[]
+  diagnostics: {
+    fitted: number[]
+    residuals: number[]
+    qq_theoretical: number[]
+    qq_observed: number[]
+  }
+  counts: { runs: number; successful_calls: number; failed_calls: number }
+  notes: string[]
+}
+
+export interface CampaignDetail {
+  manifest: {
+    campaign_id: string
+    design_name: string
+    replicates: number
+    calls_per_run: number
+    transports: string[]
+    payload_sizes: number[]
+    service_times_ms: number[]
+    concurrency_levels: number[]
+    planned_runs: unknown[]
+  }
+  progress: {
+    status: string
+    planned_runs: number
+    completed_runs: number
+  }
+  analysis: Phase2Analysis | null
+}

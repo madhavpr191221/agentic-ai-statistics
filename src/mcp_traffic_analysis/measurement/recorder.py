@@ -74,9 +74,7 @@ class EventRecorder:
         payload_bytes: int | None = None,
         frame_bytes: int | None = None,
         payload_hash: str | None = None,
-        payload_recording_policy: PayloadRecordingPolicy = (
-            PayloadRecordingPolicy.NOT_RECORDED
-        ),
+        payload_recording_policy: PayloadRecordingPolicy = (PayloadRecordingPolicy.NOT_RECORDED),
         latency_ms: float | None = None,
         error_type: ErrorType | None = None,
         error_code: str | int | None = None,

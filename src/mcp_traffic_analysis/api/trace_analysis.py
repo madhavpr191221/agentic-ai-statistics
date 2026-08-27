@@ -31,9 +31,7 @@ def _trace_window_ms(events: Iterable[TraceEvent]) -> float | None:
 
 
 def summarize_record(record: ArtifactRecord) -> RunSummary:
-    starts = [
-        event for event in record.events if event.event_kind is EventKind.REQUEST_STARTED
-    ]
+    starts = [event for event in record.events if event.event_kind is EventKind.REQUEST_STARTED]
     terminals = _terminal_events(record.events)
     successful = [event for event in terminals if event.outcome is Outcome.SUCCESS]
     failed = [event for event in terminals if event.outcome is not Outcome.SUCCESS]
@@ -135,9 +133,7 @@ def analyze_records(
             "These summaries are descriptive calibration results, not inferential claims.",
         ]
 
-    errors = Counter(
-        event.error_type.value for event in terminals if event.error_type is not None
-    )
+    errors = Counter(event.error_type.value for event in terminals if event.error_type is not None)
     return AnalysisResponse(
         unit="run" if unit == "run" else "call",
         metric=metric,

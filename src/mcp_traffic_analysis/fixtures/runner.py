@@ -94,7 +94,12 @@ async def execute_scenario(client: Client[Any], scenario: Scenario) -> None:
     """Execute one deterministic scenario against an initialized client."""
     if scenario is Scenario.LIST_TOOLS:
         tools = await client.list_tools()
-        if {tool.name for tool in tools} != {"echo_bytes", "sleep_ms", "fail_with"}:
+        if {tool.name for tool in tools} != {
+            "echo_bytes",
+            "sleep_ms",
+            "roundtrip_payload",
+            "fail_with",
+        }:
             raise RuntimeError("fixture tool discovery did not match the ground truth")
     elif scenario is Scenario.ECHO:
         await client.call_tool("echo_bytes", {"n": 64})

@@ -75,13 +75,28 @@ class TraceMiddleware(Middleware):
         name = getattr(context.message, "name", None)
         return name if isinstance(name, str) else None
 
-    @staticmethod
-    def _metadata(context: MiddlewareContext[Any]) -> dict[str, str]:
-        return {
+    def _metadata(self, context: MiddlewareContext[Any]) -> dict[str, str]:
+        metadata = {
             "measurement_boundary": "fastmcp_server_middleware",
-            "byte_measurement": "unavailable_in_memory_transport",
+            "byte_measurement": (
+                "unavailable_in_memory_transport"
+                if self.recorder.manifest.transport.value == "in_memory"
+                else "observed_at_stdio_relay"
+            ),
             "source": context.source,
         }
+        fastmcp_context = context.fastmcp_context
+        request_context = getattr(fastmcp_context, "request_context", None)
+        meta = getattr(request_context, "meta", None)
+        raw_call_id = getattr(meta, "call_id", None)
+        if isinstance(raw_call_id, str):
+            metadata["call_id"] = raw_call_id
+        return metadata
+
+    def _payload_policy(self) -> PayloadRecordingPolicy:
+        if self.recorder.manifest.transport.value == "in_memory":
+            return PayloadRecordingPolicy.UNAVAILABLE_TRANSPORT_BYPASS
+        return PayloadRecordingPolicy.NOT_RECORDED
 
     async def _record_failure(
         self,
@@ -105,7 +120,7 @@ class TraceMiddleware(Middleware):
             sample=finish,
             mcp_method=context.method,
             tool_name=self._tool_name(context),
-            payload_recording_policy=PayloadRecordingPolicy.UNAVAILABLE_TRANSPORT_BYPASS,
+            payload_recording_policy=self._payload_policy(),
             latency_ms=max(0.0, (finish.monotonic_time_ns - call_start_ns) / 1_000_000),
             error_type=error_type,
             error_code=type(error).__name__,
@@ -131,7 +146,7 @@ class TraceMiddleware(Middleware):
             outcome=Outcome.STARTED,
             mcp_method=context.method,
             tool_name=self._tool_name(context),
-            payload_recording_policy=PayloadRecordingPolicy.UNAVAILABLE_TRANSPORT_BYPASS,
+            payload_recording_policy=self._payload_policy(),
             metadata=self._metadata(context),
         )
 
@@ -166,7 +181,7 @@ class TraceMiddleware(Middleware):
             sample=finish,
             mcp_method=context.method,
             tool_name=self._tool_name(context),
-            payload_recording_policy=PayloadRecordingPolicy.UNAVAILABLE_TRANSPORT_BYPASS,
+            payload_recording_policy=self._payload_policy(),
             latency_ms=max(
                 0.0,
                 (finish.monotonic_time_ns - call_start.monotonic_time_ns) / 1_000_000,

@@ -4,7 +4,7 @@ This is the living implementation record for MCP Traffic Analysis. It summarizes
 
 Status date: **2026-08-27**
 
-Completed phase branch: **`phase/01-measurement-core`**
+Completed phase branch: **`phase/02-statistical-baseline`**
 
 Cumulative tested branch: **`demo`**
 
@@ -62,13 +62,23 @@ The complete design is in [`planning/phase1/mcp_traffic_analysis_research_protoc
 - Added Vitest component tests and Playwright Chromium flows for success, concurrency, controlled failure, and persistence.
 - Formalized the phase-to-`demo` branch workflow in `AGENTS.md` and `DEMO_WORKFLOW.md`.
 
+### Phase 2 controlled statistical baseline
+
+- Added a deterministic `roundtrip_payload` tool with known payload and programmed service time.
+- Added a real `stdio` subprocess transport and a byte-preserving JSON-RPC relay.
+- Recorded exact request and response frame sizes, direction, SHA-256 checksum, JSON-RPC identifier, and per-call correlation metadata for `stdio`.
+- Defined a frozen 48-cell factorial design: transport, payload, service time, and concurrency.
+- Collected a randomized 960-run / 7,680-call campaign with 20 independent run replicates per treatment cell and no failed calls.
+- Wrote analysis-ready CSV and Parquet tables, an HC3 run-level OLS model, a nested call-level mixed model, and a within-condition run bootstrap.
+- Added the React Statistical study, campaign API, calibration form, model diagnostics, download links, and UI/browser tests.
+
 ## Current system
 
 ```mermaid
 flowchart LR
     Command[Scenario command] --> Runner[Model-free runner]
     Runner --> Client[FastMCP client]
-    Client -->|in-memory transport| Server[Instrumented FastMCP server]
+    Client -->|in-memory or stdio transport| Server[Instrumented FastMCP server]
     Server --> Fixture[Deterministic tools]
     Server --> Trace[Trace recorder]
     Trace --> Raw[(manifest.json and events.jsonl)]
@@ -77,7 +87,7 @@ flowchart LR
     API --> UI[React TypeScript workbench]
 
     Agent[Hosted AI agent] -. not connected yet .-> Client
-    Stdio[stdio transport] -. Phase 1B .-> Server
+    Stdio[stdio relay and frame recorder] --> Server
     Network[HTTP TLS TCP IP] -. later phases .-> Server
 ```
 
@@ -101,18 +111,18 @@ No hosted model is used. `.env` is ignored by Git, is not loaded by the runner, 
 | Select runs and compute descriptive statistics | Implemented |
 | Inspect ECDF, histogram, box plot, timeline, and events | Implemented |
 | Retain UI state through persisted artifact reload | Implemented |
+| Measure real stdio JSON-RPC frame bytes | Implemented |
+| Run a balanced transport/payload/service/concurrency campaign | Implemented |
+| Fit run-level and nested-call statistical models | Implemented |
 
 ## What is not implemented yet
 
 | Capability | Reason deferred |
 |---|---|
-| Exact JSON-RPC request and response bytes | In-memory middleware does not observe wire serialization. |
-| Transport frame bytes and JSON-RPC IDs | Requires a real transport boundary. |
-| Subprocess and transport overhead | Added in Phase 1B with `stdio`. |
 | Model latency, tokens, decisions, and handoffs | Added only after recorder validation. |
 | Enterprise incident-response scenario system | Built after the deterministic fixture is trustworthy. |
 | Queueing experiments under controlled load | Requires completed jobs and observable arrivals, service, and waiting. |
-| Inferential campaign datasets and reports | Depend on the agent pilot and frozen experimental conditions. Phase 1A descriptive calibration is implemented. |
+| Agent-behaviour campaign datasets and reports | Depend on a measured agent pilot and frozen task conditions. |
 | HTTP, TLS, TCP, and IP measurements | Belong to later transport and networking phases. |
 
 Null byte fields in Phase 1A are intentional. The implementation refuses to substitute Python object sizes for unobserved serialized bytes.
@@ -135,15 +145,15 @@ The completed Phase 1A demo passed:
 
 | Check | Result |
 |---|---|
-| Deterministic pytest suite | 37 passed |
+| Deterministic pytest suite | 44 passed |
 | In-memory trial matrix | 20 trials represented in tests |
 | Ruff | Passed |
-| Strict mypy | No issues in 19 source files |
+| Strict mypy | No issues in 29 source files |
 | uv lock check | Passed |
 | Full-group environment synchronization | Passed |
-| React component tests | 3 passed |
+| React component tests | 6 passed |
 | TypeScript and Vite production build | Passed |
-| Chromium end-to-end UI tests | 2 passed |
+| Chromium end-to-end UI tests | 3 passed |
 | Markdown and Git whitespace checks | Passed |
 
 A repeated echo validation run produced eight events forming four spans: automatic discovery plus two successful tool calls. All byte fields were null and all events used `unavailable_transport_bypass`, matching the observation boundary.
@@ -201,6 +211,8 @@ npm run test:e2e
 
 - [`CODE_FLOW.md`](CODE_FLOW.md): detailed execution and data flow.
 - [`phase1a_measurement_core.md`](phase1a_measurement_core.md): Phase 1A measurement boundary and usage.
+- [`phase2_statistical_baseline.md`](phase2_statistical_baseline.md): Phase 2 design, boundary, artifacts, and models.
+- [`results/phase2_baseline_results.md`](results/phase2_baseline_results.md): completed local result memo.
 - [`planning/phase1/mcp_traffic_analysis_research_protocol.md`](planning/phase1/mcp_traffic_analysis_research_protocol.md): full research design.
 - [`../README.md`](../README.md): project orientation and setup.
 - [`DEMO_WORKFLOW.md`](DEMO_WORKFLOW.md): UI operation, acceptance tests, and branch workflow.

@@ -14,6 +14,7 @@ from mcp_traffic_analysis.api.app import create_app
 async def make_client(tmp_path: Path) -> AsyncIterator[httpx.AsyncClient]:
     app = create_app(
         artifact_root=tmp_path / "runs",
+        campaign_root=tmp_path / "campaigns",
         frontend_dist=tmp_path / "missing-frontend",
         serve_frontend=False,
     )
@@ -28,7 +29,7 @@ async def test_health_and_scenario_catalog(tmp_path: Path) -> None:
         scenarios = await client.get("/api/scenarios")
 
     assert health.status_code == 200
-    assert health.json()["measurement_boundary"] == "fastmcp_server_middleware"
+    assert health.json()["measurement_boundary"] == "application_and_stdio_transport"
     assert len(scenarios.json()) == 9
     assert {item["id"] for item in scenarios.json()} >= {"echo", "concurrent", "timeout"}
 
@@ -103,3 +104,50 @@ async def test_unknown_and_malformed_run_identifiers_are_rejected(tmp_path: Path
 
     assert missing.status_code == 404
     assert malformed.status_code in {404, 422}
+
+
+async def test_phase2_stdio_run_exposes_exact_frame_measurements(tmp_path: Path) -> None:
+    async with make_client(tmp_path) as client:
+        response = await client.post(
+            "/api/phase2/runs",
+            json={
+                "transport": "stdio",
+                "payload_target_bytes": 64,
+                "service_time_ms": 0,
+                "concurrency": 1,
+                "calls_per_run": 2,
+                "seed": 9,
+            },
+        )
+    assert response.status_code == 201
+    body = response.json()
+    assert len(body["calls"]) == 2
+    assert body["total_request_frame_bytes"] > 128
+    assert body["total_response_frame_bytes"] > 128
+    assert all(call["server_handler_ms"] is not None for call in body["calls"])
+
+
+async def test_campaign_catalog_reads_persisted_results(tmp_path: Path) -> None:
+    from datetime import UTC, datetime
+
+    from mcp_traffic_analysis.campaigns import build_manifest
+    from mcp_traffic_analysis.experiments.campaign_models import CampaignProgress
+
+    campaign = tmp_path / "campaigns" / "tiny"
+    campaign.mkdir(parents=True)
+    manifest = build_manifest(campaign_id="tiny", replicates=1, calls_per_run=1, seed=1)
+    progress = CampaignProgress(
+        campaign_id="tiny",
+        status="complete",
+        planned_runs=48,
+        completed_runs=48,
+        updated_at_utc=datetime.now(UTC),
+    )
+    (campaign / "campaign_manifest.json").write_text(manifest.model_dump_json())
+    (campaign / "progress.json").write_text(progress.model_dump_json())
+    (campaign / "analysis.json").write_text('{"experimental_unit":"run"}')
+    async with make_client(tmp_path) as client:
+        listed = await client.get("/api/campaigns")
+        detail = await client.get("/api/campaigns/tiny")
+    assert listed.json()["campaigns"][0]["completed_runs"] == 48
+    assert detail.json()["analysis"]["experimental_unit"] == "run"
