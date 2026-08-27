@@ -121,8 +121,18 @@ The project-local cache flag works around a Windows cache-path problem on the or
 
 ## Current status
 
-The application-layer research protocol is complete. The recorder, deterministic MCP fixture, and experimental harness have not yet been implemented.
+The application-layer research protocol and the first model-free measurement slice are implemented. Phase 1A uses FastMCP's in-memory transport to validate correlation, ordering, timing, storage, concurrency, and failure classification before measuring real transport bytes.
 
 Read the complete protocol in [`docs/planning/phase1/mcp_traffic_analysis_research_protocol.md`](docs/planning/phase1/mcp_traffic_analysis_research_protocol.md).
 
-The first implementation milestone is a trustworthy protocol-level recorder and deterministic MCP fixture. It must reconstruct requests, responses, notifications, backend spans, byte counts, errors, and causal relationships before a real agent is introduced.
+Run one deterministic trial:
+
+```powershell
+uv --cache-dir .uv-cache run python -m mcp_traffic_analysis.fixtures.runner echo
+```
+
+Available scenarios are `list_tools`, `echo`, `sleep`, `backend_exception`, `tool_error`, `timeout`, `nonexistent_tool`, `concurrent`, and `cancellation`. Each run creates an ignored directory under `artifacts/phase1a/` containing a versioned `manifest.json` and append-only `events.jsonl`.
+
+Phase 1A does not load `.env` and does not call a model. Request arguments, payload bodies, exception messages, credentials, and environment variables are not recorded. Because in-memory transport bypasses wire serialization, byte fields are deliberately null rather than estimated.
+
+Read [`docs/phase1a_measurement_core.md`](docs/phase1a_measurement_core.md) for the measurement boundary and trace interpretation. Phase 1B will add `stdio`, actual JSON-RPC and frame byte counts, and the complete 200-trial recorder-validation campaign.

@@ -799,7 +799,7 @@ wheels = [
 [[package]]
 name = "mcp-traffic-analysis"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "fastmcp" },
     { name = "openai-agents" },
