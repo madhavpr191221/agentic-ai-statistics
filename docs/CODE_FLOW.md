@@ -107,20 +107,20 @@ This is not an IP packet. It is an application-layer MCP/JSON-RPC frame. We have
 
 ### What exactly are we measuring?
 
-For one run (r), we record:
+For one run $r$, we record:
 
 | Quantity | Meaning |
 |---|---|
-| (N_{\mathrm{model},r}) | number of model calls |
-| (N_{\mathrm{MCP},r}) | number of MCP tool calls |
-| (L_{\mathrm{total},r}) | total time from starting the run to obtaining the result |
-| (L_{\mathrm{model},r}) | time spent inside model requests |
-| (L_{\mathrm{MCP},r}) | client-observed time for MCP tool calls |
-| (L_{\mathrm{handler},r}) | time spent inside the MCP server’s Python tool handlers |
-| (B_{\mathrm{request},r}) | exact bytes sent toward the MCP server |
-| (B_{\mathrm{response},r}) | exact bytes returned by the MCP server |
-| (C_r) | estimated model-token cost |
-| (Y_r) | whether the complete task succeeded |
+| $N_{\mathrm{model},r}$ | number of model calls |
+| $N_{\mathrm{MCP},r}$ | number of MCP tool calls |
+| $L_{\mathrm{total},r}$ | total time from starting the run to obtaining the result |
+| $L_{\mathrm{model},r}$ | time spent inside model requests |
+| $L_{\mathrm{MCP},r}$ | client-observed time for MCP tool calls |
+| $L_{\mathrm{handler},r}$ | time spent inside the MCP server’s Python tool handlers |
+| $B_{\mathrm{request},r}$ | exact bytes sent toward the MCP server |
+| $B_{\mathrm{response},r}$ | exact bytes returned by the MCP server |
+| $C_r$ | estimated model-token cost |
+| $Y_r$ | whether the complete task succeeded |
 
 The latency accounting is:
 
@@ -743,7 +743,7 @@ Protocol-frame counts and MCP tool-call counts are not the same quantity. `frame
 
 ### Latency decomposition
 
-For run (r), the implementation computes
+For run $r$, the implementation computes
 
 $$
 L_{\mathrm{total},r}
@@ -754,10 +754,10 @@ $$
 
 The terms are:
 
-- (L_{\mathrm{total},r}): monotonic time from the beginning of `run_incident()` to its terminal result;
-- (L_{\mathrm{model},r}): sum of model-call durations observed by `RunHooks`;
-- (L_{\mathrm{MCP\ RTT},r}): sum of client-observed SDK tool-call durations;
-- (L_{\mathrm{orchestration},r}): the residual after subtracting model and MCP tool time.
+- $L_{\mathrm{total},r}$: monotonic time from the beginning of `run_incident()` to its terminal result;
+- $L_{\mathrm{model},r}$: sum of model-call durations observed by `RunHooks`;
+- $L_{\mathrm{MCP\ RTT},r}$: sum of client-observed SDK tool-call durations;
+- $L_{\mathrm{orchestration},r}$: the residual after subtracting model and MCP tool time.
 
 Server-handler latency is measured separately inside each MCP RTT:
 
@@ -779,11 +779,11 @@ $$
 
 where:
 
-- (D_r): the diagnosis contains the frozen scenario concepts;
-- (E_r): the final output includes the required evidence IDs;
-- (A_r): the exact required action and target were executed and accepted;
-- (S_r): no prohibited action was attempted;
-- (R_r): the final synthetic world is resolved.
+- $D_r$: the diagnosis contains the frozen scenario concepts;
+- $E_r$: the final output includes the required evidence IDs;
+- $A_r$: the exact required action and target were executed and accepted;
+- $S_r$: no prohibited action was attempted;
+- $R_r$: the final synthetic world is resolved.
 
 `task_success` is true only if all five are true. Diagnosis terms are deterministic string rules, not an LLM evaluator. Rejected but non-prohibited actions are recorded and analyzed, although the current all-or-nothing success definition does not automatically fail them.
 
@@ -816,7 +816,7 @@ $$
 \frac{(I_r-I_r^{(c)})p_I+I_r^{(c)}p_C+O_rp_O}{10^6},
 $$
 
-where (I_r), (I_r^{(c)}), and (O_r) are input, cached-input, and output tokens. It is a reproducible estimate from the stored price snapshot, not a billing record.
+where $I_r$, $I_r^{(c)}$, and $O_r$ are input, cached-input, and output tokens. It is a reproducible estimate from the stored price snapshot, not a billing record.
 
 ### Failure path
 
