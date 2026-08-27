@@ -26,12 +26,18 @@ Raw per-run artifacts and analysis tables are local ignored outputs under `artif
 The primary model uses the log of each run's median client RTT and HC3 robust standard errors:
 
 $$
-\log(\widetilde L_r)
-\sim \text{transport} * \text{payload}
-+ \text{service time}
-+ \text{concurrency}
-+ \text{transport} * \text{concurrency}.
+\log\!\left(\widetilde L_r\right)
+= \beta_0
++ \beta_T T_r
++ \beta_P P_r
++ \beta_S S_r
++ \beta_C C_r
++ \beta_{TP}(T_rP_r)
++ \beta_{TC}(T_rC_r)
++ \varepsilon_r.
 $$
+
+Here (T_r), (P_r), (S_r), and (C_r) denote the transport, payload-size, programmed-service-time, and concurrency factor encodings for run (r). Since these are categorical factors, the corresponding coefficients are vectors of reference-coded contrasts rather than one scalar per factor. The reference condition is in-memory transport, 64-byte payload, 0 ms service time, and concurrency 1.
 
 It has (R^2=0.794) and adjusted (R^2=0.792). The most important controlled effects are expected:
 
