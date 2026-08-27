@@ -50,6 +50,17 @@ npm run demo
 
 Open `http://127.0.0.1:8000`. The production frontend is built first and served by FastAPI. Artifacts are written below `artifacts/phase1a/`.
 
+Choose **Behavior study** for Phase 4. The default scripted mode runs one concrete ticket through its five-call oracle without a hosted model. It validates task gating and scoring, while the UI marks model timing, tokens, and stdio bytes unavailable. Live mode uses the real model and measured stdio boundary.
+
+The repeated Phase 4 campaigns are CLI-only:
+
+```powershell
+uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.behavior.campaigns task-structure-pilot-v1 --stage pilot
+uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.behavior.campaigns task-structure-main-v1 --stage main
+```
+
+The pilot has 27 runs. The main study has 90 separate runs. Do not collect the main campaign until the pilot has been inspected and its task protocol frozen.
+
 Choose **Incident Agent** for Phase 3. A UI run uses one real hosted model and writes below `artifacts/phase3/`; every remediation remains synthetic. The full 30-run campaign stays in the CLI so a browser click cannot accidentally launch it.
 
 For UI and API hot reload:

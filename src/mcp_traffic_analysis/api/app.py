@@ -35,11 +35,21 @@ from mcp_traffic_analysis.api.repository import (
     RunNotFoundError,
 )
 from mcp_traffic_analysis.api.trace_analysis import analyze_records, summarize_record
+from mcp_traffic_analysis.behavior.repository import BehaviorRepository
 from mcp_traffic_analysis.experiments.condition_runner import run_condition
 from mcp_traffic_analysis.fixtures.runner import Scenario, run_fixture
-from mcp_traffic_analysis.incidents.models import IncidentRunDetail, IncidentRunRequest
+from mcp_traffic_analysis.incidents.models import (
+    BehaviorRunRequest,
+    IncidentRunDetail,
+    IncidentRunRequest,
+    TaskStructure,
+)
 from mcp_traffic_analysis.incidents.repository import IncidentRepository
 from mcp_traffic_analysis.incidents.runner import run_incident
+from mcp_traffic_analysis.incidents.world import (
+    INCOMING_MESSAGES,
+    oracle_sequence,
+)
 from mcp_traffic_analysis.incidents.world import SCENARIOS as INCIDENT_SCENARIOS
 from mcp_traffic_analysis.measurement.transport_models import CallMeasurement, RunMeasurement
 
@@ -106,21 +116,24 @@ def create_app(
     artifact_root: Path = Path("artifacts/phase1a"),
     campaign_root: Path = Path("artifacts/phase2"),
     agent_root: Path = Path("artifacts/phase3"),
+    behavior_root: Path = Path("artifacts/phase4"),
     frontend_dist: Path = Path("frontend/dist"),
     serve_frontend: bool = True,
 ) -> FastAPI:
     repository = ArtifactRepository(artifact_root)
     campaigns_repository = CampaignRepository(campaign_root)
     incident_repository = IncidentRepository(agent_root)
+    behavior_repository = BehaviorRepository(behavior_root)
     agent_available = bool(os.getenv("OPENAI_API_KEY") or Path(".env").is_file())
     api = FastAPI(
         title="MCP Traffic Analysis",
-        version="0.3.0",
+        version="0.4.0",
         description="Local API for deterministic MCP performance experiments.",
     )
     api.state.repository = repository
     api.state.campaign_repository = campaigns_repository
     api.state.incident_repository = incident_repository
+    api.state.behavior_repository = behavior_repository
     api.add_middleware(
         CORSMiddleware,
         allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
@@ -138,6 +151,84 @@ def create_app(
     @api.get("/api/health", response_model=HealthResponse)
     async def health() -> HealthResponse:
         return HealthResponse(agent_available=agent_available)
+
+    @api.get("/api/behavior/conditions")
+    async def behavior_conditions() -> list[dict[str, object]]:
+        return [
+            {
+                "scenario_id": scenario.value,
+                "label": INCIDENT_SCENARIOS[scenario].label,
+                "incoming_message": INCOMING_MESSAGES[scenario],
+                "task_structure": structure.value,
+                "oracle_sequence": oracle_sequence(scenario, structure),
+            }
+            for scenario in INCIDENT_SCENARIOS
+            for structure in TaskStructure
+        ]
+
+    @api.post("/api/behavior/runs", response_model=IncidentRunDetail, status_code=201)
+    async def create_behavior_run(request: BehaviorRunRequest) -> IncidentRunDetail:
+        if request.mode == "live" and not agent_available:
+            raise HTTPException(
+                status_code=503,
+                detail="OPENAI_API_KEY is missing. Add it to .env and restart the API.",
+            )
+        try:
+            return await run_incident(
+                scenario=request.scenario,
+                task_structure=request.task_structure,
+                output_root=behavior_repository.root,
+                mode=request.mode,
+            )
+        except RuntimeError as error:
+            raise HTTPException(status_code=503, detail=str(error)) from error
+
+    @api.get("/api/behavior/runs", response_model=list[IncidentRunDetail])
+    async def list_behavior_runs() -> list[IncidentRunDetail]:
+        return behavior_repository.list_runs()
+
+    @api.get("/api/behavior/runs/{run_id}", response_model=IncidentRunDetail)
+    async def get_behavior_run(run_id: UUID) -> IncidentRunDetail:
+        try:
+            return behavior_repository.get(run_id)
+        except KeyError as error:
+            raise HTTPException(status_code=404, detail="behavior run not found") from error
+
+    @api.get("/api/behavior/campaigns")
+    async def list_behavior_campaigns() -> list[dict[str, object]]:
+        return behavior_repository.list_campaigns()
+
+    @api.get("/api/behavior/campaigns/{campaign_id}")
+    async def get_behavior_campaign(campaign_id: str) -> dict[str, object]:
+        try:
+            return behavior_repository.campaign(campaign_id)
+        except KeyError as error:
+            raise HTTPException(status_code=404, detail="behavior campaign not found") from error
+
+    @api.get("/api/behavior/campaigns/{campaign_id}/tables/{table_name}")
+    async def behavior_campaign_table(
+        campaign_id: str,
+        table_name: Literal[
+            "runs.csv",
+            "runs.parquet",
+            "traces.csv",
+            "traces.parquet",
+            "transitions.csv",
+            "transitions.parquet",
+            "actions.csv",
+            "actions.parquet",
+            "mcp_calls.csv",
+            "mcp_calls.parquet",
+            "model_calls.csv",
+            "model_calls.parquet",
+        ],
+    ) -> FileResponse:
+        if not campaign_id or any(character in campaign_id for character in "/\\.."):
+            raise HTTPException(status_code=404, detail="behavior campaign not found")
+        path = behavior_repository.root / f"campaign-{campaign_id}" / "tables" / table_name
+        if not path.is_file():
+            raise HTTPException(status_code=404, detail="behavior campaign table not found")
+        return FileResponse(path, filename=table_name)
 
     @api.get("/api/agent/scenarios")
     async def agent_scenarios() -> list[dict[str, object]]:

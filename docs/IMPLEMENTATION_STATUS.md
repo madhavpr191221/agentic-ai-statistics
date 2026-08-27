@@ -4,11 +4,23 @@ This is the living implementation record for MCP Traffic Analysis. It summarizes
 
 Status date: **2026-08-27**
 
-Active phase branch: **`phase/03-it-incident-agent`**
+Active phase branch: **`phase/04-task-structure`**
 
 Cumulative tested branch: **`demo`**
 
 The phase branch is preserved for inspection. `main` remains unchanged until an explicit release decision.
+
+### Phase 4 concrete task-structure study
+
+- Three realistic synthetic incident tickets crossed with sequential, branching, and recovery task graphs.
+- Nine matched conditions whose shortest successful paths all contain five MCP calls.
+- Explicit oracle distance, excess calls, expected recovery rejection, path entropy, and empirical transitions.
+- Frozen 27-run pilot and 90-run main randomized complete-block schedules with resume protection.
+- Poisson log-mean primary call-count model with HC3 covariance and a prespecified negative-binomial sensitivity trigger.
+- A React **Behavior study** surface that distinguishes scripted validation from live measurement.
+- Dedicated run, call, action, trace, transition, CSV, Parquet, API, and campaign artifacts.
+
+The implementation, credit-free validation, three live smoke runs, corrected 27-run pilot, and separate 90-run main campaign are complete. Recovery structure increased expected MCP calls by about 20.5% relative to sequential structure; branching showed no detectable call-count difference. All five failures occurred in the orders recovery condition and exposed one repeatable path-dependent mistake. The full result is documented in [`results/phase4_task_structure_main_results.md`](results/phase4_task_structure_main_results.md).
 
 ## Project objective
 

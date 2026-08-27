@@ -13,8 +13,7 @@ from typing import Any
 
 from fastmcp import FastMCP
 
-from mcp_traffic_analysis.incidents.models import IncidentScenario
-from mcp_traffic_analysis.incidents.world import apply_action, evidence, load_state, save_state
+from mcp_traffic_analysis.incidents.world import apply_action, load_state, observe, save_state
 
 
 def _append(path: Path, value: dict[str, Any]) -> None:
@@ -55,28 +54,22 @@ def create_incident_server(state_path: Path, event_path: Path) -> FastMCP:
         return wrapper
 
     async def alert() -> dict[str, Any]:
-        scenario = IncidentScenario(load_state(state_path)["scenario"])
-        return evidence(scenario)["alert"]
+        return observe(state_path, "get_alert")
 
     async def metrics() -> dict[str, Any]:
-        scenario = IncidentScenario(load_state(state_path)["scenario"])
-        return evidence(scenario)["metrics"]
+        return observe(state_path, "get_metrics")
 
     async def logs(query: str = "") -> dict[str, Any]:
-        scenario = IncidentScenario(load_state(state_path)["scenario"])
-        return evidence(scenario)["logs"] | {"query": query}
+        return observe(state_path, "search_logs", query)
 
     async def dependencies() -> dict[str, Any]:
-        scenario = IncidentScenario(load_state(state_path)["scenario"])
-        return evidence(scenario)["dependencies"]
+        return observe(state_path, "get_dependencies")
 
     async def changes() -> dict[str, Any]:
-        scenario = IncidentScenario(load_state(state_path)["scenario"])
-        return evidence(scenario)["changes"]
+        return observe(state_path, "get_recent_changes")
 
     async def runbook() -> dict[str, Any]:
-        scenario = IncidentScenario(load_state(state_path)["scenario"])
-        return evidence(scenario)["runbook"]
+        return observe(state_path, "get_runbook")
 
     async def restart(target: str) -> dict[str, Any]:
         return apply_action(state_path, "restart_service", target).model_dump(mode="json")
