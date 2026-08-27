@@ -707,6 +707,7 @@ Pre-register the primary outcome, model formula, planned contrasts, exclusions, 
 - Derived tables reproduce raw-event counts exactly.
 - A saved manifest reproduces scenario state and synthetic backend behaviour, though not identical hosted-model output.
 - Each campaign produces a methods note, validated dataset, analysis artifact, plots, and formal result memo.
+- Each phase exposes its measured quantities and limitations in a tested local React/TypeScript UI before it is merged into the cumulative `demo` branch.
 - The final report separates confirmatory results, exploratory findings, limitations, and negative results.
 
 ## Phase exit gates
@@ -724,7 +725,7 @@ Pre-register the primary outcome, model formula, planned contrasts, exclusions, 
 
 ## Deferred work
 
-The first release excludes dashboards, real enterprise credentials or systems, adversarial-security benchmarking, multiple model providers, raw TLS decryption, TCP/IP packet capture, and formal queueing-theory claims.
+The first release excludes external dashboard infrastructure, real enterprise credentials or systems, adversarial-security benchmarking, multiple model providers, raw TLS decryption, TCP/IP packet capture, and formal queueing-theory claims. A local scientific UI is required as the primary phase-testing surface; it must present statistics computed by the tested analysis layer and preserve all measurement caveats.
 
 The recorder must nevertheless preserve arrival, departure, service, waiting, concurrency, and queue-depth observations where available so later work can study:
 

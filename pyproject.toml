@@ -1,22 +1,31 @@
 [project]
 name = "mcp-traffic-analysis"
-version = "0.1.0"
+version = "0.3.0"
 description = "Empirical performance analysis of agentic AI systems and MCP communication"
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
 dependencies = [
+    "fastapi>=0.116,<1",
     "fastmcp==3.2.4",
+    "numpy>=2,<3",
+    # Newer releases require a usage field that openai-agents 0.7.0 does not populate.
+    "openai==2.40.0",
     "openai-agents==0.7.0",
+    "pandas>=2,<4",
     "psutil>=7,<8",
     "pydantic>=2.12,<3",
+    "python-dotenv>=1,<2",
+    "uvicorn>=0.35,<1",
 ]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [dependency-groups]
 analysis = [
     "matplotlib>=3,<4",
     "networkx>=3,<4",
-    "numpy>=2,<3",
-    "pandas>=2,<4",
     "pyarrow>=20,<30",
     "scipy>=1,<2",
     "seaborn>=0.13,<1",
@@ -32,4 +41,20 @@ dev = [
 
 [tool.uv]
 default-groups = ["dev"]
-package = false
+
+[tool.pytest.ini_options]
+addopts = "-ra -p no:cacheprovider"
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+packages = ["mcp_traffic_analysis"]
