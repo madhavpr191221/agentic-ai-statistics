@@ -39,6 +39,18 @@ N_{\mathrm{call}}=7{,}680
 \quad\text{call-level measurements}.
 $$
 
+Every run creates exactly one fresh MCP client/server session. Therefore, runs and sessions are in one-to-one correspondence:
+
+$$
+N_{\mathrm{session}}=N_{\mathrm{run}}=960,
+\qquad
+1\ \text{run per session},
+\qquad
+8\ \text{modeled calls per run/session}.
+$$
+
+There are no multiple runs inside one session. For the models, $r=1,\ldots,960$ indexes the run/session and $i=1,\ldots,8$ indexes a call inside that run/session. Equivalently, each of the 48 treatment conditions contains 20 fresh run/session replicates and $20\times8=160$ modeled calls.
+
 The eight calls within one run share a session and startup state. They are therefore related measurements, not eight independent replications. For the main analysis, we summarize each run by its median call latency, $\widetilde L_r$, and use one value per run. This gives the primary model 960 experimental units instead of an artificially inflated sample size of 7,680. We call runs independent **by experimental design** because each run starts a fresh session; possible time dependence on the same machine remains a limitation to diagnose rather than something the design can guarantee away.
 
 The main model asks how the typical latency of run $r$ changes with transport $T_r$, payload $P_r$, programmed service time $S_r$, and concurrency $C_r$:
@@ -184,10 +196,10 @@ $$
 
 This is ordinary least squares with HC3 heteroskedasticity-robust standard errors. It is a controlled descriptive/explanatory model, not a claim about a population of arbitrary MCP servers.
 
-The call-level secondary model accounts for calls being nested within runs:
+The call-level secondary model accounts for calls being nested within runs. Here $r=1,\ldots,960$ indexes the run/session and $i=1,\ldots,8$ indexes the modeled call within it:
 
 $$
-\log(L_{rj}) = X_r\beta + \gamma\,\mathrm{first}_{rj} + b_r + \epsilon_{rj},
+\log(L_{ri}) = X_r\beta + \gamma\,\mathrm{first}_{ri} + b_r + \epsilon_{ri},
 \qquad b_r \sim \mathcal N(0, \tau^2).
 $$
 
