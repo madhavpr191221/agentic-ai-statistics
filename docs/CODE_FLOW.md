@@ -1047,4 +1047,4 @@ The browser can launch one run. It cannot launch a repeated paid campaign.
 | Incident result and trace render in React | Vitest component test |
 | Browser can inspect a scored agent trace without credit | mocked Playwright flow |
 
-The current validated gate is 50 Python tests, 7 React component tests, 4 Chromium end-to-end flows, Ruff, strict mypy, a production TypeScript/Vite build, lockfile verification, and `git diff --check`.
+The current validated gate is 70 Python tests, 8 React component tests, 5 Chromium end-to-end flows, Ruff, strict mypy, a production TypeScript/Vite build, lockfile verification, and `git diff --check`.

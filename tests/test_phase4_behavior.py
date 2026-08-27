@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 
 from mcp_traffic_analysis.api.app import create_app
-from mcp_traffic_analysis.behavior.analysis import fit_count_models
+from mcp_traffic_analysis.behavior.analysis import fit_count_models, fit_success_model
 from mcp_traffic_analysis.behavior.campaigns import build_manifest, run_campaign
 from mcp_traffic_analysis.behavior.traces import (
     normalized_oracle_distance,
@@ -188,6 +188,25 @@ def test_poisson_sensitivity_recovers_known_call_ratios() -> None:
     assert effects[
         "C(task_structure, Treatment(reference='sequential'))[T.recovery]"
     ] == pytest.approx(3.0, rel=0.25)
+
+
+def test_success_model_accepts_boolean_outcome() -> None:
+    scenarios = ("checkout", "images", "orders")
+    structures = ("sequential", "branching", "recovery")
+    frame = pd.DataFrame(
+        [
+            {
+                "task_success": (block + scenario_index + structure_index) % 3 != 0,
+                "task_structure": structure,
+                "scenario_id": scenario,
+                "block": block,
+            }
+            for block in range(1, 11)
+            for scenario_index, scenario in enumerate(scenarios)
+            for structure_index, structure in enumerate(structures)
+        ]
+    )
+    assert fit_success_model(frame)["available"] is True
 
 
 async def test_behavior_api_exposes_conditions_and_scripted_validation(tmp_path: Path) -> None:

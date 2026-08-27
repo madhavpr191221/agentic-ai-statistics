@@ -16,11 +16,11 @@ The phase branch is preserved for inspection. `main` remains unchanged until an 
 - Nine matched conditions whose shortest successful paths all contain five MCP calls.
 - Explicit oracle distance, excess calls, expected recovery rejection, path entropy, and empirical transitions.
 - Frozen 27-run pilot and 90-run main randomized complete-block schedules with resume protection.
-- Negative-binomial primary call-count model and robust Poisson sensitivity analysis.
+- Poisson log-mean primary call-count model with HC3 covariance and a prespecified negative-binomial sensitivity trigger.
 - A React **Behavior study** surface that distinguishes scripted validation from live measurement.
 - Dedicated run, call, action, trace, transition, CSV, Parquet, API, and campaign artifacts.
 
-The implementation, credit-free validation, three live smoke runs, and corrected 27-run pilot are complete. Paid live campaigns are never started automatically and require an explicit CLI invocation. The pilot result and its invalid-v1 audit are documented in [`results/phase4_task_structure_pilot_results.md`](results/phase4_task_structure_pilot_results.md).
+The implementation, credit-free validation, three live smoke runs, corrected 27-run pilot, and separate 90-run main campaign are complete. Recovery structure increased expected MCP calls by about 20.5% relative to sequential structure; branching showed no detectable call-count difference. All five failures occurred in the orders recovery condition and exposed one repeatable path-dependent mistake. The full result is documented in [`results/phase4_task_structure_main_results.md`](results/phase4_task_structure_main_results.md).
 
 ## Project objective
 

@@ -136,7 +136,7 @@ def _log_model(frame: pd.DataFrame, outcome: str) -> dict[str, Any] | None:
     }
 
 
-def _success_model(frame: pd.DataFrame) -> dict[str, Any]:
+def fit_success_model(frame: pd.DataFrame) -> dict[str, Any]:
     formula = (
         "task_success ~ C(task_structure, Treatment(reference='sequential')) "
         "+ C(scenario_id) + C(block)"
@@ -147,8 +147,25 @@ def _success_model(frame: pd.DataFrame) -> dict[str, Any]:
             "formula": formula,
             "note": "Logistic regression is unavailable because task success is constant.",
         }
+    separated_factors = [
+        factor
+        for factor in ("task_structure", "scenario_id", "block")
+        if any(rate in {0.0, 1.0} for rate in frame.groupby(factor)["task_success"].mean())
+    ]
+    if separated_factors:
+        return {
+            "available": False,
+            "formula": formula,
+            "error_type": "quasi_complete_separation",
+            "note": (
+                "Logistic regression was not reported because one or more fixed-effect "
+                f"levels had a constant outcome: {', '.join(separated_factors)}."
+            ),
+        }
     try:
-        result = smf.logit(formula, data=frame).fit(disp=False, cov_type="HC3")
+        model_frame = frame.copy()
+        model_frame["task_success"] = model_frame["task_success"].astype(int)
+        result = smf.logit(formula, data=model_frame).fit(disp=False, cov_type="HC3")
         return {
             "available": True,
             "formula": formula,
@@ -320,7 +337,7 @@ def analyze_campaign(
             "success_wilson_95": wilson(successes, len(runs)),
             "primary_outcome": "mcp_call_count",
             "primary_model": fit_count_models(runs),
-            "success_model": _success_model(runs),
+            "success_model": fit_success_model(runs),
             "secondary_models": {
                 outcome: _log_model(runs, outcome)
                 for outcome in (

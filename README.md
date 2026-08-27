@@ -129,7 +129,7 @@ All remediation is simulated. No real infrastructure is restarted, rolled back, 
 | Phase 1 | Can MCP events, timing, ordering, concurrency, and failures be recorded correctly? | Complete |
 | Phase 2 | Can exact `stdio` frame bytes and controlled latency effects be measured statistically? | Complete |
 | Phase 3 | What does a real model-driven agent execution trace look like? | Complete |
-| Phase 4 | How does hidden task structure change MCP work and stochastic trace variability? | Implemented; live campaigns are explicit |
+| Phase 4 | How does hidden task structure change MCP work and stochastic trace variability? | Complete |
 | Later | What happens under controlled arrival rates, contention, queues, and network transport? | Not implemented |
 
 Phase 1 and Phase 2 deliberately used no model. They established the measurement system before agent behavior was introduced.
@@ -155,6 +155,14 @@ Success did not imply perfect behavior. Every orders run first attempted a rejec
 An earlier pilot is retained as invalid calibration evidence because its required escalation target was not exposed to the agent. It was corrected and rerun rather than silently rescored.
 
 These results are descriptive. Ten observations per scenario are not enough for strong tail, causal, or reliability claims.
+
+## Phase 4 main result
+
+The completed balanced campaign used 90 fresh agent runs: three tickets, three hidden task structures, and ten randomized blocks. Recovery structure increased expected MCP calls by about 20.5% relative to sequential structure (HC3 95% interval: 16.7% to 24.4%; Holm-adjusted $p=4.52\times10^{-30}$). Branching showed no detectable call-count difference.
+
+Overall success was 85/90. All five failures occurred in the orders recovery condition and shared the same path-dependent mistake: the agent retried escalation without rereading a runbook after the task state changed. This is why the study records ordered traces rather than only final answers.
+
+See [`docs/results/phase4_task_structure_main_results.md`](docs/results/phase4_task_structure_main_results.md) for the design, model, secondary outcomes, trace variability, limitations, and artifact checksums.
 
 ## Run the workbench
 
@@ -272,14 +280,14 @@ Read [`docs/CODE_FLOW.md`](docs/CODE_FLOW.md) for a plain-language walkthrough f
 
 ## Validation
 
-The completed Phase 3 gate passed:
+The completed Phase 4 gate passed:
 
-- 50 Python tests;
+- 70 Python tests;
 - Ruff;
 - strict mypy;
-- 7 React component tests;
+- 8 React component tests;
 - production TypeScript/Vite build;
-- 4 Playwright Chromium workflows;
+- 5 Playwright Chromium workflows;
 - uv lockfile verification;
 - Markdown and Git diff checks.
 
@@ -293,6 +301,7 @@ Automated agent tests use a deterministic credit-free path. Browser tests do not
 - [`docs/phase4_task_structure.md`](docs/phase4_task_structure.md) — plain-language Phase 4 methods, commands, and interpretation.
 - [`docs/planning/phase4_task_structure_plan.md`](docs/planning/phase4_task_structure_plan.md) — frozen concrete-task design and statistical plan.
 - [`docs/results/phase4_task_structure_pilot_results.md`](docs/results/phase4_task_structure_pilot_results.md) — corrected 27-run pilot, invalid-v1 audit, and frozen main-study model rule.
+- [`docs/results/phase4_task_structure_main_results.md`](docs/results/phase4_task_structure_main_results.md) — completed 90-run main result, reliability audit, and reproducibility record.
 - [`docs/results/phase3_incident_pilot_results.md`](docs/results/phase3_incident_pilot_results.md) — corrected pilot results and invalid-pilot audit.
 - [`docs/phase2_statistical_baseline.md`](docs/phase2_statistical_baseline.md) — controlled factorial design and models.
 - [`docs/results/phase2_baseline_results.md`](docs/results/phase2_baseline_results.md) — completed 960-run Phase 2 result memo.
