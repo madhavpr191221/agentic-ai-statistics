@@ -39,9 +39,9 @@ $$
 + \varepsilon_r.
 $$
 
-Here (T_r), (P_r), (S_r), and (C_r) denote the transport, payload-size, programmed-service-time, and concurrency factor encodings for run (r). Since these are categorical factors, the corresponding coefficients are vectors of reference-coded contrasts rather than one scalar per factor. The reference condition is in-memory transport, 64-byte payload, 0 ms service time, and concurrency 1.
+Here $T_r$, $P_r$, $S_r$, and $C_r$ denote the transport, payload-size, programmed-service-time, and concurrency factor encodings for run $r$. Since these are categorical factors, the corresponding coefficients are vectors of reference-coded contrasts rather than one scalar per factor. The reference condition is in-memory transport, 64-byte payload, 0 ms service time, and concurrency 1.
 
-It has (R^2=0.794) and adjusted (R^2=0.792). The most important controlled effects are expected:
+It has $R^2=0.794$ and adjusted $R^2=0.792$. The most important controlled effects are expected:
 
 | Contrast against baseline level | Log effect | 95% HC3 interval | Multiplicative RTT ratio |
 | --- | ---: | ---: | ---: |
@@ -57,17 +57,17 @@ The fastest observed condition median was 4.78 ms (`in_memory`, 65,536-byte targ
 
 ## Nested-call model
 
-The secondary mixed model uses all 7,680 calls with a random intercept for run. It converged, with estimated between-run variance (0.200), within-run variance (0.084), and
+The secondary mixed model uses all 7,680 calls with a random intercept for run. It converged, with estimated between-run variance $0.200$, within-run variance $0.084$, and
 
 $$
 \mathrm{ICC}=0.705.
 $$
 
-That high ICC is a concrete empirical warning against pseudo-replication: measurements from calls in the same fresh session have substantial shared variation. The model also estimates that the first call in a run is about (1.43\times) later than subsequent calls after the included controls. This is consistent with session/discovery/startup behaviour and is exactly why raw protocol traces are retained alongside the analysis table.
+That high ICC is a concrete empirical warning against pseudo-replication: measurements from calls in the same fresh session have substantial shared variation. The model also estimates that the first call in a run is about $1.43\times$ later than subsequent calls after the included controls. This is consistent with session/discovery/startup behaviour and is exactly why raw protocol traces are retained alongside the analysis table.
 
 ## Byte model
 
-For `stdio` only, actual request and response JSON-RPC frame bytes were captured at the relay. The frame-byte model has (R^2=0.886). Conditional on service and concurrency, doubling the median total frame bytes was associated with a factor of (1.013) in run-median RTT (95% interval [1.003, 1.023]) in this local calibration. This is a small association relative to the programmed service and concurrency effects; it is not a bandwidth benchmark.
+For `stdio` only, actual request and response JSON-RPC frame bytes were captured at the relay. The frame-byte model has $R^2=0.886$. Conditional on service and concurrency, doubling the median total frame bytes was associated with a factor of $1.013$ in run-median RTT (95% interval [1.003, 1.023]) in this local calibration. This is a small association relative to the programmed service and concurrency effects; it is not a bandwidth benchmark.
 
 ## Interpretation and next step
 
