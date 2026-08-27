@@ -1,6 +1,6 @@
 # Code Flow
 
-This document explains how the implemented Phase 1A code executes. It covers the model-free measurement core, descriptive-analysis layer, FastAPI application, and React/TypeScript workbench on branch `phase/01-measurement-core`.
+This document explains the implemented Phase 1A recorder and Phase 2 statistical baseline. It covers the model-free measurement core, real `stdio` protocol-frame boundary, campaign analysis, FastAPI application, and React/TypeScript workbench.
 
 The code has one deliberate boundary: it observes normalized MCP activity inside FastMCP, but it does not yet observe serialized JSON-RPC bytes or transport frames.
 
@@ -20,6 +20,11 @@ The code has one deliberate boundary: it observes normalized MCP activity inside
 | `api.repository` | Reads only validated run directories below the configured artifact root. |
 | `api.trace_analysis` | Derives run summaries, call/run distributions, grouped statistics, errors, and timeline spans. |
 | `api.app` | Exposes typed experiment, artifact, event, and analysis endpoints and serves the production UI. |
+| `transport.stdio_relay` | Proxies newline-delimited JSON-RPC between the MCP client and child server, retaining exact bytes, hashes, direction, and protocol identifiers. |
+| `experiments.condition_runner` | Runs one fresh controlled Phase 2 session and writes its raw artifacts. |
+| `campaigns` | Freezes, randomizes, resumes, and completes the 48-cell Phase 2 campaign. |
+| `analysis.phase2_models` | Builds analysis tables, fits run- and call-level models, and computes run-cluster bootstrap summaries. |
+| `api.campaign_repository` | Reads a completed campaign safely without treating browser state as data. |
 | `demo` | Starts the combined production workbench with Uvicorn. |
 | `frontend/src/App.tsx` | Coordinates experiment creation, run selection, analysis unit, active-run events, and UI state. |
 | `frontend/src/components` | Renders experiment controls, empirical distributions, timelines, summaries, and event tables. |
@@ -318,3 +323,30 @@ The Python suite contains 37 tests, including the 20-trial in-memory matrix and 
 Phase 1A can answer which normalized MCP methods and tools ran, in what causal spans, for how long at the server boundary, and with what classified outcome.
 
 It cannot yet answer the exact JSON-RPC request size, response size, frame size, wire ID, subprocess overhead, or transport latency. Phase 1B must add observation at a real `stdio` boundary rather than infer those values from Python objects.
+
+## Phase 2: controlled transport and statistical flow
+
+Phase 2 implements that real boundary and turns it into a deliberately small factorial study. `roundtrip_payload` returns a known-length payload after a programmed delay. The campaign runner creates a fresh session for every independent run, so calls within the same run are never mistaken for independent experimental replicates.
+
+```mermaid
+flowchart LR
+    Manifest[Frozen randomized manifest] --> Campaign[Campaign runner]
+    Campaign --> Condition[One treatment condition]
+    Condition --> Session[Fresh MCP session]
+    Session --> IM[in-memory client/server]
+    Session --> Relay[stdio relay]
+    Relay --> Child[Child FastMCP server]
+    IM --> Raw[Per-run artifacts]
+    Child --> Raw
+    Relay --> Frames[frames.jsonl with exact bytes]
+    Raw --> Tables[runs.csv and calls.csv]
+    Frames --> Tables
+    Tables --> Models[OLS, MixedLM, bootstrap]
+    Models --> Analysis[analysis.json]
+    Analysis --> API[Campaign API]
+    API --> StudyUI[Statistical-study UI]
+```
+
+For `stdio`, the child server uses standard input and output exclusively for MCP frames. The relay pumps each complete frame unchanged, records its actual byte length including line ending, computes a checksum, and maps JSON-RPC IDs back to the call metadata. Server diagnostic output is captured separately in `server.stderr.log`, so it cannot corrupt the protocol stream.
+
+The campaign CLI is the authority for a full 960-run collection. It writes `progress.json` after each run and can resume an interrupted collection. At completion, `analysis.phase2_models` derives run-level medians, call-level records, HC3 OLS estimates, a random-run-intercept mixed model, and a within-condition run bootstrap. The UI reads those saved artifacts and can make a small calibration run; it does not silently launch the scientific campaign in a browser request.

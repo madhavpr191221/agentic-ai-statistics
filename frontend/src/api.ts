@@ -5,6 +5,10 @@ import type {
   RunSummary,
   ScenarioDescriptor,
   TraceEvent,
+  CampaignDetail,
+  CampaignSummary,
+  Phase2RunParameters,
+  Phase2RunResponse,
 } from './types'
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
@@ -40,4 +44,13 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ run_ids: runIds, unit }),
     }),
+  createPhase2Run: (parameters: Phase2RunParameters) =>
+    request<Phase2RunResponse>('/api/phase2/runs', {
+      method: 'POST',
+      body: JSON.stringify(parameters),
+    }),
+  listCampaigns: async () =>
+    (await request<{ campaigns: CampaignSummary[] }>('/api/campaigns')).campaigns,
+  getCampaign: (campaignId: string) =>
+    request<CampaignDetail>(`/api/campaigns/${campaignId}`),
 }

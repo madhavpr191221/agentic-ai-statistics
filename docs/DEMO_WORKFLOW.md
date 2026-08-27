@@ -18,6 +18,11 @@ gitGraph
     branch demo
     checkout demo
     merge phase/01-measurement-core id: "Phase 1A demo"
+    branch phase/02-statistical-baseline
+    checkout phase/02-statistical-baseline
+    commit id: "stdio and factorial baseline"
+    checkout demo
+    merge phase/02-statistical-baseline id: "Phase 2 demo"
 ```
 
 ## What the demo proves
@@ -52,6 +57,19 @@ npm run dev
 ```
 
 The Vite UI runs at `http://127.0.0.1:5173` and proxies `/api` to FastAPI at port 8000.
+
+## Phase 2 statistical study
+
+Phase 2 adds a separate **Statistical study** surface. It runs a small one-condition calibration through either `in_memory` or real `stdio`, and it reads a completed 48-condition campaign. The full campaign is launched at the command line so its frozen manifest, randomized order, progress, raw artifacts, and analysis output can be inspected and resumed independently of the browser.
+
+```powershell
+uv run python -m mcp_traffic_analysis.campaigns baseline-v1 `
+  --output-root artifacts/phase2 `
+  --replicates 20 --calls-per-run 8 --seed 20260827 `
+  --bootstrap-iterations 2000
+```
+
+This generates 960 independent runs and 7,680 nested calls. Refresh the workbench and select **Statistical study** to see campaign balance, HC3 coefficient estimates, diagnostics, run-cluster bootstrap summaries, and downloads for the `runs` and `calls` tables. Read [`phase2_statistical_baseline.md`](phase2_statistical_baseline.md) before interpreting the model output.
 
 ## Phase acceptance sequence
 

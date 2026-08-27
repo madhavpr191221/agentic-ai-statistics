@@ -2,12 +2,15 @@ import { useEffect, useState } from 'react'
 
 import { api } from './api'
 import { EventTable } from './components/EventTable'
+import { CampaignPanel } from './components/CampaignPanel'
 import { ExperimentForm } from './components/ExperimentForm'
 import { MetricCard } from './components/MetricCard'
 import { RunBrowser } from './components/RunBrowser'
 import { StatisticsPanel } from './components/StatisticsPanel'
 import { TraceTimeline } from './components/TraceTimeline'
-import type { AnalysisResponse, RunDetail, RunParameters, RunSummary, ScenarioDescriptor, TraceEvent } from './types'
+import { Phase2RunForm } from './components/Phase2RunForm'
+import { Phase2RunResult } from './components/Phase2RunResult'
+import type { AnalysisResponse, Phase2RunParameters, Phase2RunResponse, RunDetail, RunParameters, RunSummary, ScenarioDescriptor, TraceEvent } from './types'
 
 function number(value: number | null, suffix = '') {
   return value === null ? '—' : `${value.toFixed(2)}${suffix}`
@@ -26,6 +29,9 @@ export default function App() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
+  const [view, setView] = useState<'calibration' | 'study'>('study')
+  const [phase2Run, setPhase2Run] = useState<Phase2RunResponse | null>(null)
+  const [phase2Busy, setPhase2Busy] = useState(false)
 
   async function refreshRuns(preferredRunId?: string) {
     const nextRuns = await api.listRuns()
@@ -96,6 +102,20 @@ export default function App() {
     }
   }
 
+  async function runPhase2(parameters: Phase2RunParameters) {
+    setPhase2Busy(true)
+    setError(null)
+    try {
+      const result = await api.createPhase2Run(parameters)
+      setPhase2Run(result)
+      setNotice(`Measured ${parameters.calls_per_run} calls through ${parameters.transport}.`)
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : String(reason))
+    } finally {
+      setPhase2Busy(false)
+    }
+  }
+
   function toggleRun(runId: string) {
     setSelectedIds((current) => current.includes(runId)
       ? current.filter((id) => id !== runId)
@@ -112,13 +132,16 @@ export default function App() {
           <h1>MCP Traffic Analysis</h1>
           <p className="header-copy">Generate controlled traces, inspect protocol events, and examine reproducible descriptive statistics before making modeling claims.</p>
         </div>
-        <div className="status-badge"><span /> Local calibration workbench</div>
+        <div><div className="status-badge"><span /> Model-free statistical laboratory</div><nav className="view-tabs" aria-label="Workbench view"><button className={view === 'study' ? 'active' : ''} onClick={() => setView('study')}>Statistical study</button><button className={view === 'calibration' ? 'active' : ''} onClick={() => setView('calibration')}>Phase 1 traces</button></nav></div>
       </header>
 
       {error ? <div className="message error" role="alert">{error}</div> : null}
       {notice ? <div className="message success" role="status">{notice}</div> : null}
 
-      <main className="workspace">
+      {view === 'study' ? <main className="workspace">
+        <aside className="sidebar"><section className="panel control-panel"><Phase2RunForm busy={phase2Busy} onRun={runPhase2} /></section><section className="panel"><p className="eyebrow">Study question</p><h2>What explains MCP latency?</h2><p className="field-note">Transport, serialized size, controlled service time, concurrency, and run-level variation. No agent is used in this phase.</p></section></aside>
+        <div className="main-column">{phase2Run ? <Phase2RunResult run={phase2Run} /> : <section className="panel welcome-panel"><p className="eyebrow">Single-run calibration</p><h2>Cross a measured transport boundary</h2><p>Run the same controlled workload through in-memory MCP or a real stdio subprocess. Exact bytes exist only for stdio.</p></section>}<CampaignPanel /></div>
+      </main> : <main className="workspace">
         <aside className="sidebar">
           <section className="panel control-panel">
             <ExperimentForm scenarios={scenarios} busy={busy} onRun={runExperiment} />
@@ -157,7 +180,7 @@ export default function App() {
           ) : null}
           {events.length > 0 ? <EventTable events={events} /> : null}
         </div>
-      </main>
+      </main>}
     </div>
   )
 }

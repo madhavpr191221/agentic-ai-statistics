@@ -127,6 +127,8 @@ The project-local cache flag works around a Windows cache-path problem on the or
 
 - [`docs/planning/phase1/mcp_traffic_analysis_research_protocol.md`](docs/planning/phase1/mcp_traffic_analysis_research_protocol.md) — complete research design and experimental campaigns.
 - [`docs/phase1a_measurement_core.md`](docs/phase1a_measurement_core.md) — Phase 1A measurement boundary and usage.
+- [`docs/phase2_statistical_baseline.md`](docs/phase2_statistical_baseline.md) — the Phase 2 factorial design, protocol-frame measurement, and statistical models.
+- [`docs/results/phase2_baseline_results.md`](docs/results/phase2_baseline_results.md) — the completed 960-run local baseline result memo.
 - [`docs/CODE_FLOW.md`](docs/CODE_FLOW.md) — module responsibilities, runtime paths, trace lifecycle, and failure flow.
 - [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md) — completed work, validation evidence, limitations, and roadmap.
 - [`docs/DEMO_WORKFLOW.md`](docs/DEMO_WORKFLOW.md) — UI usage, phase acceptance, and the permanent `demo` branch workflow.
@@ -134,7 +136,7 @@ The project-local cache flag works around a Windows cache-path problem on the or
 
 ## Current status
 
-The application-layer research protocol and the first model-free measurement slice are implemented. Phase 1A uses FastMCP's in-memory transport to validate correlation, ordering, timing, storage, concurrency, and failure classification before measuring real transport bytes.
+The application-layer research protocol, Phase 1A recorder validation, and the Phase 2 controlled statistical baseline are implemented. Phase 2 uses a deterministic MCP tool to measure the effect of transport, payload size, service time, and concurrency; it records actual `stdio` JSON-RPC frame bytes and produces reproducible analysis tables and model diagnostics.
 
 Run the primary React/TypeScript workbench:
 
@@ -154,4 +156,4 @@ Available scenarios are `list_tools`, `echo`, `sleep`, `backend_exception`, `too
 
 Phase 1A does not load `.env` and does not call a model. Request arguments, payload bodies, exception messages, credentials, and environment variables are not recorded. Because in-memory transport bypasses wire serialization, byte fields are deliberately null rather than estimated.
 
-Phase 1B will add `stdio`, actual JSON-RPC and frame byte counts, and the complete 200-trial recorder-validation campaign.
+For the full Phase 2 baseline campaign, see [`docs/phase2_statistical_baseline.md`](docs/phase2_statistical_baseline.md). It is intentionally not an agent benchmark: the goal is to establish trustworthy measurements and statistical units before adding agent behaviour.

@@ -41,6 +41,15 @@ def create_fixture_server(recorder: EventRecorder) -> FastMCP:
         return {"delay_ms": delay_ms}
 
     @server.tool
+    async def roundtrip_payload(
+        payload: Annotated[str, Field(max_length=100_000)],
+        delay_ms: Annotated[int, Field(ge=0, le=5_000)],
+    ) -> str:
+        """Return a synthetic ASCII payload after a controlled service time."""
+        await asyncio.sleep(delay_ms / 1_000)
+        return payload
+
+    @server.tool
     async def fail_with(kind: FailureKind) -> None:
         """Raise one controlled failure without using external services."""
         if kind is FailureKind.BACKEND_EXCEPTION:
