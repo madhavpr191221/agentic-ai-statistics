@@ -4,6 +4,8 @@ Status: complete local calibration campaign, collected on 2026-08-27.
 
 This is a reproducible result memo for the first controlled MCP performance dataset. It describes one local machine and one implementation, not a general claim about MCP deployments or agentic AI systems.
 
+For a plain-language explanation of the system, experimental unit, and model before reading these results, start with the [Phase 2 walkthrough](../phase2_statistical_baseline.md#plain-language-walkthrough-what-we-actually-did).
+
 ## Dataset integrity
 
 | Item | Value |
