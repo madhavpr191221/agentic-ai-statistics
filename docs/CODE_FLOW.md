@@ -1,6 +1,6 @@
 # Code Flow
 
-This document explains how the implemented Phase 1A code executes. It describes the model-free, in-memory measurement core on branch `phase/01-measurement-core`, whose implementation baseline is commit `07a3161`.
+This document explains how the implemented Phase 1A code executes. It covers the model-free measurement core, descriptive-analysis layer, FastAPI application, and React/TypeScript workbench on branch `phase/01-measurement-core`.
 
 The code has one deliberate boundary: it observes normalized MCP activity inside FastMCP, but it does not yet observe serialized JSON-RPC bytes or transport frames.
 
@@ -16,6 +16,66 @@ The code has one deliberate boundary: it observes normalized MCP activity inside
 | `measurement.recorder` | Adds correlation identifiers, process information, and atomic sequence numbers. |
 | `measurement.sink` | Creates and durably appends to a JSONL trace without overwriting an existing run. |
 | `measurement.validation` | Enforces completed-trace invariants after a trial. |
+| `analysis.descriptive` | Computes finite-value summaries, linear quantiles, ECDF points, and reproducible histograms. |
+| `api.repository` | Reads only validated run directories below the configured artifact root. |
+| `api.trace_analysis` | Derives run summaries, call/run distributions, grouped statistics, errors, and timeline spans. |
+| `api.app` | Exposes typed experiment, artifact, event, and analysis endpoints and serves the production UI. |
+| `demo` | Starts the combined production workbench with Uvicorn. |
+| `frontend/src/App.tsx` | Coordinates experiment creation, run selection, analysis unit, active-run events, and UI state. |
+| `frontend/src/components` | Renders experiment controls, empirical distributions, timelines, summaries, and event tables. |
+
+## Demo application flow
+
+```mermaid
+flowchart LR
+    User[Statistician in browser] --> React[React and TypeScript workbench]
+    React -->|POST /api/runs| API[FastAPI]
+    API --> Runner[Deterministic fixture runner]
+    Runner --> Raw[(manifest.json and events.jsonl)]
+    Raw --> Repo[Validated artifact repository]
+    React -->|GET runs and events| Repo
+    React -->|POST /api/analysis/describe| Analysis[Descriptive analysis]
+    Repo --> Analysis
+    Analysis --> Stats[Summary ECDF histogram box plot]
+    Analysis --> Timeline[Trace timeline and failure counts]
+    Stats --> React
+    Timeline --> React
+```
+
+The browser never computes the authoritative statistics. It sends selected run identifiers and the experimental unit (`call` or `run`) to the Python analysis layer. This keeps quantile and histogram definitions testable and consistent across interfaces.
+
+### API paths
+
+| Route | Purpose |
+|---|---|
+| `GET /api/scenarios` | Describe the nine deterministic scenarios. |
+| `POST /api/runs` | Execute, validate, persist, and return one experiment run. |
+| `GET /api/runs` | List validated run summaries. |
+| `GET /api/runs/{run_id}` | Read one manifest and run summary. |
+| `GET /api/runs/{run_id}/events` | Read the canonical ordered event stream. |
+| `POST /api/analysis/describe` | Describe selected runs at call or run level. |
+
+```mermaid
+sequenceDiagram
+    actor S as Statistician
+    participant UI as React UI
+    participant API as FastAPI
+    participant R as Fixture runner
+    participant Store as Artifact store
+    participant A as Analysis layer
+
+    S->>UI: choose scenario, repeat, seed
+    UI->>API: POST /api/runs
+    API->>R: run_fixture
+    R->>Store: validated manifest and events
+    R-->>API: RunArtifacts
+    API-->>UI: RunDetail
+    UI->>API: POST /api/analysis/describe
+    API->>Store: load selected validated runs
+    Store-->>A: canonical events
+    A-->>UI: distributions, groups, errors, timeline
+    UI-->>S: statistics and trace inspection
+```
 
 ## Component architecture
 
@@ -251,7 +311,7 @@ Pydantic adds field-level and cross-field constraints, including strict schema f
 | Privacy | all recording paths | no API-key name, arguments, or backend message in JSONL |
 | Completed traces | `measurement.validation` | every generated run passes span and ordering invariants |
 
-The suite currently contains 28 tests, including the 20-trial in-memory matrix.
+The Python suite contains 37 tests, including the 20-trial in-memory matrix and API/statistical tests. Three Vitest component tests cover the experiment form, statistics panel, and timeline. Two Playwright tests cover successful repeated execution, concurrency, classified failure, and persistence through reload.
 
 ## Boundary for Phase 1B
 

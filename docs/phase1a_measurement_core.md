@@ -74,5 +74,7 @@ Phase 1A is complete when the deterministic tests prove:
 - timing respects known service delays;
 - no unobserved byte measurement is reported;
 - no payload or secret content enters the trace.
+- the React/TypeScript workbench can run scenarios, inspect artifacts, and reproduce descriptive summaries from the canonical events;
+- the complete successful, concurrent, failure, and persistence flows pass in Chromium.
 
 Phase 1B will cross a subprocess `stdio` boundary and validate exact serialized payload and frame bytes over the full 200-trial recorder-validation campaign.

@@ -4,11 +4,11 @@ This is the living implementation record for MCP Traffic Analysis. It summarizes
 
 Status date: **2026-08-27**
 
-Current development branch: **`phase/01-measurement-core`**
+Completed phase branch: **`phase/01-measurement-core`**
 
-Phase 1A implementation baseline: **`07a3161` (`feat: add model-free measurement core`)**
+Cumulative tested branch: **`demo`**
 
-The Phase 1A implementation remains separate from `main` for inspection.
+The phase branch is preserved for inspection. `main` remains unchanged until an explicit release decision.
 
 ## Project objective
 
@@ -51,6 +51,17 @@ The complete design is in [`planning/phase1/mcp_traffic_analysis_research_protoc
 - Validated completed traces after every runner invocation.
 - Added a 20-trial deterministic matrix within a 28-test suite.
 
+### Phase 1A statistical workbench
+
+- Added tested descriptive statistics for call-level latency and run-level observed trace windows.
+- Defined finite/missing handling, sample standard deviation, IQR, linear quantiles, coefficient of variation, ECDFs, and deterministic histogram rules.
+- Added a typed FastAPI layer for running experiments, reading validated artifacts, and analyzing selected runs.
+- Added a React/TypeScript/Vite UI as the primary experiment surface.
+- Added run selection, call/run unit switching, grouped method summaries, ECDFs, histograms, box plots, timelines, and canonical event inspection.
+- Displayed failure classifications and explicit unavailable-byte markers.
+- Added Vitest component tests and Playwright Chromium flows for success, concurrency, controlled failure, and persistence.
+- Formalized the phase-to-`demo` branch workflow in `AGENTS.md` and `DEMO_WORKFLOW.md`.
+
 ## Current system
 
 ```mermaid
@@ -62,6 +73,8 @@ flowchart LR
     Server --> Trace[Trace recorder]
     Trace --> Raw[(manifest.json and events.jsonl)]
     Raw --> Validate[Ground-truth validation]
+    Raw --> API[FastAPI analysis API]
+    API --> UI[React TypeScript workbench]
 
     Agent[Hosted AI agent] -. not connected yet .-> Client
     Stdio[stdio transport] -. Phase 1B .-> Server
@@ -84,6 +97,10 @@ No hosted model is used. `.env` is ignored by Git, is not loaded by the runner, 
 | Reject invalid event combinations | Implemented |
 | Validate completed trace structure | Implemented |
 | Prevent payload and secret recording | Implemented |
+| Run experiments through the browser | Implemented |
+| Select runs and compute descriptive statistics | Implemented |
+| Inspect ECDF, histogram, box plot, timeline, and events | Implemented |
+| Retain UI state through persisted artifact reload | Implemented |
 
 ## What is not implemented yet
 
@@ -95,7 +112,7 @@ No hosted model is used. `.env` is ignored by Git, is not loaded by the runner, 
 | Model latency, tokens, decisions, and handoffs | Added only after recorder validation. |
 | Enterprise incident-response scenario system | Built after the deterministic fixture is trustworthy. |
 | Queueing experiments under controlled load | Requires completed jobs and observable arrivals, service, and waiting. |
-| Statistical campaign datasets and reports | Depend on the agent pilot and frozen experimental conditions. |
+| Inferential campaign datasets and reports | Depend on the agent pilot and frozen experimental conditions. Phase 1A descriptive calibration is implemented. |
 | HTTP, TLS, TCP, and IP measurements | Belong to later transport and networking phases. |
 
 Null byte fields in Phase 1A are intentional. The implementation refuses to substitute Python object sizes for unobserved serialized bytes.
@@ -114,16 +131,19 @@ These observations shaped the tests. The suite validates span-level causality an
 
 ## Validation evidence
 
-The Phase 1A baseline passed:
+The completed Phase 1A demo passed:
 
 | Check | Result |
 |---|---|
-| Deterministic pytest suite | 28 passed |
+| Deterministic pytest suite | 37 passed |
 | In-memory trial matrix | 20 trials represented in tests |
 | Ruff | Passed |
-| Strict mypy | No issues in 11 source files |
+| Strict mypy | No issues in 19 source files |
 | uv lock check | Passed |
 | Full-group environment synchronization | Passed |
+| React component tests | 3 passed |
+| TypeScript and Vite production build | Passed |
+| Chromium end-to-end UI tests | 2 passed |
 | Markdown and Git whitespace checks | Passed |
 
 A repeated echo validation run produced eight events forming four spans: automatic discovery plus two successful tool calls. All byte fields were null and all events used `unavailable_transport_bypass`, matching the observation boundary.
@@ -134,7 +154,16 @@ Create the locked environment:
 
 ```powershell
 uv --cache-dir .uv-cache sync --locked
+npm install
 ```
+
+Run the primary UI:
+
+```powershell
+npm run demo
+```
+
+Open `http://127.0.0.1:8000`.
 
 Run one scenario:
 
@@ -163,6 +192,9 @@ uv --cache-dir .uv-cache run pytest -q
 uv --cache-dir .uv-cache run ruff check .
 uv --cache-dir .uv-cache run mypy
 uv --cache-dir .uv-cache lock --check
+npm test
+npm run build
+npm run test:e2e
 ```
 
 ## Documentation map
@@ -171,6 +203,7 @@ uv --cache-dir .uv-cache lock --check
 - [`phase1a_measurement_core.md`](phase1a_measurement_core.md): Phase 1A measurement boundary and usage.
 - [`planning/phase1/mcp_traffic_analysis_research_protocol.md`](planning/phase1/mcp_traffic_analysis_research_protocol.md): full research design.
 - [`../README.md`](../README.md): project orientation and setup.
+- [`DEMO_WORKFLOW.md`](DEMO_WORKFLOW.md): UI operation, acceptance tests, and branch workflow.
 
 ## Roadmap
 

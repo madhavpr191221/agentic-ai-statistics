@@ -5,10 +5,14 @@ description = "Empirical performance analysis of agentic AI systems and MCP comm
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
 dependencies = [
+    "fastapi>=0.116,<1",
     "fastmcp==3.2.4",
+    "numpy>=2,<3",
     "openai-agents==0.7.0",
+    "pandas>=2,<4",
     "psutil>=7,<8",
     "pydantic>=2.12,<3",
+    "uvicorn>=0.35,<1",
 ]
 
 [build-system]
@@ -19,8 +23,6 @@ build-backend = "hatchling.build"
 analysis = [
     "matplotlib>=3,<4",
     "networkx>=3,<4",
-    "numpy>=2,<3",
-    "pandas>=2,<4",
     "pyarrow>=20,<30",
     "scipy>=1,<2",
     "seaborn>=0.13,<1",
