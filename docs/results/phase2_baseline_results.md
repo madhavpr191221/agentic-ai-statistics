@@ -19,6 +19,8 @@ For a plain-language explanation of the system, experimental unit, and model bef
 | Execution randomization seed | 20260827 |
 | Bootstrap iterations | 2,000 |
 
+Each run created exactly one fresh MCP session. Thus the campaign contains 960 sessions, one run per session, and eight modeled calls per run/session. In the nested model, $r=1,\ldots,960$ indexes the run/session and $i=1,\ldots,8$ indexes a call within it.
+
 The frozen campaign manifest has SHA-256 `25B2ACBDC0608EACCFDD04DC0B499C6525CAD9E08A93B418D099E9C66DBEB0BA`. The generated analysis file has SHA-256 `09C93D4F4F19F5D7C1C0B9788BB5E2E098C9D1ABA60315582544BB6599EA5F9B`.
 
 Raw per-run artifacts and analysis tables are local ignored outputs under `artifacts/phase2/baseline-v1/`. The analysis-ready files are in `tables/runs.csv`, `tables/calls.csv`, and their Parquet equivalents.
@@ -57,7 +59,15 @@ The fastest observed condition median was 4.78 ms (`in_memory`, 65,536-byte targ
 
 ## Nested-call model
 
-The secondary mixed model uses all 7,680 calls with a random intercept for run. It converged, with estimated between-run variance $0.200$, within-run variance $0.084$, and
+The secondary mixed model uses all 7,680 calls with a random intercept for each run/session:
+
+$$
+\log(L_{ri})=X_r\beta+\gamma\,\mathrm{first}_{ri}+b_r+\epsilon_{ri},
+\qquad
+b_r\sim\mathcal N(0,\tau^2).
+$$
+
+It converged, with estimated between-run variance $0.200$, within-run variance $0.084$, and
 
 $$
 \mathrm{ICC}=0.705.
