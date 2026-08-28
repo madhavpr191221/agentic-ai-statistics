@@ -62,7 +62,7 @@ Failed runs do not receive a successful-path excess value because they never com
 ## Data stages
 
 - **Stage 5A** reuses the 90 Phase 4 runs and costs no model credit. Its ten Orders-recovery observations are pilot evidence.
-- **Stage 5B** collects 100 new Orders-recovery runs under a frozen configuration. Collection is currently paused at 66 valid runs after provider quota exhaustion. Provider failures are audited but never counted as agent outcomes.
+- **Stage 5B** collected 100 new Orders-recovery runs under a frozen configuration. Seventeen provider failures from an earlier quota interruption are audited but never counted as agent outcomes.
 
 The UI labels these stages rather than silently combining them.
 

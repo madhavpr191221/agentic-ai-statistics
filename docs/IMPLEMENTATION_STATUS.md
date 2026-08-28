@@ -38,7 +38,7 @@ The main study found approximately 20.5% more expected MCP calls under recovery 
 - Frozen focused campaign with configuration fingerprint, resumability, batches, pilot/main separation, and a USD 5 estimated-cost guard.
 - Read-only trace-study API and a practical React trace-dynamics workbench.
 
-Stage 5A has reanalysed all 90 Phase 4 observations without new model calls. Stage 5B has 66 of 100 valid runs and is paused after provider quota exhaustion. Seventeen provider-error attempts are retained for audit but excluded from scientific analysis; the campaign resumes from the first missing scheduled observation.
+Stage 5A has reanalysed all 90 Phase 4 observations without new model calls. Stage 5B is complete with 100 valid runs. Seventeen provider-error attempts from the earlier quota interruption are retained for audit but excluded from scientific analysis.
 
 ## Measurement boundary
 

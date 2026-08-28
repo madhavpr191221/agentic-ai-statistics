@@ -51,7 +51,7 @@ Phase 5 asks a practical question about the Orders recovery condition:
 
 > After escalation is rejected, does the agent read the runbook before trying another action, and how is that observable choice associated with failure?
 
-The credit-free Stage 5A reanalysis uses the 90 saved Phase 4 runs. In its ten focused Orders-recovery observations, the five agents that read the runbook first succeeded and the five that retried first failed. The separate Stage 5B campaign currently has 66 of 100 valid runs and is paused after provider quota exhaustion. Its interim values are visible for audit but are not presented as the planned final analysis.
+The credit-free Stage 5A reanalysis uses the 90 saved Phase 4 runs. In its ten focused Orders-recovery observations, the five agents that read the runbook first succeeded and the five that retried first failed. The separate Stage 5B campaign is now complete with 100 valid runs; 17 earlier provider-error attempts remain visible for audit but are excluded from the scientific analysis.
 
 Phase 5 also reports complete path frequencies, entropy, one-step transition counts, oracle divergence, and excess calls. It does not infer private model reasoning or claim that the traces form a Markov chain. See [the Phase 5 study guide](docs/phase5_stochastic_traces.md) and [single Phase 5 result document](docs/results/phase5_stochastic_trace_results.md).
 
@@ -150,7 +150,7 @@ Phase 5 smoke and main collection are intentionally CLI-only:
 
 ```powershell
 uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.trace_study.campaigns collect trace-orders-recovery-smoke-v1 --stage smoke
-uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.trace_study.campaigns collect trace-orders-recovery-main-v2 --stage main --resume
+uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.trace_study.campaigns collect trace-orders-recovery-main-v2 --stage main --analyze-only
 ```
 
 Use `--resume` after an interruption. Collection freezes a configuration fingerprint and applies a USD 5 estimated-cost guard by default.
