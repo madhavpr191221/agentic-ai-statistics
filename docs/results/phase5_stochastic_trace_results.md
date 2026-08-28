@@ -219,3 +219,5 @@ These are measured local runtime components. They do not estimate queue waiting,
 The median first oracle divergence was step 2 for both successful and failed traces. The 100 valid traces had 22 distinct paths overall, with 13 singleton paths. The most common path covered 55% of runs and path entropy was 2.70 bits.
 
 Phase 6A adds detail to the Phase 5 result but does not change its interpretation. The synthetic world still makes the runbook-first and retry-first branches strongly associated with outcome, and the observed branch was not randomized.
+
+The complete small-question statistical learning sequence is recorded in [the Phase 6A statistical analysis roadmap](../planning/phase6_statistical_analysis_roadmap.md).

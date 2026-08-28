@@ -57,6 +57,8 @@ Phase 5 also reports complete path frequencies, entropy, one-step transition cou
 
 Phase 6A performs credit-free secondary analysis of those 100 saved runs: partial-history failure tables, tool usage, runtime decomposition, oracle divergence, and path concentration. It makes no new model calls and keeps run-level summaries primary.
 
+For the step-by-step statistical learning sequence, see the [Phase 6A statistical analysis roadmap](docs/planning/phase6_statistical_analysis_roadmap.md).
+
 ## What crosses the measurement boundary?
 
 ```mermaid

@@ -44,6 +44,8 @@ Stage 5A has reanalysed all 90 Phase 4 observations without new model calls. Sta
 
 Phase 6A reuses the completed Phase 5B artifacts without model calls. It adds partial-history outcome tables, tool-usage counts, latency-component summaries, divergence-by-outcome, path concentration, downloadable tables, and corresponding UI sections.
 
+The [Phase 6A statistical analysis roadmap](planning/phase6_statistical_analysis_roadmap.md) documents the small-question learning sequence and interpretation rules.
+
 ## Measurement boundary
 
 The active system measures model activity and local newline-delimited MCP/JSON-RPC frames crossing a stdio relay. Request and response byte counts are exact at that boundary.
