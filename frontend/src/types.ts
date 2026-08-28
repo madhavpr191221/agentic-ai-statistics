@@ -179,6 +179,17 @@ export interface BehaviorCampaignAnalysis {
     values: number[]
     ecdf: Array<{ value: number; probability: number }>
   }>
+  workload_by_structure?: Array<{
+    task_structure: TaskStructure
+    n_runs: number
+    successes: number
+    success_rate: number
+    mcp_call_count: { mean: number | null; median: number | null; q1: number | null; q3: number | null; minimum: number | null; maximum: number | null }
+    model_call_count: { mean: number | null; median: number | null; q1: number | null; q3: number | null; minimum: number | null; maximum: number | null }
+    total_latency_ms: { mean: number | null; median: number | null; q1: number | null; q3: number | null; minimum: number | null; maximum: number | null }
+    total_tokens: { mean: number | null; median: number | null; q1: number | null; q3: number | null; minimum: number | null; maximum: number | null }
+    estimated_cost_usd: { mean: number | null; median: number | null; q1: number | null; q3: number | null; minimum: number | null; maximum: number | null }
+  }>
   transition_summary?: Array<{
     task_structure: TaskStructure
     source_tool: string

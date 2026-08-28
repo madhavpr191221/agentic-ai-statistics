@@ -61,6 +61,8 @@ For the step-by-step statistical learning sequence, see the [Phase 6A statistica
 
 Phase 8 begins the executable statistical baseline without new model calls. It treats scalar run-level quantitiesâ€”calls, latency, tokens, cost, and successâ€”as the first objects, exposes their distributions and batch-stability diagnostics in the Scalar Baseline view, and provides downloadable Q01â€“Q03 artifacts.
 
+Phase 10 reuses the 90-run Phase 4 campaign for workload analysis. It compares scalar MCP-call distributions across sequential, branching, and recovery task structures, then reports the pre-specified count model with incident and block adjustment. No new model calls are required.
+
 The complete specification-driven statistical program is defined in the [statistical analysis specification](docs/specs/statistical_analysis_spec.md), [question registry](docs/specs/analysis_questions.yaml), [data dictionary](docs/specs/data_dictionary.md), and [traceability matrix](docs/specs/analysis_traceability.md).
 
 ## What crosses the measurement boundary?

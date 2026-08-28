@@ -73,6 +73,25 @@ def _write_json(path: Path, value: Any) -> None:
     path.write_text(json.dumps(value, indent=2, default=str) + "\n", encoding="utf-8")
 
 
+def _write_workload_artifacts(campaign_directory: Path, analysis: dict[str, Any]) -> None:
+    payload = {
+        "schema_version": "10.0.0",
+        "campaign_id": analysis["campaign_id"],
+        "study_stage": analysis["study_stage"],
+        "experimental_unit": analysis["experimental_unit"],
+        "n_runs": analysis["n_runs"],
+        "primary_outcome": analysis.get("primary_outcome", "mcp_call_count"),
+        "workload_by_structure": analysis.get("workload_by_structure", []),
+        "limitations": analysis.get("notes", []),
+    }
+    _write_json(campaign_directory / "q04_workload_by_condition.json", payload)
+    _write_json(campaign_directory / "q04_count_model.json", {
+        "schema_version": "10.0.0",
+        "campaign_id": analysis["campaign_id"],
+        "model": analysis.get("primary_model"),
+    })
+
+
 def reanalyze(campaign_directory: Path) -> dict[str, Any]:
     manifest = json.loads(
         (campaign_directory / "campaign_manifest.json").read_text(encoding="utf-8")
@@ -115,6 +134,21 @@ def reanalyze(campaign_directory: Path) -> dict[str, Any]:
     for name, frame in tables.items():
         frame.to_csv(table_directory / f"{name}.csv", index=False)
         frame.to_parquet(table_directory / f"{name}.parquet", index=False)
+    tables["q04_workload_by_condition"] = pd.DataFrame(
+        analysis.get("workload_by_structure", [])
+    )
+    distribution_columns = [
+        "run_id", "scenario_id", "task_structure", "block", "mcp_call_count",
+        "model_call_count", "total_latency_ms", "total_tokens", "estimated_cost_usd",
+    ]
+    tables["q04_distribution_data"] = (
+        tables["runs"].reindex(columns=distribution_columns)
+    )
+    for name in ("q04_workload_by_condition", "q04_distribution_data"):
+        frame = tables[name]
+        frame.to_csv(table_directory / f"{name}.csv", index=False)
+        frame.to_parquet(table_directory / f"{name}.parquet", index=False)
+    _write_workload_artifacts(campaign_directory, analysis)
     return analysis
 
 

@@ -182,6 +182,35 @@ def fit_success_model(frame: pd.DataFrame) -> dict[str, Any]:
         }
 
 
+def _numeric_summary(values: pd.Series) -> dict[str, float | None]:
+    numeric = [float(value) for value in values.dropna()]
+    return {
+        "mean": sum(numeric) / len(numeric) if numeric else None,
+        "median": float(pd.Series(numeric).median()) if numeric else None,
+        "q1": float(pd.Series(numeric).quantile(0.25)) if numeric else None,
+        "q3": float(pd.Series(numeric).quantile(0.75)) if numeric else None,
+        "minimum": min(numeric) if numeric else None,
+        "maximum": max(numeric) if numeric else None,
+    }
+
+
+def _workload_by_structure(frame: pd.DataFrame) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for structure, group in frame.groupby("task_structure", sort=True):
+        rows.append({
+            "task_structure": str(structure),
+            "n_runs": int(len(group)),
+            "successes": int(group["task_success"].sum()),
+            "success_rate": float(group["task_success"].mean()),
+            "mcp_call_count": _numeric_summary(group["mcp_call_count"]),
+            "model_call_count": _numeric_summary(group["model_call_count"]),
+            "total_latency_ms": _numeric_summary(group["total_latency_ms"]),
+            "total_tokens": _numeric_summary(group["total_tokens"]),
+            "estimated_cost_usd": _numeric_summary(group["estimated_cost_usd"]),
+        })
+    return rows
+
+
 def analyze_campaign(
     details: list[IncidentRunDetail], campaign_id: str, study_stage: str
 ) -> tuple[dict[str, Any], dict[str, pd.DataFrame]]:
@@ -326,6 +355,7 @@ def analyze_campaign(
                     ],
                 }
             )
+        workload_by_structure = _workload_by_structure(runs)
         analysis = {
             "campaign_id": campaign_id,
             "study_stage": study_stage,
@@ -350,6 +380,7 @@ def analyze_campaign(
             },
             "condition_summaries": condition_summaries,
             "mcp_call_distributions": call_distributions,
+            "workload_by_structure": workload_by_structure,
             "transition_summary": transition_summary,
             "notes": [
                 "Pilot observations are not combined with the main study.",

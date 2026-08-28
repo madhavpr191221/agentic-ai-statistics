@@ -52,6 +52,10 @@ The specification-driven statistical program is documented in `docs/specs/`: an 
 
 Phase 8 implements Q01–Q03 from the specification using only the saved Phase 5 campaign. It adds run-level scalar distributions, an explicit scalar data dictionary, batch-stability summaries, downloadable JSON/CSV artifacts, a read-only artifact route, and a Scalar Baseline section in the React workbench. Q04 and later remain specified but pending.
 
+### Phase 10 workload by task condition
+
+Phase 10 implements Q04 using the saved 90-run Phase 4 main campaign. It publishes workload summaries by sequential, branching, and recovery structure, the pre-specified Poisson count model with HC3 covariance, dispersion diagnostics, downloadable Q04 artifacts, and a workload comparison in the Behavior workbench. No new model calls are required.
+
 ## Measurement boundary
 
 The active system measures model activity and local newline-delimited MCP/JSON-RPC frames crossing a stdio relay. Request and response byte counts are exact at that boundary.
