@@ -1,6 +1,6 @@
 [project]
 name = "mcp-traffic-analysis"
-version = "0.6.0"
+version = "0.7.0"
 description = "Empirical performance analysis of agentic AI systems and MCP communication"
 readme = "README.md"
 requires-python = ">=3.13,<3.14"

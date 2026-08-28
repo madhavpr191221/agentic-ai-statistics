@@ -107,6 +107,19 @@ export function TraceDynamicsWorkbench() {
         <p className="method-note">{post?.interpretation_limit} {post?.classified_runs ?? 0} of {post?.focused_runs ?? 0} focused runs entered the two behaviour groups; {post?.unclassified_runs ?? 0} lacked the required rejection/follow-up sequence. Counts come first because a percentage based on five runs is not as precise as one based on one hundred.</p>
       </section>
 
+      {campaign.prefix_outcomes?.length ? <section className="panel">
+        <p className="eyebrow">Secondary analysis · partial histories</p><h2>Where does failure become visible?</h2>
+        <p>These are observed prefixes of the trace, not predictions from private model reasoning.</p>
+        <div className="table-scroll"><table className="data-table"><thead><tr><th>Observed prefix</th><th>Runs</th><th>Successes</th><th>Failures</th><th>Failure rate</th><th>95% interval</th></tr></thead><tbody>{campaign.prefix_outcomes.filter((row) => row.n_runs > 0).map((row) => <tr key={row.prefix}><td>{row.prefix.replaceAll('_', ' ')}</td><td>{row.n_runs}</td><td>{row.successes}</td><td>{row.failures}</td><td>{percentage(row.failure_rate)}</td><td>{interval(row.failure_rate_wilson_95)}</td></tr>)}</tbody></table></div>
+        <p className="method-note">A prefix is an observed history. These percentages are conditional summaries, not a fitted Markov model.</p>
+      </section> : null}
+
+      {campaign.tool_usage?.length ? <section className="panel">
+        <p className="eyebrow">Secondary analysis · tool traffic</p><h2>Which tools dominate the work?</h2>
+        <div className="table-scroll"><table className="data-table"><thead><tr><th>Tool</th><th>Invocations</th><th>Share of calls</th><th>Runs using tool</th><th>Successful runs</th></tr></thead><tbody>{campaign.tool_usage.map((row) => <tr key={row.tool_name}><td>{row.tool_name.replaceAll('_', ' ')}</td><td>{row.invocations}</td><td>{percentage(row.invocation_proportion)}</td><td>{row.runs}</td><td>{row.successful_runs}</td></tr>)}</tbody></table></div>
+        <p className="method-note">Invocation counts are available by tool. Per-tool bytes and latency are unavailable because the current recorder stores those quantities at run level.</p>
+      </section> : null}
+
       <section className="panel">
         <p className="eyebrow">Where paths separate</p><h2>One successful trace and one failed trace</h2>
         <div className="trace-lanes">{traceCard('Successful run', successTrace)}{traceCard('Failed run', failureTrace)}</div>
@@ -138,11 +151,23 @@ export function TraceDynamicsWorkbench() {
         return <tr key={String(key)}><td>{label}</td><td>{summary?.n ?? 0}</td><td>{measured(summary?.median, Number(digits))}</td><td>{measured(summary?.q1, Number(digits))}–{measured(summary?.q3, Number(digits))}</td><td>{measured(summary?.minimum, Number(digits))}–{measured(summary?.maximum, Number(digits))}</td></tr>
       })}</tbody></table></div><p className="method-note">{campaign.measurement_boundary}</p></section>
 
+      {campaign.latency_decomposition?.length ? <section className="panel">
+        <p className="eyebrow">Secondary analysis · runtime components</p><h2>Where does the runtime go?</h2>
+        <div className="table-scroll"><table className="data-table"><thead><tr><th>Component</th><th>Median ms</th><th>Median share</th><th>Correlation with total</th></tr></thead><tbody>{campaign.latency_decomposition.map((row) => <tr key={row.component}><td>{row.component.replaceAll('_', ' ').replace(' ms', '')}</td><td>{measured(row.median)}</td><td>{percentage(row.median_share_of_total)}</td><td>{measured(row.correlation_with_total, 2)}</td></tr>)}</tbody></table></div>
+        <p className="method-note">Component shares describe this measured run decomposition; they do not estimate queueing delay or network transmission time.</p>
+      </section> : null}
+
+      {campaign.divergence_by_outcome?.length ? <section className="panel">
+        <p className="eyebrow">Secondary analysis · oracle divergence</p><h2>When do successful and failed traces depart?</h2>
+        <div className="study-facts">{campaign.divergence_by_outcome.map((row) => <span key={row.outcome}><strong>{row.median ?? 'N/A'}</strong> median step for {row.outcome} traces <small>({row.n_runs} runs)</small></span>)}</div>
+        <p className="method-note">The step number is an index in the observed tool sequence, not a model-internal reasoning step.</p>
+      </section> : null}
+
       {campaign.batch_summaries.length > 1 ? <section className="panel"><p className="eyebrow">Acquisition diagnostic</p><h2>Did behaviour change across batches?</h2><Plot data={[{ x: campaign.batch_summaries.map((row) => row.batch), y: campaign.batch_summaries.map((row) => row.success_rate), name: 'Success rate', type: 'scatter', mode: 'lines+markers' }, { x: campaign.batch_summaries.map((row) => row.batch), y: campaign.batch_summaries.map((row) => row.read_runbook_first_rate), name: 'Read runbook first', type: 'scatter', mode: 'lines+markers' }]} layout={{ autosize: true, height: 280, margin: { l: 50, r: 15, t: 10, b: 45 }, xaxis: { title: { text: 'Batch' } }, yaxis: { title: { text: 'Observed proportion' }, range: [0, 1] }, paper_bgcolor: 'transparent', plot_bgcolor: 'transparent', legend: { orientation: 'h' } }} config={{ displayModeBar: false, responsive: true }} useResizeHandler style={{ width: '100%' }} /><p className="method-note">A diagnostic for time-related drift, not an additional hypothesis test.</p></section> : null}
 
       <section className="panel trace-explorer"><p className="eyebrow">Raw observation</p><h2>Inspect one focused trace</h2><label>Run<select aria-label="Focused trace" value={activeTrace?.run_id ?? ''} onChange={(event) => setSelectedRun(event.target.value)}>{focusedTraces.map((trace) => <option key={trace.run_id} value={trace.run_id}>{trace.task_success ? 'Success' : 'Failure'} · order {trace.execution_order ?? 'unknown'} · {trace.run_id.slice(0, 8)}</option>)}</select></label>{activeTrace ? <ol className="raw-trace">{activeTrace.state_sequence.split(' > ').map((state, index) => <li key={`${state}-${index}`}>{shortState(state)}</li>)}</ol> : null}</section>
 
-      <section className="panel"><p className="eyebrow">Auditable artifacts</p><div className="download-row">{['runs.csv', 'traces.csv', 'paths.csv', 'transitions.csv', 'post_rejection_outcomes.csv'].map((name) => <a key={name} href={`/api/trace-study/campaigns/${campaign.campaign_id}/tables/${name}`}>{name}</a>)}</div></section>
+      <section className="panel"><p className="eyebrow">Auditable artifacts</p><div className="download-row">{['runs.csv', 'traces.csv', 'paths.csv', 'transitions.csv', 'post_rejection_outcomes.csv', 'prefix_outcomes.csv', 'tool_usage.csv', 'latency_components.csv', 'divergence.csv', 'path_concentration.csv'].map((name) => <a key={name} href={`/api/trace-study/campaigns/${campaign.campaign_id}/tables/${name}`}>{name}</a>)}</div></section>
     </>}
   </main>
 }
