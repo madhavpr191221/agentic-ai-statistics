@@ -10,6 +10,24 @@ The practical question is:
 
 This document is the single results record for Phase 5. Stage 5A is complete, and the frozen Stage 5B campaign now has all 100 valid observations.
 
+## How the observations are represented
+
+The first layer is scalar random variables measured once per fresh run: call count $N_r$, total latency $L_r$, tokens $T_r$, estimated cost $C_r$, and success $Y_r$. Their ordinary distributions are the basic results of the study. For example, $\widehat P(Y=1)$ is the observed success proportion across repeated runs.
+
+The same run also produces a richer random object, its finite observable trajectory,
+
+$$
+\mathbf X_r=(X_{r1},\ldots,X_{rN_r}).
+$$
+
+The empirical distribution over complete paths is
+
+$$
+\widehat P(\mathbf X=x)=\frac{1}{R}\sum_{r=1}^{R}\mathbf 1\{\mathbf X_r=x\}.
+$$
+
+Thus path analysis does not replace scalar analysis: call count, latency, cost, and success are scalar summaries or functionals of each run, while the path preserves ordering information. We report the scalar results first and use paths to explain variation in those outcomes. The paths have random finite length; transition frequencies below are descriptive and do not assume a Markov model.
+
 ## Stage 5A: existing 90-run dataset
 
 Stage 5A reanalysed the complete Phase 4 main campaign:

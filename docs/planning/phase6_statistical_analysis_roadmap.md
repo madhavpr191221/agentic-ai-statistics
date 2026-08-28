@@ -22,6 +22,17 @@ $$
 
 Actions inside one run are nested measurements, not independent experimental units.
 
+## The statistical hierarchy
+
+We will learn and analyze the objects in increasing richness:
+
+1. scalar run-level random variables such as call count, latency, tokens, cost, and success;
+2. a random vector collecting those scalars for one run;
+3. a random finite sequence of observable actions/states;
+4. a timed, marked event sequence containing timestamps and per-event measurements.
+
+The scalar distributions come first. They answer the basic questions—how much work, how long, how costly, and how often successful—before we study why complete paths differ. A path distribution is not automatically a Markov chain, and the continuous-path analogy is conceptual only: the present recorder observes finitely many MCP events.
+
 ## Small questions, in learning order
 
 ### 1. What is one observation?

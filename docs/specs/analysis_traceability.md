@@ -2,6 +2,15 @@
 
 This matrix is the review checklist for the specification. A question is complete only when its practical wording, estimand, artifact, UI representation, test, and result paragraph agree.
 
+## Foundational principles
+
+| ID | Principle | Documentation evidence | Verification |
+|---|---|---|---|
+| F01 | Scalar random variables are the first analysis objects | statistical specification; data dictionary | scalar distributions are reported before path summaries |
+| F02 | Trajectories have random finite length | statistical specification | length or terminal state is included in path probability |
+| F03 | Path frequencies do not imply a Markov model | statistical specification; roadmap | transitions are labeled descriptive unless separately justified |
+| F04 | Scalars are functionals of richer run objects | statistical specification; Phase 5 results | scalar summaries remain primary outcomes and are not replaced by paths |
+
 | ID | Practical object | Primary artifact | UI surface | Verification |
 |---|---|---|---|---|
 | Q01 | Run and variable definitions | data dictionary | measurement notes | schema/range reconciliation |
