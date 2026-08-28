@@ -91,6 +91,42 @@ The variables on the right are called **covariates**. A covariate is simply a re
 - **incident identity**, because checkout, image, and orders incidents may naturally differ; and
 - **randomized block**, which identifies the group of nine conditions run around the same time and helps account for time-related drift.
 
+### Variable types, values, and model coding
+
+| Variable | Role | Statistical type | Possible values in this study | How it entered the model |
+|---|---|---|---|---|
+| $N_{\mathrm{MCP},r}$ | Outcome being explained | Discrete count | Any non-negative integer in principle; observed values were 7, 8, 9, 10, and 11 | Used directly as the response variable |
+| Task structure | Main explanatory variable | Nominal categorical | `sequential`, `branching`, `recovery` | Converted into two binary indicators, with `sequential` as the reference |
+| Incident identity | Adjustment variable | Nominal categorical | `checkout_failures`, `image_worker_degradation`, `orders_api_outage` | Converted into two binary indicators, with `checkout_failures` as the reference |
+| Randomized block | Adjustment variable | Categorical blocking factor | Block labels 1 through 10 | Converted into nine binary indicators, with block 1 as the reference |
+| $\mu_r$ | Model-produced expected call count | Positive continuous quantity | Any value greater than zero | Not observed directly; calculated by the fitted model |
+
+**Nominal categorical** means that the values name different groups but have no natural numerical order. For example, recovery is not “larger than” branching in the way that 20 seconds is larger than 10 seconds.
+
+Although blocks are labelled 1 to 10, block was **not** treated as a continuous number. The model did not assume that moving from block 1 to block 2 had the same effect as moving from block 8 to block 9. Each block was treated as its own category.
+
+The two task-structure indicators were
+
+$$
+I(\text{branching}_r)=
+\begin{cases}
+1,&\text{if run }r\text{ used branching},\\
+0,&\text{otherwise},
+\end{cases}
+$$
+
+and
+
+$$
+I(\text{recovery}_r)=
+\begin{cases}
+1,&\text{if run }r\text{ used recovery},\\
+0,&\text{otherwise}.
+\end{cases}
+$$
+
+A sequential run has zero for both indicators. The incident and block categories were represented by the same reference-category idea. Therefore, this primary model contained **no continuous observed covariates**.
+
 Sequential structure was the reference level. Exponentiating a structure coefficient gives an expected call ratio.
 
 | Comparison with sequential | Expected call ratio | 95% confidence interval | Conclusion |
