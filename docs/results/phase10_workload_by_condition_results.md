@@ -1,5 +1,8 @@
 # Phase 10 Results: Workload by Task Condition
 
+For the concise combined study findings, start with
+[`agent_execution_study_results.md`](agent_execution_study_results.md).
+
 ## Question
 
 Does changing the hidden task structure change the amount of MCP work performed by the agent?

@@ -1,5 +1,8 @@
 # Phase 5 Results: Stochastic Trace and Failure Paths
 
+For the concise combined study findings, start with
+[`agent_execution_study_results.md`](agent_execution_study_results.md).
+
 ## What question are we answering?
 
 The agent repeatedly receives the same synthetic Orders API incident. After its escalation is deliberately rejected, it must either read the runbook before trying another action or try another action first.

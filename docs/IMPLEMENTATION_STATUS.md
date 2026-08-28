@@ -48,6 +48,10 @@ The [Phase 6A statistical analysis roadmap](planning/phase6_statistical_analysis
 
 The specification-driven statistical program is documented in `docs/specs/`: an authoritative specification, question registry, data dictionary, and traceability matrix. These documentation artifacts do not require new model calls.
 
+The reader-facing synthesis of the main empirical findings is
+[`results/agent_execution_study_results.md`](results/agent_execution_study_results.md).
+Phase-specific result files remain as technical provenance and audit records.
+
 ### Phase 12: statistical study layer
 
 Phase 12A is a specification phase with no new model calls. It formalizes the

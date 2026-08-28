@@ -1,5 +1,8 @@
 # Phase 3 IT-Incident Agent: Pilot Results
 
+For the concise combined study findings, start with
+[`agent_execution_study_results.md`](agent_execution_study_results.md).
+
 Status date: **2026-08-27**
 
 Valid campaign: **`incident-pilot-v2`**

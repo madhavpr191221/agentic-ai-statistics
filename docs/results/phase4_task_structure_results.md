@@ -1,5 +1,8 @@
 # Phase 4 Results: Does Task Structure Change Agent Behavior?
 
+For the concise combined study findings, start with
+[`agent_execution_study_results.md`](agent_execution_study_results.md).
+
 Status: **complete**
 
 Main campaign: **`task-structure-main-v1`**, completed on 2026-08-27

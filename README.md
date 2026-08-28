@@ -8,6 +8,9 @@ Observability asks what happened in one run. This project asks how the
 distribution of runs changes, how variable the paths are, and which controlled
 conditions or observable histories explain that variation.
 
+Read the [main results report](docs/results/agent_execution_study_results.md)
+for the concise combined findings from the completed studies.
+
 ## What does this repository study?
 
 The repository measures how a real AI agent communicates and behaves while resolving controlled, synthetic IT incidents.
@@ -246,6 +249,7 @@ git diff --check
 - [Phase 5 method](docs/phase5_stochastic_traces.md)
 - [Phase 5 frozen plan](docs/planning/phase5_stochastic_trace_plan.md)
 - [Phase 5 results](docs/results/phase5_stochastic_trace_results.md)
+- [Combined agent-execution study results](docs/results/agent_execution_study_results.md)
 - [Phase 6A plan](docs/planning/phase6_credit_free_analysis_plan.md)
 
 ## Current limits
