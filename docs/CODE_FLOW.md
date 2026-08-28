@@ -1,6 +1,6 @@
 # Code Flow
 
-This document follows one active experiment from the browser to the saved statistical artifact. The repository now contains two study surfaces: the Phase 3 incident agent and the Phase 4 task-structure experiment.
+This document follows one active experiment from the browser to the saved statistical artifact. The repository contains the Phase 3 incident agent, Phase 4 task-structure experiment, and Phase 5 stochastic-trace study.
 
 ## One-run overview
 
@@ -32,8 +32,9 @@ sequenceDiagram
 
 ## UI and API
 
-`frontend/src/App.tsx` selects one of two workbenches:
+`frontend/src/App.tsx` selects one of three workbenches:
 
+- `TraceDynamicsWorkbench` uses `/api/trace-study/*` for Phase 5;
 - `IncidentWorkbench` uses `/api/agent/*` for Phase 3;
 - `BehaviorWorkbench` uses `/api/behavior/*` for Phase 4.
 
@@ -183,6 +184,30 @@ The analysis also reports:
 - empirical tool-transition probabilities; and
 - exploratory latency, byte, token, and cost models.
 
+## Phase 5 trace analysis
+
+`trace_study/campaigns.py` has two deliberately separate paths:
+
+```mermaid
+flowchart LR
+    A[Saved Phase 4 main campaign] --> B[Stage 5A reanalysis]
+    B --> C[Exploratory Phase 5 tables]
+    D[Frozen Orders recovery condition] --> E[100 fresh sessions]
+    E --> F[Stage 5B main tables]
+    C --> G[Trace dynamics UI]
+    F --> G
+```
+
+`trace_study/analysis.py` joins the ordered MCP tool sequence to the synthetic action ledger. This creates states such as `escalate_incident|expected_rejection` and `escalate_incident|accepted`; outcomes are therefore observed from the world rather than guessed from final prose.
+
+For the primary practical comparison, the code finds the first expected escalation rejection and records whether `get_runbook` or another action occurs first. It constructs the raw two-by-two success/failure table before calculating conditional failure percentages and uncertainty intervals.
+
+The same module constructs complete state paths, one-step transitions, repeated-tool counts, first oracle divergence, bootstrap entropy intervals, and successful-run excess calls. It does not fit a Markov model.
+
+Phase 5 collection writes a configuration fingerprint before model calls. Resumption is rejected if the frozen model, prompt, scenario, tools, oracle, or settings change. Three smoke observations and the historical pilot are never pooled with the 100-run main campaign.
+
+Provider failures are not agent failures. A valid scientific observation must pass correlation reconciliation and must not have a provider exception such as `RateLimitError`. The collector stops immediately on such an exception. It preserves the failed attempt for audit, excludes it from every scientific table, and retries the same scheduled run ID on resume. Cost accounting separately reports valid-run cost, excluded-attempt cost, and their total.
+
 ## Artifact ownership
 
 One live run writes a directory containing world state, model events, MCP events, exact frames, actions, structured output, score, reconciled measurements, and the combined detail object.
@@ -193,15 +218,16 @@ Campaign directories add:
 - `analysis.json`; and
 - CSV and Parquet tables.
 
-Raw generated artifacts are ignored by Git. Research methods and result memos are version controlled.
+Raw generated artifacts are ignored by Git. Research methods and the single canonical Phase 5 results document are version controlled.
 
 ## Reading order
 
 For the active system, read:
 
-1. `frontend/src/components/BehaviorWorkbench.tsx` or `IncidentWorkbench.tsx`;
+1. `frontend/src/components/TraceDynamicsWorkbench.tsx`, `BehaviorWorkbench.tsx`, or `IncidentWorkbench.tsx`;
 2. `api/app.py`;
 3. `incidents/runner.py`;
 4. `transport/stdio_relay.py`;
 5. `incidents/server.py` and `incidents/world.py`; and
-6. `behavior/campaigns.py` and `behavior/analysis.py` for repeated Phase 4 work.
+6. `behavior/campaigns.py` and `behavior/analysis.py` for repeated Phase 4 work; and
+7. `trace_study/campaigns.py` and `trace_study/analysis.py` for Phase 5.

@@ -6,6 +6,7 @@ import type {
   IncidentScenarioDescriptor,
   IncidentScenarioId,
   TaskStructure,
+  TraceStudyAnalysis,
 } from './types'
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
@@ -45,4 +46,6 @@ export const api = {
   }),
   listBehaviorCampaigns: () =>
     request<BehaviorCampaignAnalysis[]>('/api/behavior/campaigns'),
+  listTraceStudyCampaigns: () =>
+    request<TraceStudyAnalysis[]>('/api/trace-study/campaigns'),
 }

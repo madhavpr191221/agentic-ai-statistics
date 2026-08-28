@@ -2,9 +2,10 @@ import { useState } from 'react'
 
 import { BehaviorWorkbench } from './components/BehaviorWorkbench'
 import { IncidentWorkbench } from './components/IncidentWorkbench'
+import { TraceDynamicsWorkbench } from './components/TraceDynamicsWorkbench'
 
 export default function App() {
-  const [view, setView] = useState<'behavior' | 'agent'>('behavior')
+  const [view, setView] = useState<'trace' | 'behavior' | 'agent'>('trace')
 
   return (
     <div className="app-shell" data-testid="app-ready">
@@ -21,6 +22,12 @@ export default function App() {
           <div className="status-badge"><span /> Measured agent systems laboratory</div>
           <nav className="view-tabs" aria-label="Workbench view">
             <button
+              className={view === 'trace' ? 'active' : ''}
+              onClick={() => setView('trace')}
+            >
+              Trace dynamics
+            </button>
+            <button
               className={view === 'behavior' ? 'active' : ''}
               onClick={() => setView('behavior')}
             >
@@ -35,7 +42,7 @@ export default function App() {
           </nav>
         </div>
       </header>
-      {view === 'behavior' ? <BehaviorWorkbench /> : <IncidentWorkbench />}
+      {view === 'trace' ? <TraceDynamicsWorkbench /> : view === 'behavior' ? <BehaviorWorkbench /> : <IncidentWorkbench />}
     </div>
   )
 }

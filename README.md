@@ -45,6 +45,16 @@ Recovery structure increased expected MCP calls by about 20.5% relative to seque
 
 Read [the single Phase 4 results document](docs/results/phase4_task_structure_results.md) for the model, covariates, uncertainty, trace variability, limitations, and artifact checksums.
 
+### Phase 5: stochastic trace and failure-path study
+
+Phase 5 asks a practical question about the Orders recovery condition:
+
+> After escalation is rejected, does the agent read the runbook before trying another action, and how is that observable choice associated with failure?
+
+The credit-free Stage 5A reanalysis uses the 90 saved Phase 4 runs. In its ten focused Orders-recovery observations, the five agents that read the runbook first succeeded and the five that retried first failed. The separate Stage 5B campaign is now complete with 100 valid runs; 17 earlier provider-error attempts remain visible for audit but are excluded from the scientific analysis.
+
+Phase 5 also reports complete path frequencies, entropy, one-step transition counts, oracle divergence, and excess calls. It does not infer private model reasoning or claim that the traces form a Markov chain. See [the Phase 5 study guide](docs/phase5_stochastic_traces.md) and [single Phase 5 result document](docs/results/phase5_stochastic_trace_results.md).
+
 ## What crosses the measurement boundary?
 
 ```mermaid
@@ -99,8 +109,9 @@ npm run demo
 
 Open `http://127.0.0.1:8000`.
 
-The UI has two active surfaces:
+The UI has three active surfaces:
 
+- **Trace dynamics** — connect the rejected-action story to counts, probabilities, uncertainty, paths, and efficiency;
 - **Behavior study** — compare sequential, branching, and recovery tasks;
 - **Incident Agent** — run and inspect one measured agent trace.
 
@@ -129,6 +140,21 @@ uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.behavio
 
 Use `--resume` after interruption or `--analyze-only` to rebuild derived tables without model calls.
 
+Phase 5 credit-free reanalysis:
+
+```powershell
+uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.trace_study.campaigns reanalyze-phase4
+```
+
+Phase 5 smoke and main collection are intentionally CLI-only:
+
+```powershell
+uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.trace_study.campaigns collect trace-orders-recovery-smoke-v1 --stage smoke
+uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.trace_study.campaigns collect trace-orders-recovery-main-v2 --stage main --analyze-only
+```
+
+Use `--resume` after an interruption. Collection freezes a configuration fingerprint and applies a USD 5 estimated-cost guard by default.
+
 ## Active API
 
 | Endpoint | Purpose |
@@ -142,6 +168,7 @@ Use `--resume` after interruption or `--analyze-only` to rebuild derived tables 
 | `POST /api/behavior/runs` | Run one Phase 4 condition. |
 | `GET /api/behavior/runs` | List saved Phase 4 runs. |
 | `GET /api/behavior/campaigns` | List saved Phase 4 analyses. |
+| `GET /api/trace-study/campaigns` | List Phase 5 exploratory, smoke, and main analyses. |
 
 Run and campaign detail endpoints and allow-listed CSV/Parquet downloads are also available below the corresponding prefixes.
 
@@ -150,9 +177,11 @@ Run and campaign detail endpoints and allow-listed CSV/Parquet downloads are als
 ```text
 frontend/src/components/IncidentWorkbench.tsx  Phase 3 UI
 frontend/src/components/BehaviorWorkbench.tsx  Phase 4 UI and analysis
+frontend/src/components/TraceDynamicsWorkbench.tsx  Phase 5 practical statistics UI
 src/mcp_traffic_analysis/api/app.py            active HTTP API
 src/mcp_traffic_analysis/incidents/             agent, MCP server, and task world
 src/mcp_traffic_analysis/behavior/              Phase 4 campaigns and models
+src/mcp_traffic_analysis/trace_study/           Phase 5 paths and reliability analysis
 src/mcp_traffic_analysis/transport/             exact stdio frame recorder
 ```
 
@@ -184,6 +213,9 @@ git diff --check
 - [Phase 4 method](docs/phase4_task_structure.md)
 - [Phase 4 frozen plan](docs/planning/phase4_task_structure_plan.md)
 - [Phase 4 pilot and main results](docs/results/phase4_task_structure_results.md)
+- [Phase 5 method](docs/phase5_stochastic_traces.md)
+- [Phase 5 frozen plan](docs/planning/phase5_stochastic_trace_plan.md)
+- [Phase 5 results](docs/results/phase5_stochastic_trace_results.md)
 
 ## Current limits
 
