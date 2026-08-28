@@ -12,8 +12,8 @@ import statsmodels.api as sm  # type: ignore[import-untyped]
 import statsmodels.formula.api as smf  # type: ignore[import-untyped]
 from statsmodels.stats.multitest import multipletests  # type: ignore[import-untyped]
 
-from mcp_traffic_analysis.behavior.traces import path_entropy, transitions
-from mcp_traffic_analysis.incidents.models import IncidentRunDetail
+from agentic_ai_statistics.behavior.traces import path_entropy, transitions
+from agentic_ai_statistics.incidents.models import IncidentRunDetail
 
 
 def wilson(successes: int, total: int, z: float = 1.959963984540054) -> list[float]:

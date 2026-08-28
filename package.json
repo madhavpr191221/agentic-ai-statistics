@@ -1,16 +1,16 @@
 {
-  "name": "mcp-traffic-analysis-workbench",
+  "name": "agentic-ai-statistics-workbench",
   "private": true,
-  "version": "0.7.0",
+  "version": "0.9.0",
   "workspaces": [
     "frontend"
   ],
   "scripts": {
-    "dev": "concurrently -k -n api,ui -c blue,green \"uv --cache-dir .uv-cache run uvicorn mcp_traffic_analysis.api.app:app --reload --host 127.0.0.1 --port 8000\" \"npm run dev --workspace frontend\"",
+    "dev": "concurrently -k -n api,ui -c blue,green \"uv --cache-dir .uv-cache run uvicorn agentic_ai_statistics.api.app:app --reload --host 127.0.0.1 --port 8000\" \"npm run dev --workspace frontend\"",
     "build": "npm run build --workspace frontend",
     "test": "npm run test --workspace frontend",
     "test:e2e": "npm run test:e2e --workspace frontend",
-    "demo": "npm run build && uv --cache-dir .uv-cache run python -m mcp_traffic_analysis.demo"
+    "demo": "npm run build && uv --cache-dir .uv-cache run python -m agentic_ai_statistics.demo"
   },
   "devDependencies": {
     "concurrently": "^10.0.5"

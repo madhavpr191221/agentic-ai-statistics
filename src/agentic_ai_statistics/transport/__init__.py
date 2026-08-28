@@ -1,6 +1,6 @@
 """Transport-boundary instrumentation."""
 
-from mcp_traffic_analysis.transport.models import (
+from agentic_ai_statistics.transport.models import (
     FrameDirection,
     FrameMessageType,
     TransportFrame,

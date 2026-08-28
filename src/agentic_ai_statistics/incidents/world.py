@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, cast
 
-from mcp_traffic_analysis.incidents.models import (
+from agentic_ai_statistics.incidents.models import (
     ActionRecord,
     IncidentResult,
     IncidentScenario,

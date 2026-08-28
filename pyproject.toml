@@ -1,6 +1,6 @@
 [project]
-name = "mcp-traffic-analysis"
-version = "0.8.0"
+name = "agentic-ai-statistics"
+version = "0.9.0"
 description = "Empirical performance analysis of agentic AI systems and MCP communication"
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
@@ -52,4 +52,4 @@ select = ["E", "F", "I", "UP", "B", "ASYNC"]
 [tool.mypy]
 python_version = "3.13"
 strict = true
-packages = ["mcp_traffic_analysis"]
+packages = ["agentic_ai_statistics"]

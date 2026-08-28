@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import cast
 from uuid import UUID
 
-from mcp_traffic_analysis.incidents.models import IncidentRunDetail
+from agentic_ai_statistics.incidents.models import IncidentRunDetail
 
 
 class IncidentRepository:

@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any, BinaryIO
 from uuid import UUID, uuid4
 
-from mcp_traffic_analysis.transport.models import (
+from agentic_ai_statistics.transport.models import (
     FrameDirection,
     FrameMessageType,
     TransportFrame,

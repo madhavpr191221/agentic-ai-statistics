@@ -12,18 +12,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from mcp_traffic_analysis.behavior.repository import BehaviorRepository
-from mcp_traffic_analysis.incidents.models import (
+from agentic_ai_statistics.behavior.repository import BehaviorRepository
+from agentic_ai_statistics.incidents.models import (
     BehaviorRunRequest,
     IncidentRunDetail,
     IncidentRunRequest,
     TaskStructure,
 )
-from mcp_traffic_analysis.incidents.repository import IncidentRepository
-from mcp_traffic_analysis.incidents.runner import run_incident
-from mcp_traffic_analysis.incidents.world import INCOMING_MESSAGES, oracle_sequence
-from mcp_traffic_analysis.incidents.world import SCENARIOS as INCIDENT_SCENARIOS
-from mcp_traffic_analysis.trace_study.repository import TraceStudyRepository
+from agentic_ai_statistics.incidents.repository import IncidentRepository
+from agentic_ai_statistics.incidents.runner import run_incident
+from agentic_ai_statistics.incidents.world import INCOMING_MESSAGES, oracle_sequence
+from agentic_ai_statistics.incidents.world import SCENARIOS as INCIDENT_SCENARIOS
+from agentic_ai_statistics.trace_study.repository import TraceStudyRepository
 
 AgentTable = Literal[
     "runs.csv",
@@ -106,8 +106,8 @@ def create_app(
     trace_study_repository = TraceStudyRepository(trace_study_root)
     agent_available = bool(os.getenv("OPENAI_API_KEY") or Path(".env").is_file())
     api = FastAPI(
-        title="MCP Traffic Analysis",
-        version="0.8.0",
+        title="Agentic AI Statistics",
+        version="0.9.0",
         description="Local API for measured IT-incident agent experiments.",
     )
     api.state.incident_repository = incident_repository
@@ -290,7 +290,7 @@ def create_app(
         @api.get("/", include_in_schema=False)
         async def api_root() -> dict[str, str]:
             return {
-                "name": "MCP Traffic Analysis API",
+                "name": "Agentic AI Statistics API",
                 "docs": "/docs",
                 "health": "/api/health",
             }

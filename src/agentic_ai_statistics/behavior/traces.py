@@ -6,7 +6,7 @@ import math
 from collections import Counter
 from typing import Literal
 
-from mcp_traffic_analysis.incidents.models import ActionRecord, BehaviorTraceStep
+from agentic_ai_statistics.incidents.models import ActionRecord, BehaviorTraceStep
 
 
 def edit_distance(left: list[str], right: list[str]) -> int:

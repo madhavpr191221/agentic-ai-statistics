@@ -14,8 +14,8 @@ from typing import Any
 
 import pandas as pd  # type: ignore[import-untyped]
 
-from mcp_traffic_analysis.incidents.models import IncidentRunDetail, IncidentScenario
-from mcp_traffic_analysis.incidents.runner import run_incident
+from agentic_ai_statistics.incidents.models import IncidentRunDetail, IncidentScenario
+from agentic_ai_statistics.incidents.runner import run_incident
 
 
 def distribution(values: list[float]) -> dict[str, float | int | None]:
