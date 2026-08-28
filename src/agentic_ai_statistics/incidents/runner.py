@@ -9,7 +9,7 @@ import sys
 import time
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID, uuid4
 
 from agents import Agent, ModelSettings, RunConfig, RunHooks, Runner
@@ -48,11 +48,16 @@ from agentic_ai_statistics.incidents.world import (
 from agentic_ai_statistics.transport.models import FrameDirection, TransportFrame
 
 MODEL_ID = "gpt-5.6-sol"
+RUNBOOK_INTERVENTION_POLICY_VERSION = "runbook-first-v1"
 AGENT_INSTRUCTIONS = (
     "Resolve the synthetic IT incident using only MCP evidence and actions. "
     "Gather evidence before acting. Never invent evidence IDs. Return every material "
     "evidence ID. Do not claim resolution unless an action "
     "tool accepted the exact target. The orders-api must not be restarted."
+)
+RUNBOOK_FIRST_INSTRUCTIONS = (
+    " If an escalation is rejected, your next action must be get_runbook before "
+    "attempting any other action."
 )
 INPUT_USD_PER_MILLION = 4.0
 CACHED_INPUT_USD_PER_MILLION = 0.40
@@ -208,6 +213,7 @@ async def run_incident(
     execution_order: int | None = None,
     block: int | None = None,
     task_structure: TaskStructure | None = None,
+    intervention_arm: Literal["control", "runbook_first"] | None = None,
 ) -> IncidentRunDetail:
     load_dotenv()
     run_id = run_id or uuid4()
@@ -264,7 +270,14 @@ async def run_incident(
             async with server:
                 agent: Agent[Any] = Agent(
                     name="IT incident responder",
-                    instructions=AGENT_INSTRUCTIONS,
+                    instructions=(
+                        AGENT_INSTRUCTIONS
+                        + (
+                            RUNBOOK_FIRST_INSTRUCTIONS
+                            if intervention_arm == "runbook_first"
+                            else ""
+                        )
+                    ),
                     model=model,
                     mcp_servers=[server],
                     output_type=IncidentResult,
@@ -416,6 +429,10 @@ async def run_incident(
             ),
             block=block,
             execution_order=execution_order,
+            intervention_arm=intervention_arm,
+            intervention_policy_version=(
+                RUNBOOK_INTERVENTION_POLICY_VERSION if intervention_arm else None
+            ),
         )
     detail = IncidentRunDetail(
         run_id=run_id,
@@ -438,6 +455,10 @@ async def run_incident(
         "mode": mode,
         "execution_order": execution_order,
         "block": block,
+        "intervention_arm": intervention_arm,
+        "intervention_policy_version": (
+            RUNBOOK_INTERVENTION_POLICY_VERSION if intervention_arm else None
+        ),
         "task_structure": task_structure.value if task_structure else None,
         "incoming_message": INCOMING_MESSAGES[scenario] if task_structure else None,
         "transport": "stdio",

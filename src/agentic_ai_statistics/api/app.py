@@ -82,6 +82,7 @@ TraceStudyArtifact = Literal[
     "q02_scalar_distributions.json",
     "q03_batch_stability.json",
     "q09_q14_trajectory_analysis.json",
+    "q16_randomized_intervention.json",
 ]
 
 

@@ -220,6 +220,47 @@ shortest valid solution. The next scientifically meaningful step is a small
 controlled intervention, not a larger dashboard or an unsupported stochastic
 process model.
 
+## Result 9: randomized recovery-policy intervention
+
+The first causal phase assigned 60 fresh Orders-recovery runs to one of two
+policies before execution:
+
+- **normal policy:** the agent received the existing instructions;
+- **runbook-first policy:** the agent was instructed that, after a rejected
+  escalation, its next action must be reading the runbook.
+
+There were 30 valid runs in each arm. The primary outcome was task success.
+
+| Assigned policy | Runs | Successes | Success rate |
+|---|---:|---:|---:|
+| Normal policy | 30 | 20 | 66.7% |
+| Runbook first | 30 | 30 | 100.0% |
+
+The intention-to-treat success-rate difference was
+
+$$
+\widehat\Delta=1.000-0.667=0.333.
+$$
+
+The Newcombe 95% interval was **0.152–0.512**, and Fisher's two-sided exact
+$p$-value was **0.000797**.
+
+In this experiment, assigning the runbook-first recovery policy increased
+observed success by **33.3 percentage points**. This is the first causal result
+in the project, but its scope is narrow: it applies to this model, prompt,
+tool set, synthetic Orders incident, and intervention policy. It is not a
+universal production-agent reliability estimate.
+
+The intervention arm also had lower descriptive workload and latency:
+
+| Assigned policy | Mean MCP calls | Mean latency | Mean tokens |
+|---|---:|---:|---:|
+| Normal policy | 9.87 | 22.35 s | 10,348 |
+| Runbook first | 9.23 | 20.53 s | 9,816 |
+
+These secondary differences are descriptive. The primary pre-specified causal
+claim concerns task success.
+
 ## Technical evidence
 
 - [Phase 3 pilot results](phase3_incident_pilot_results.md)
@@ -229,3 +270,4 @@ process model.
 - [Statistical analysis specification](../specs/statistical_analysis_spec.md)
 - [Analysis contracts](../specs/analysis_contracts.md)
 - [Trajectory artifact](../../artifacts/phase5/campaign-trace-orders-recovery-main-v2/q09_q14_trajectory_analysis.json)
+- [Randomized intervention artifact](../../artifacts/phase5/campaign-intervention-orders-recovery-v1/q16_randomized_intervention.json)

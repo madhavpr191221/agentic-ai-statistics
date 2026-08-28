@@ -72,6 +72,14 @@ transitions, oracle divergence, excess work, tool usage, and path-family
 comparisons while preserving the run-level denominator and the no-Markov/no-
 causal-claim limits.
 
+### Phase 13: randomized recovery-policy intervention
+
+Completed with 60 valid live runs (30 normal-policy control, 30 assigned
+runbook-first). Success was 20/30 versus 30/30; the intention-to-treat
+success-rate difference was 33.3 percentage points with Newcombe 95% interval
+15.2–51.2 points. The campaign stayed below the $3.00 guard and is documented
+in the combined results report and `q16_randomized_intervention.json`.
+
 ### Phase 8 scalar statistical baseline
 
 Phase 8 implements Q01–Q03 from the specification using only the saved Phase 5 campaign. It adds run-level scalar distributions, an explicit scalar data dictionary, batch-stability summaries, downloadable JSON/CSV artifacts, a read-only artifact route, and a Scalar Baseline section in the React workbench. Q04 and later remain specified but pending.

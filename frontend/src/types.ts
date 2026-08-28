@@ -390,4 +390,23 @@ export interface TraceStudyAnalysis {
     first_oracle_divergence: number | null
   }>
   notes: string[]
+  intervention_arms?: Array<{
+    arm: 'control' | 'runbook_first'
+    assigned_runs: number
+    successes: number
+    failures: number
+    success_rate: number | null
+    success_rate_wilson_95: [number, number] | null
+    mean_mcp_calls: number | null
+    mean_total_latency_ms: number | null
+    mean_total_tokens: number | null
+  }>
+  primary_intervention_result?: {
+    treatment_success_rate: number | null
+    control_success_rate: number | null
+    risk_difference: number | null
+    risk_difference_newcombe_95: [number, number] | null
+    fisher_exact_two_sided_p: number | null
+  }
+  causal_interpretation_limit?: string
 }

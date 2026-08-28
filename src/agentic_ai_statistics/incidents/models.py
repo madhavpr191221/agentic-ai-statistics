@@ -83,6 +83,8 @@ class BehaviorMetadata(StrictModel):
     response_frame_bytes: int | None
     block: int | None = None
     execution_order: int | None = None
+    intervention_arm: Literal["control", "runbook_first"] | None = None
+    intervention_policy_version: str | None = None
 
 
 class ScoreCard(StrictModel):

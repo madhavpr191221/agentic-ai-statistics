@@ -96,6 +96,15 @@ export function TraceDynamicsWorkbench() {
         <div><strong>{campaign.study_stage === 'exploratory' ? 'Reused Phase 4 evidence' : `New Phase 5 ${campaign.study_stage} evidence`}</strong><span>{campaign.study_stage === 'exploratory' ? 'No new model calls' : campaign.campaign_complete ? 'Complete campaign' : 'Incomplete campaign'}</span></div>
       </section>
 
+      {campaign.primary_intervention_result && campaign.intervention_arms ? <section className="panel primary-result" data-testid="intervention-result">
+        <p className="eyebrow">Phase 13 · randomized policy intervention</p>
+        <h2>Does assigning runbook-first recovery improve success?</h2>
+        <div className="table-scroll"><table className="data-table"><thead><tr><th>Assigned policy</th><th>Runs</th><th>Successes</th><th>Success rate</th><th>95% interval</th></tr></thead><tbody>{campaign.intervention_arms.map((row) => <tr key={row.arm}><td>{row.arm === 'runbook_first' ? 'Runbook first' : 'Normal policy'}</td><td>{row.assigned_runs}</td><td>{row.successes}</td><td>{percentage(row.success_rate)}</td><td>{interval(row.success_rate_wilson_95)}</td></tr>)}</tbody></table></div>
+        <div className="plain-result"><strong>Assigned-policy success difference: {percentage(campaign.primary_intervention_result.risk_difference)}</strong><span>95% interval: {interval(campaign.primary_intervention_result.risk_difference_newcombe_95)}</span></div>
+        <div className="download-row"><a href={`/api/trace-study/campaigns/${campaign.campaign_id}/artifacts/q16_randomized_intervention.json`}>Download intervention result</a></div>
+        <p className="method-note">This compares randomized policy assignment under one synthetic incident configuration. It does not measure private reasoning or claim a universal production effect. {campaign.causal_interpretation_limit}</p>
+      </section> : null}
+
       {campaign.scalar_distributions?.length ? <section className="panel" data-testid="scalar-baseline">
         <p className="eyebrow">Phase 8 · scalar baseline</p>
         <h2>Start with one run and its basic measurements</h2>

@@ -516,6 +516,8 @@ def analyze_details(
             "task_success": detail.score.task_success,
             "batch": behavior.block,
             "execution_order": behavior.execution_order,
+            "intervention_arm": behavior.intervention_arm,
+            "intervention_policy_version": behavior.intervention_policy_version,
         }
         row = common | {
             "mcp_call_count": detail.measurement.mcp_call_count,

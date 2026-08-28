@@ -86,6 +86,13 @@ Phase 12C packages the trajectory analyses—complete paths, concentration,
 descriptive transitions, divergence, excess work, and tool coverage—without
 assuming a Markov process or making causal claims from observed paths.
 
+Phase 13 ran the first randomized recovery-policy intervention: 60 fresh runs,
+30 normal-policy controls and 30 runbook-first assignments. Success was 20/30
+under the normal policy and 30/30 under the assigned runbook-first policy. The
+estimated success difference was 33.3 percentage points (Newcombe 95% interval
+15.2–51.2 points). This result is causal only for the tested policy and
+synthetic incident configuration.
+
 For a complete explanation of every UI tab, number, chart, artifact, and measurement limitation, read the [UI guide](docs/UI_GUIDE.md).
 
 ## What crosses the measurement boundary?

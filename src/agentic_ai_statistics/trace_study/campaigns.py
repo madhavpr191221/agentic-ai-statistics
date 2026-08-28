@@ -6,6 +6,7 @@ import argparse
 import asyncio
 import hashlib
 import json
+import random
 from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
@@ -22,16 +23,24 @@ from agentic_ai_statistics.incidents.models import (
 from agentic_ai_statistics.incidents.runner import (
     AGENT_INSTRUCTIONS,
     MODEL_ID,
+    RUNBOOK_INTERVENTION_POLICY_VERSION,
     run_incident,
 )
 from agentic_ai_statistics.incidents.world import INCOMING_MESSAGES, SCENARIOS, oracle_sequence
-from agentic_ai_statistics.trace_study.analysis import analyze_details
+from agentic_ai_statistics.trace_study.analysis import (
+    analyze_details,
+    fisher_exact_two_sided,
+    newcombe_difference_interval,
+    wilson_interval,
+)
 
 StudyStage = Literal["exploratory", "smoke", "main"]
 FOCUSED_SCENARIO = IncidentScenario.ORDERS_API_OUTAGE
 FOCUSED_STRUCTURE = TaskStructure.RECOVERY
 DEFAULT_RUNS: dict[StudyStage, int] = {"exploratory": 0, "smoke": 3, "main": 100}
 DEFAULT_COST_LIMIT_USD = 5.0
+INTERVENTION_RUNS = 60
+INTERVENTION_ASSIGNMENT_SEED = 20260828
 PROVIDER_FAILURE_TYPES = frozenset(
     {
         "APIConnectionError",
@@ -226,6 +235,51 @@ def build_manifest(
     }
 
 
+def build_intervention_manifest(
+    campaign_id: str,
+    *,
+    planned_runs: int = INTERVENTION_RUNS,
+    assignment_seed: int = INTERVENTION_ASSIGNMENT_SEED,
+    mode: Literal["live", "deterministic"] = "live",
+) -> dict[str, Any]:
+    if planned_runs < 2 or planned_runs % 2:
+        raise ValueError("intervention campaign size must be a positive even number")
+    arms = ["control"] * (planned_runs // 2) + ["runbook_first"] * (planned_runs // 2)
+    random.Random(assignment_seed).shuffle(arms)
+    schedule = []
+    for execution_order, arm in enumerate(arms, start=1):
+        batch = (execution_order - 1) // 10 + 1
+        run_id = uuid5(
+            NAMESPACE_URL,
+            f"agentic-ai-statistics:phase13:{campaign_id}:{execution_order}",
+        )
+        schedule.append({
+            "run_id": str(run_id),
+            "execution_order": execution_order,
+            "batch": batch,
+            "intervention_arm": arm,
+            "scenario_id": FOCUSED_SCENARIO.value,
+            "task_structure": FOCUSED_STRUCTURE.value,
+        })
+    return {
+        "schema_version": "13.0.0",
+        "campaign_id": campaign_id,
+        "study_stage": "main",
+        "created_at_utc": datetime.now(UTC).isoformat(),
+        "experimental_unit": "one fresh agent run and MCP session",
+        "planned_runs": planned_runs,
+        "planned_batches": (planned_runs - 1) // 10 + 1,
+        "mode": mode,
+        "intervention_study": "assigned runbook-first recovery policy",
+        "assignment_seed": assignment_seed,
+        "intervention_policy_version": RUNBOOK_INTERVENTION_POLICY_VERSION,
+        "arms": {"control": planned_runs // 2, "runbook_first": planned_runs // 2},
+        "configuration": frozen_configuration(),
+        "configuration_fingerprint_sha256": configuration_fingerprint(),
+        "schedule": schedule,
+    }
+
+
 def _load_details(campaign_directory: Path) -> list[IncidentRunDetail]:
     return [
         IncidentRunDetail.model_validate_json(path.read_text(encoding="utf-8"))
@@ -323,6 +377,98 @@ def analyze_collected_campaign(campaign_directory: Path) -> dict[str, Any]:
     _write_tables(campaign_directory, tables)
     _write_scalar_artifacts(campaign_directory, analysis)
     _write_trajectory_artifact(campaign_directory, analysis)
+    return analysis
+
+
+def analyze_intervention_campaign(campaign_directory: Path) -> dict[str, Any]:
+    manifest = json.loads(
+        (campaign_directory / "campaign_manifest.json").read_text(encoding="utf-8")
+    )
+    details = _load_details(campaign_directory)
+    analysis, tables = analyze_details(
+        details,
+        campaign_id=str(manifest["campaign_id"]),
+        study_stage="main",
+    )
+    arms: dict[str, list[IncidentRunDetail]] = {"control": [], "runbook_first": []}
+    for detail in details:
+        assigned_arm = detail.behavior.intervention_arm if detail.behavior else None
+        if assigned_arm in arms:
+            arms[assigned_arm].append(detail)
+    arm_rows: list[dict[str, Any]] = []
+    for arm_name, group in arms.items():
+        successes = sum(detail.score.task_success for detail in group)
+        total = len(group)
+        arm_rows.append({
+            "arm": arm_name,
+            "assigned_runs": total,
+            "successes": successes,
+            "failures": total - successes,
+            "success_rate": successes / total if total else None,
+            "success_rate_wilson_95": wilson_interval(successes, total),
+            "mean_mcp_calls": (
+                sum(detail.measurement.mcp_call_count for detail in group) / total
+                if total else None
+            ),
+            "mean_total_latency_ms": (
+                sum(detail.measurement.total_latency_ms for detail in group) / total
+                if total else None
+            ),
+            "mean_total_tokens": (
+                sum(detail.measurement.total_tokens for detail in group) / total
+                if total else None
+            ),
+        })
+    control = next(row for row in arm_rows if row["arm"] == "control")
+    treatment = next(row for row in arm_rows if row["arm"] == "runbook_first")
+    primary = {
+        "estimand": "intention-to-treat success-rate difference, runbook-first minus control",
+        "treatment_success_rate": treatment["success_rate"],
+        "control_success_rate": control["success_rate"],
+        "risk_difference": (
+            treatment["success_rate"] - control["success_rate"]
+            if treatment["success_rate"] is not None and control["success_rate"] is not None
+            else None
+        ),
+        "risk_difference_newcombe_95": newcombe_difference_interval(
+            int(treatment["successes"]), int(treatment["assigned_runs"]),
+            int(control["successes"]), int(control["assigned_runs"]),
+        ),
+        "fisher_exact_two_sided_p": fisher_exact_two_sided(
+            int(treatment["successes"]), int(treatment["failures"]),
+            int(control["successes"]), int(control["failures"]),
+        ) if treatment["assigned_runs"] and control["assigned_runs"] else None,
+    }
+    analysis.update({
+        "schema_version": "13.0.0",
+        "intervention_study": "assigned runbook-first recovery policy",
+        "assignment_seed": manifest["assignment_seed"],
+        "intervention_policy_version": manifest["intervention_policy_version"],
+        "intervention_arms": arm_rows,
+        "primary_intervention_result": primary,
+        "causal_interpretation_limit": (
+            "The contrast estimates the assigned recovery policy effect only for this "
+            "model, prompt, tools, and synthetic Orders incident."
+        ),
+    })
+    tables["intervention_arms"] = pd.DataFrame(arm_rows)
+    tables["intervention_primary"] = pd.DataFrame([primary])
+    _write_json(campaign_directory / "analysis.json", analysis)
+    _write_tables(campaign_directory, tables)
+    _write_scalar_artifacts(campaign_directory, analysis)
+    _write_trajectory_artifact(campaign_directory, analysis)
+    _write_json(campaign_directory / "q16_randomized_intervention.json", {
+        "schema_version": "13.0.0",
+        "question_id": "Q16",
+        "campaign_id": manifest["campaign_id"],
+        "unit": "run",
+        "assignment_seed": manifest["assignment_seed"],
+        "assignment": "randomized before run; 30 control and 30 runbook-first planned",
+        "primary": primary,
+        "arms": arm_rows,
+        "secondary_outcomes": ["MCP calls", "latency", "tokens", "trajectory"],
+        "limitations": [analysis["causal_interpretation_limit"]],
+    })
     return analysis
 
 
@@ -480,6 +626,93 @@ async def run_campaign(
     return campaign_directory
 
 
+async def run_intervention_campaign(
+    *,
+    campaign_id: str,
+    output_root: Path,
+    mode: Literal["live", "deterministic"] = "live",
+    resume: bool = False,
+    max_estimated_cost_usd: float = 3.0,
+    planned_runs: int = INTERVENTION_RUNS,
+    assignment_seed: int = INTERVENTION_ASSIGNMENT_SEED,
+) -> Path:
+    campaign_directory = output_root / f"campaign-{campaign_id}"
+    manifest_path = campaign_directory / "campaign_manifest.json"
+    if manifest_path.is_file():
+        if not resume:
+            raise FileExistsError(f"campaign already exists: {campaign_directory}; use --resume")
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        expected = build_intervention_manifest(
+            campaign_id, planned_runs=int(manifest["planned_runs"]),
+            assignment_seed=int(manifest["assignment_seed"]), mode=mode,
+        )
+        for field in ("campaign_id", "planned_runs", "mode", "assignment_seed", "schedule"):
+            if manifest.get(field) != expected.get(field):
+                raise ValueError(f"existing intervention campaign {field} does not match")
+    else:
+        if campaign_directory.exists() and any(campaign_directory.iterdir()):
+            raise FileExistsError(f"non-empty campaign directory: {campaign_directory}")
+        campaign_directory.mkdir(parents=True, exist_ok=True)
+        manifest = build_intervention_manifest(
+            campaign_id, planned_runs=planned_runs, assignment_seed=assignment_seed, mode=mode
+        )
+        _write_json(manifest_path, manifest)
+    schedule = cast(list[dict[str, Any]], manifest["schedule"])
+    completed = [
+        detail
+        for detail in _load_details(campaign_directory)
+        if is_scientific_observation(detail)
+    ]
+    completed_ids = {str(item.run_id) for item in completed}
+    accumulated_cost = sum(
+        item.measurement.estimated_cost_usd for item in _load_details(campaign_directory)
+    )
+    for item in schedule:
+        if str(item["run_id"]) in completed_ids:
+            continue
+        if cost_limit_reached(accumulated_cost, max_estimated_cost_usd, mode):
+            break
+        quarantine_excluded_attempt(campaign_directory, str(item["run_id"]))
+        quarantine_incomplete_run(campaign_directory, str(item["run_id"]))
+        detail = await run_incident(
+            scenario=FOCUSED_SCENARIO,
+            task_structure=FOCUSED_STRUCTURE,
+            output_root=campaign_directory,
+            mode=mode,
+            run_id=uuid5(
+                NAMESPACE_URL,
+                f"agentic-ai-statistics:phase13:{campaign_id}:{item['execution_order']}",
+            ),
+            execution_order=int(item["execution_order"]),
+            block=int(item["batch"]),
+            intervention_arm=cast(
+                Literal["control", "runbook_first"], item["intervention_arm"]
+            ),
+        )
+        accumulated_cost += detail.measurement.estimated_cost_usd
+        if not is_scientific_observation(detail):
+            _write_json(campaign_directory / "progress.json", {
+                "status": "provider_failure",
+                "completed_runs": len(completed_ids),
+                "planned_runs": len(schedule),
+                "failed_execution_order": item["execution_order"],
+                "failure_type": detail.measurement.failure_type,
+                "estimated_cost_usd": accumulated_cost,
+                "cost_limit_usd": max_estimated_cost_usd,
+            })
+            break
+        completed_ids.add(str(detail.run_id))
+        _write_json(campaign_directory / "progress.json", {
+            "status": "complete" if len(completed_ids) == len(schedule) else "running",
+            "completed_runs": len(completed_ids),
+            "planned_runs": len(schedule),
+            "estimated_cost_usd": accumulated_cost,
+            "cost_limit_usd": max_estimated_cost_usd,
+        })
+    analyze_intervention_campaign(campaign_directory)
+    return campaign_directory
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -502,6 +735,14 @@ def main() -> int:
     collect.add_argument(
         "--max-estimated-cost-usd", type=float, default=DEFAULT_COST_LIMIT_USD
     )
+    intervention = subparsers.add_parser("intervention")
+    intervention.add_argument("campaign_id")
+    intervention.add_argument("--output-root", type=Path, default=Path("artifacts/phase5"))
+    intervention.add_argument("--mode", choices=["live", "deterministic"], default="live")
+    intervention.add_argument("--resume", action="store_true")
+    intervention.add_argument("--planned-runs", type=int, default=INTERVENTION_RUNS)
+    intervention.add_argument("--assignment-seed", type=int, default=INTERVENTION_ASSIGNMENT_SEED)
+    intervention.add_argument("--max-estimated-cost-usd", type=float, default=3.0)
     args = parser.parse_args()
     if args.command == "reanalyze-phase4":
         path = reanalyze_phase4(
@@ -509,6 +750,16 @@ def main() -> int:
             output_root=args.output_root,
             campaign_id=args.campaign_id,
         )
+    elif args.command == "intervention":
+        path = asyncio.run(run_intervention_campaign(
+            campaign_id=args.campaign_id,
+            output_root=args.output_root,
+            mode=args.mode,
+            resume=args.resume,
+            planned_runs=args.planned_runs,
+            assignment_seed=args.assignment_seed,
+            max_estimated_cost_usd=args.max_estimated_cost_usd,
+        ))
     else:
         campaign_directory = args.output_root / f"campaign-{args.campaign_id}"
         if args.analyze_only:

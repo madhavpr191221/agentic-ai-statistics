@@ -35,6 +35,7 @@ from agentic_ai_statistics.trace_study.analysis import (
 )
 from agentic_ai_statistics.trace_study.campaigns import (
     analyze_collected_campaign,
+    build_intervention_manifest,
     build_manifest,
     configuration_fingerprint,
     cost_limit_reached,
@@ -504,3 +505,12 @@ def test_scalar_bootstrap_intervals_are_reproducible_and_bounded() -> None:
 
 def test_scalar_bootstrap_handles_single_observation() -> None:
     assert bootstrap_interval([3.5], "median") == [3.5, 3.5]
+
+
+def test_intervention_manifest_is_balanced_and_reproducible() -> None:
+    first = build_intervention_manifest("intervention-test", planned_runs=20, assignment_seed=17)
+    second = build_intervention_manifest("intervention-test", planned_runs=20, assignment_seed=17)
+    assert first["schedule"] == second["schedule"]
+    arms = [item["intervention_arm"] for item in first["schedule"]]
+    assert arms.count("control") == 10
+    assert arms.count("runbook_first") == 10

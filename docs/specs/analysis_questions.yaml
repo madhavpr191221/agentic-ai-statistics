@@ -152,3 +152,12 @@ questions:
     uncertainty: not_applicable
     outputs: [q15_intervention_design.md]
     acceptance: [no causal estimate is reported from Phase 5]
+  - id: Q16
+    question: Does assigning runbook-first recovery improve success?
+    unit: run
+    variables: [intervention_arm, task_success, mcp_call_count, total_latency_ms, total_tokens]
+    estimand: intention-to-treat success-rate difference, runbook-first minus normal policy
+    method: [randomized_assignment, success_proportion, risk_difference, fisher_exact]
+    uncertainty: newcombe_interval_for_risk_difference_and_wilson_arm_intervals
+    outputs: [q16_randomized_intervention.json, intervention_arms.csv, intervention_primary.csv]
+    acceptance: [assignment precedes outcome, arms are balanced, causal wording is limited to the tested policy and setup]
