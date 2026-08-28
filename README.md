@@ -1,6 +1,12 @@
 # Agentic AI Statistics
 
-A statistical performance study of MCP-based AI agents.
+A specification-driven statistical study of repeated agent executions. MCP is
+the first measurement adapter; the scientific focus is distributions,
+uncertainty, trajectory variability, reliability, and controlled effects.
+
+Observability asks what happened in one run. This project asks how the
+distribution of runs changes, how variable the paths are, and which controlled
+conditions or observable histories explain that variation.
 
 ## What does this repository study?
 
@@ -64,6 +70,11 @@ Phase 8 begins the executable statistical baseline without new model calls. It t
 Phase 10 reuses the 90-run Phase 4 campaign for workload analysis. It compares scalar MCP-call distributions across sequential, branching, and recovery task structures, then reports the pre-specified count model with incident and block adjustment. No new model calls are required.
 
 The complete specification-driven statistical program is defined in the [statistical analysis specification](docs/specs/statistical_analysis_spec.md), [question registry](docs/specs/analysis_questions.yaml), [data dictionary](docs/specs/data_dictionary.md), and [traceability matrix](docs/specs/analysis_traceability.md).
+
+Phase 12 defines the statistical study layer and reporting rules. Read the
+[Phase 12 plan](docs/planning/phase12_statistical_study_layer_plan.md) and
+[analysis contracts](docs/specs/analysis_contracts.md) to see how each number
+maps to a question, estimand, data unit, uncertainty method, and limitation.
 
 For a complete explanation of every UI tab, number, chart, artifact, and measurement limitation, read the [UI guide](docs/UI_GUIDE.md).
 

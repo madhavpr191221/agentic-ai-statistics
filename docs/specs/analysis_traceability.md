@@ -2,6 +2,11 @@
 
 This matrix is the review checklist for the specification. A question is complete only when its practical wording, estimand, artifact, UI representation, test, and result paragraph agree.
 
+Phase 12 adds the cross-cutting contract in [`analysis_contracts.md`](analysis_contracts.md).
+It governs the status of every value (`measured`, `derived`, `inferred`, or
+`unavailable`) and requires each result to name its question, estimand, unit,
+uncertainty method, and limitation.
+
 ## Foundational principles
 
 | ID | Principle | Documentation evidence | Verification |

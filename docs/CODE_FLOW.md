@@ -4,6 +4,15 @@ This document follows one active experiment from the browser to the saved statis
 
 For a screen-by-screen explanation of what the user sees and what each number means, read [`UI_GUIDE.md`](UI_GUIDE.md).
 
+## Statistical study layer
+
+The instrumentation resembles what an observability product might expose, but
+the scientific layer is different: one fresh run is the experimental unit, and
+repeated runs form the sample. Scalar run outcomes are the first random
+variables; the ordered, variable-length path is a richer random object. Every
+analysis is registered with a question, estimand, unit, uncertainty rule, and
+limitation in `docs/specs/analysis_contracts.md`.
+
 ## One-run overview
 
 ```mermaid
