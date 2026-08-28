@@ -1,46 +1,28 @@
-# Demo and Phase Workflow
+# Demo and Release Workflow
 
-The repository uses two kinds of long-lived evidence:
+The repository has two permanent branches:
 
-- each `phase/...` branch preserves one milestone;
-- `demo` accumulates only phases that passed backend, statistical, UI, and browser tests.
+- `demo` is the tested integration branch;
+- `main` is the released branch.
 
-`main` remains untouched until an explicit release decision.
+Work branches are temporary. They are deleted after their tested contents are released; the merge commits preserve their history.
+
+## Development flow
 
 ```mermaid
-gitGraph
-    commit id: "foundation"
-    branch phase/01-measurement-core
-    checkout phase/01-measurement-core
-    commit id: "measurement core"
-    commit id: "tested UI and statistics"
-    checkout main
-    branch demo
-    checkout demo
-    merge phase/01-measurement-core id: "Phase 1A demo"
-    branch phase/02-statistical-baseline
-    checkout phase/02-statistical-baseline
-    commit id: "stdio and factorial baseline"
-    checkout demo
-    merge phase/02-statistical-baseline id: "Phase 2 demo"
+flowchart LR
+    A[Create work branch from demo] --> B[Implement one bounded change]
+    B --> C[Run full validation gate]
+    C --> D[No-FF merge into demo]
+    D --> E[Push demo]
+    E --> F[No-FF release merge into main]
+    F --> G[Fast-forward demo to main]
+    G --> H[Delete merged work branch]
 ```
 
-## What the demo proves
+Do not merge an untested work branch. Do not rewrite branch history.
 
-Phase 1A provides a local React/TypeScript research workbench backed by FastAPI. A user can:
-
-1. run any deterministic MCP scenario;
-2. inspect validated run artifacts after they are persisted;
-3. select one or more runs as the descriptive-analysis sample;
-4. switch between call-level handler latency and run-level observed trace windows;
-5. inspect summary statistics, ECDFs, reproducible histograms, box plots, timelines, and canonical events;
-6. see classified failures and explicit unavailable-byte markers.
-
-The UI does not claim that nested calls are independent, that the observed event window is total agent latency, or that in-memory Python objects reveal wire bytes.
-
-For a field-by-field interpretation of the metrics, ECDF, histogram, box plot, grouped method table, timeline, and event stream, read [`WORKBENCH_GUIDE.md`](WORKBENCH_GUIDE.md).
-
-## Run the workbench
+## Run the active demo
 
 ```powershell
 uv --cache-dir .uv-cache sync --locked --all-groups
@@ -48,64 +30,49 @@ npm install
 npm run demo
 ```
 
-Open `http://127.0.0.1:8000`. The production frontend is built first and served by FastAPI. Artifacts are written below `artifacts/phase1a/`.
+Open `http://127.0.0.1:8000`.
 
-Choose **Behavior study** for Phase 4. The default scripted mode runs one concrete ticket through its five-call oracle without a hosted model. It validates task gating and scoring, while the UI marks model timing, tokens, and stdio bytes unavailable. Live mode uses the real model and measured stdio boundary.
+The default **Behavior study** surface runs a credit-free scripted validation. Select **Real model measurement** only when a hosted-model observation is intended.
 
-The repeated Phase 4 campaigns are CLI-only:
+The **Incident Agent** surface runs one live model-driven incident. All remediation remains synthetic.
 
-```powershell
-uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.behavior.campaigns task-structure-pilot-v1 --stage pilot
-uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.behavior.campaigns task-structure-main-v1 --stage main
-```
-
-The pilot has 27 runs. The main study has 90 separate runs. Do not collect the main campaign until the pilot has been inspected and its task protocol frozen.
-
-Choose **Incident Agent** for Phase 3. A UI run uses one real hosted model and writes below `artifacts/phase3/`; every remediation remains synthetic. The full 30-run campaign stays in the CLI so a browser click cannot accidentally launch it.
-
-For UI and API hot reload:
+For hot reload:
 
 ```powershell
 npm run dev
 ```
 
-The Vite UI runs at `http://127.0.0.1:5173` and proxies `/api` to FastAPI at port 8000.
+The Vite UI uses port 5173 and proxies `/api` to FastAPI on port 8000.
 
-## Phase 2 statistical study
-
-Phase 2 adds a separate **Statistical study** surface. It runs a small one-condition calibration through either `in_memory` or real `stdio`, and it reads a completed 48-condition campaign. The full campaign is launched at the command line so its frozen manifest, randomized order, progress, raw artifacts, and analysis output can be inspected and resumed independently of the browser.
+## Acceptance gate
 
 ```powershell
-uv run python -m mcp_traffic_analysis.campaigns baseline-v1 `
-  --output-root artifacts/phase2 `
-  --replicates 20 --calls-per-run 8 --seed 20260827 `
-  --bootstrap-iterations 2000
+uv --cache-dir .uv-cache lock --check
+uv --cache-dir .uv-cache sync --locked --all-groups --check
+uv --cache-dir .uv-cache run pytest -q
+uv --cache-dir .uv-cache run ruff check .
+uv --cache-dir .uv-cache run mypy src
+npm test
+npm run build
+npm run test:e2e
+git diff --check
 ```
 
-This generates 960 independent runs and 7,680 nested calls. Refresh the workbench and select **Statistical study** to see campaign balance, HC3 coefficient estimates, diagnostics, run-cluster bootstrap summaries, and downloads for the `runs` and `calls` tables. Read [`phase2_statistical_baseline.md`](phase2_statistical_baseline.md) before interpreting the model output.
+The gate must verify measurement logic, API behavior, React components, production compilation, and both browser workflows.
 
-## Phase acceptance sequence
+## Release sequence
 
-```mermaid
-flowchart LR
-    A[Implement measured capability] --> B[Python tests]
-    B --> C[React component tests]
-    C --> D[Production build]
-    D --> E[Chromium end-to-end tests]
-    E --> F[Documentation and boundary review]
-    F --> G[No-FF merge to demo]
-    G --> H[Push phase and demo]
-```
-
-Playwright covers a successful repeated run, concurrent calls, controlled backend failure, artifact persistence across reload, statistics, the timeline, and the event table. Failure runs intentionally emit a FastMCP traceback in the server test log; the application records only the class-based error category, not the exception message.
-
-## Branch commands after validation
+After a clean merge into `demo`:
 
 ```powershell
-git push origin phase/01-measurement-core
+git switch main
+git pull --ff-only origin main
+git merge --no-ff demo
+git push origin main
+
 git switch demo
-git merge --no-ff phase/01-measurement-core
+git merge --ff-only main
 git push origin demo
 ```
 
-For the first completed phase, create `demo` from `main` before the merge. Leave the checkout on `demo` so the immediately runnable branch is visible.
+Delete only branches proven to be ancestors of the released `main` commit. Keep `main` and `demo` synchronized immediately after a release.

@@ -118,6 +118,6 @@ Transition probabilities and entropy are descriptive. They are not evidence that
 5. Freeze the protocol; if it changes, use a new pilot identifier.
 6. Collect the separate 90-run main study.
 7. Publish the methods, limitations, and result memo.
-8. Merge the tested phase branch into `demo` with `--no-ff`; do not merge to `main`.
+8. Merge tested work into `demo` with `--no-ff`; release `demo` to `main` only after the full gate passes.
 
 Out of scope are prompt variants, autonomy levels, multi-agent systems, queueing, HTTP MCP, packet capture, and claims about all IT incidents.

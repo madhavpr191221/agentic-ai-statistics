@@ -1,7 +1,3 @@
-"""Measurement tools for empirical MCP performance experiments."""
+"""Statistical performance experiments for MCP-based AI agents."""
 
-from mcp_traffic_analysis.measurement.models import ExperimentManifest, TraceEvent
-
-__all__ = ["ExperimentManifest", "TraceEvent"]
-
-__version__ = "0.1.0"
+__version__ = "0.5.0"

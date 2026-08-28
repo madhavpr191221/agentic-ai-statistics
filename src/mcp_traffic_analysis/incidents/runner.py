@@ -45,7 +45,7 @@ from mcp_traffic_analysis.incidents.world import (
     score,
     score_behavior,
 )
-from mcp_traffic_analysis.measurement.transport_models import FrameDirection, TransportFrame
+from mcp_traffic_analysis.transport.models import FrameDirection, TransportFrame
 
 MODEL_ID = "gpt-5.6-sol"
 INPUT_USD_PER_MILLION = 4.0
@@ -75,6 +75,7 @@ class MeasurementHooks(RunHooks[Any]):
     async def on_llm_start(
         self, context: Any, agent: Any, system_prompt: Any, input_items: Any
     ) -> None:
+        del context, agent, system_prompt, input_items  # Required RunHooks signature.
         started = time.perf_counter_ns()
         self._model_starts.append(started)
         self.events.append(
@@ -82,6 +83,7 @@ class MeasurementHooks(RunHooks[Any]):
         )
 
     async def on_llm_end(self, context: Any, agent: Any, response: Any) -> None:
+        del context, agent  # Required RunHooks signature.
         started = self._model_starts[-1]
         usage = getattr(response, "usage", None)
         details = getattr(usage, "input_tokens_details", None)
@@ -97,6 +99,7 @@ class MeasurementHooks(RunHooks[Any]):
         self._event("model_finished", started, call_index=measurement.call_index)
 
     async def on_tool_start(self, context: Any, agent: Any, tool: Any) -> None:
+        del context, agent  # Required RunHooks signature.
         name = str(getattr(tool, "name", "unknown"))
         started = time.perf_counter_ns()
         self._tool_starts[name] = started
@@ -107,6 +110,7 @@ class MeasurementHooks(RunHooks[Any]):
         )
 
     async def on_tool_end(self, context: Any, agent: Any, tool: Any, result: str) -> None:
+        del context, agent, result  # Required RunHooks signature.
         name = str(getattr(tool, "name", "unknown"))
         self._event(
             "tool_finished", self._tool_starts.pop(name, time.perf_counter_ns()), tool_name=name
