@@ -46,6 +46,8 @@ Phase 6A reuses the completed Phase 5B artifacts without model calls. It adds pa
 
 The [Phase 6A statistical analysis roadmap](planning/phase6_statistical_analysis_roadmap.md) documents the small-question learning sequence and interpretation rules.
 
+The specification-driven statistical program is documented in `docs/specs/`: an authoritative specification, question registry, data dictionary, and traceability matrix. These documentation artifacts do not require new model calls.
+
 ## Measurement boundary
 
 The active system measures model activity and local newline-delimited MCP/JSON-RPC frames crossing a stdio relay. Request and response byte counts are exact at that boundary.

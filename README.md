@@ -59,6 +59,8 @@ Phase 6A performs credit-free secondary analysis of those 100 saved runs: partia
 
 For the step-by-step statistical learning sequence, see the [Phase 6A statistical analysis roadmap](docs/planning/phase6_statistical_analysis_roadmap.md).
 
+The complete specification-driven statistical program is defined in the [statistical analysis specification](docs/specs/statistical_analysis_spec.md), [question registry](docs/specs/analysis_questions.yaml), [data dictionary](docs/specs/data_dictionary.md), and [traceability matrix](docs/specs/analysis_traceability.md).
+
 ## What crosses the measurement boundary?
 
 ```mermaid
