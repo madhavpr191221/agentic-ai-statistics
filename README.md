@@ -65,6 +65,8 @@ Phase 10 reuses the 90-run Phase 4 campaign for workload analysis. It compares s
 
 The complete specification-driven statistical program is defined in the [statistical analysis specification](docs/specs/statistical_analysis_spec.md), [question registry](docs/specs/analysis_questions.yaml), [data dictionary](docs/specs/data_dictionary.md), and [traceability matrix](docs/specs/analysis_traceability.md).
 
+For a complete explanation of every UI tab, number, chart, artifact, and measurement limitation, read the [UI guide](docs/UI_GUIDE.md).
+
 ## What crosses the measurement boundary?
 
 ```mermaid
