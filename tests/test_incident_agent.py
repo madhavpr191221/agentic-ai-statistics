@@ -65,8 +65,6 @@ async def test_deterministic_agent_path_writes_scored_artifact(tmp_path: Path) -
 
 async def test_incident_api_supports_credit_free_test_run(tmp_path: Path) -> None:
     app = create_app(
-        artifact_root=tmp_path / "phase1",
-        campaign_root=tmp_path / "phase2",
         agent_root=tmp_path / "phase3",
         frontend_dist=tmp_path / "missing",
         serve_frontend=False,

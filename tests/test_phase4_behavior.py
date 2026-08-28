@@ -211,8 +211,6 @@ def test_success_model_accepts_boolean_outcome() -> None:
 
 async def test_behavior_api_exposes_conditions_and_scripted_validation(tmp_path: Path) -> None:
     app = create_app(
-        artifact_root=tmp_path / "phase1",
-        campaign_root=tmp_path / "phase2",
         agent_root=tmp_path / "phase3",
         behavior_root=tmp_path / "phase4",
         frontend_dist=tmp_path / "missing",
