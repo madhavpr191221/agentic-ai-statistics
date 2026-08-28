@@ -62,6 +62,12 @@ Wilson intervals for success proportions, richer per-batch summaries, and
 explicit Q01–Q03 artifact contracts. It reuses saved Phase 5 data and makes no
 new model calls.
 
+Phase 12C adds an explicit Q09–Q14 trajectory-analysis artifact contract. It
+packages complete-path frequencies, entropy/concentration, descriptive
+transitions, oracle divergence, excess work, tool usage, and path-family
+comparisons while preserving the run-level denominator and the no-Markov/no-
+causal-claim limits.
+
 ### Phase 8 scalar statistical baseline
 
 Phase 8 implements Q01–Q03 from the specification using only the saved Phase 5 campaign. It adds run-level scalar distributions, an explicit scalar data dictionary, batch-stability summaries, downloadable JSON/CSV artifacts, a read-only artifact route, and a Scalar Baseline section in the React workbench. Q04 and later remain specified but pending.

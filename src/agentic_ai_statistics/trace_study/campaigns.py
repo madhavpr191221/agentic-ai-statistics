@@ -78,6 +78,43 @@ def _write_scalar_artifacts(directory: Path, analysis: dict[str, Any]) -> None:
         "n_runs": analysis["n_runs"],
         "variables": analysis["scalar_data_dictionary"],
     })
+
+
+def _write_trajectory_artifact(directory: Path, analysis: dict[str, Any]) -> None:
+    """Write the Q09-Q14 trajectory contract beside the downloadable tables."""
+    _write_json(directory / "q09_q14_trajectory_analysis.json", {
+        "schema_version": "12.1.0",
+        "question_ids": ["Q09", "Q10", "Q11", "Q12", "Q13", "Q14"],
+        "campaign_id": analysis["campaign_id"],
+        "unit": "run (with nested events for Q10 and Q13)",
+        "estimands": {
+            "Q09": "empirical distribution of complete paths and entropy",
+            "Q10": "observed adjacent-state transition frequencies",
+            "Q11": "successful-run excess action distribution",
+            "Q12": "first observable oracle-divergence position",
+            "Q13": "tool invocation share and run coverage",
+            "Q14": "observed path-family differences in workload and outcome",
+        },
+        "methods": {
+            "Q09": "path frequencies, cumulative coverage, and bootstrap entropy",
+            "Q10": "transition counts and row normalization",
+            "Q11": "oracle comparison on successful runs only",
+            "Q12": "sequence-position comparison by outcome",
+            "Q13": "nested-event aggregation to invocation and run coverage",
+            "Q14": "descriptive grouping by observed path family",
+        },
+        "measurement_status": "derived from measured run and event records",
+        "path_summary": analysis["path_summary"],
+        "transition_summary": analysis["transition_summary"],
+        "path_concentration": analysis["path_concentration"],
+        "divergence_by_outcome": analysis["divergence_by_outcome"],
+        "tool_usage": analysis["tool_usage"],
+        "limitations": [
+            "Transition frequencies are descriptive and do not establish a Markov process.",
+            "Path family is observed, not randomized; comparisons are associational.",
+            "Per-tool latency and bytes are unavailable at the current measurement boundary.",
+        ],
+    })
     _write_json(directory / "q02_scalar_distributions.json", {
         "schema_version": "12.0.0",
         "question_id": "Q02",
@@ -285,6 +322,7 @@ def analyze_collected_campaign(campaign_directory: Path) -> dict[str, Any]:
     _write_json(campaign_directory / "analysis.json", analysis)
     _write_tables(campaign_directory, tables)
     _write_scalar_artifacts(campaign_directory, analysis)
+    _write_trajectory_artifact(campaign_directory, analysis)
     return analysis
 
 
@@ -322,6 +360,7 @@ def reanalyze_phase4(
     _write_json(campaign_directory / "analysis.json", analysis)
     _write_tables(campaign_directory, tables)
     _write_scalar_artifacts(campaign_directory, analysis)
+    _write_trajectory_artifact(campaign_directory, analysis)
     return campaign_directory
 
 

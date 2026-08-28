@@ -420,6 +420,7 @@ async def test_trace_study_api_lists_details_and_allowlisted_tables(tmp_path: Pa
     (tables / "paths.csv").write_text("count\n1\n", encoding="utf-8")
     (tables / "tool_usage.csv").write_text("tool_name\nget_alert\n", encoding="utf-8")
     (campaign / "q02_scalar_distributions.json").write_text("{}", encoding="utf-8")
+    (campaign / "q09_q14_trajectory_analysis.json").write_text("{}", encoding="utf-8")
     app = create_app(
         agent_root=tmp_path / "phase3",
         behavior_root=tmp_path / "phase4",
@@ -439,6 +440,9 @@ async def test_trace_study_api_lists_details_and_allowlisted_tables(tmp_path: Pa
         artifact = await client.get(
             "/api/trace-study/campaigns/study-v1/artifacts/q02_scalar_distributions.json"
         )
+        trajectory_artifact = await client.get(
+            "/api/trace-study/campaigns/study-v1/artifacts/q09_q14_trajectory_analysis.json"
+        )
         invalid = await client.get("/api/trace-study/campaigns/study-v1/tables/secret.txt")
         missing = await client.get("/api/trace-study/campaigns/missing")
     assert listed.status_code == 200
@@ -446,6 +450,7 @@ async def test_trace_study_api_lists_details_and_allowlisted_tables(tmp_path: Pa
     assert table.status_code == 200
     assert secondary.status_code == 200
     assert artifact.status_code == 200
+    assert trajectory_artifact.status_code == 200
     assert invalid.status_code == 422
     assert missing.status_code == 404
 

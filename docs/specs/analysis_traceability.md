@@ -34,6 +34,10 @@ uncertainty method, and limitation.
 | Q14 | Path/workload/failure | grouped run summaries | trace dynamics | nested-unit test |
 | Q15 | Causal intervention design | design note only | limitations | no Phase 5 causal claim |
 
+The Q09–Q14 trajectory questions also have a combined metadata artifact:
+`q09_q14_trajectory_analysis.json`. The individual CSV tables remain the
+auditable data products for each question.
+
 ## Review questions
 
 - Does every percentage name its denominator?

@@ -79,6 +79,10 @@ maps to a question, estimand, data unit, uncertainty method, and limitation.
 Phase 12B adds uncertainty intervals to the scalar baseline and expands the
 batch-stability diagnostic, still using saved data only.
 
+Phase 12C packages the trajectory analyses—complete paths, concentration,
+descriptive transitions, divergence, excess work, and tool coverage—without
+assuming a Markov process or making causal claims from observed paths.
+
 For a complete explanation of every UI tab, number, chart, artifact, and measurement limitation, read the [UI guide](docs/UI_GUIDE.md).
 
 ## What crosses the measurement boundary?

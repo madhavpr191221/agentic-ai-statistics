@@ -79,6 +79,14 @@ $$
 
 be interpreted causally, subject to the design limits.
 
+## Trajectory artifact
+
+The Q09–Q14 artifact is `q09_q14_trajectory_analysis.json`. It is derived from
+measured run and nested-event records and mirrors the downloadable path tables.
+Its transition values are descriptive row-normalized frequencies; its path
+family comparisons are observational. It must not be interpreted as a fitted
+Markov model or as evidence that an observed path choice caused an outcome.
+
 ## Measurement-status rules
 
 - **Measured:** directly recorded by instrumentation, such as local stdio frame bytes or timestamps.
