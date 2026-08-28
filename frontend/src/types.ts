@@ -196,6 +196,34 @@ export interface TraceStudyAnalysis {
   created_at_utc: string
   experimental_unit: string
   n_runs: number
+  scalar_data_dictionary?: Array<{
+    field: string
+    label: string
+    type: string
+    unit: string
+    status: string
+    level: string
+  }>
+  scalar_distributions?: Array<{
+    field: string
+    label: string
+    type: string
+    unit: string
+    status: string
+    n: number
+    missing: number
+    mean: number | null
+    median: number | null
+    q1: number | null
+    q3: number | null
+    sample_sd: number | null
+    minimum: number | null
+    maximum: number | null
+    proportion?: number | null
+    successes?: number
+    failures?: number
+    empirical_cdf: Array<{ value: number; probability: number }>
+  }>
   planned_runs?: number
   campaign_complete?: boolean
   new_model_calls?: number
@@ -281,6 +309,9 @@ export interface TraceStudyAnalysis {
     success_rate: number
     read_runbook_first_rate: number
     mean_mcp_calls: number
+    mean_total_latency_ms?: number
+    mean_total_tokens?: number
+    mean_estimated_cost_usd?: number
   }>
   prefix_outcomes?: Array<{
     prefix: string

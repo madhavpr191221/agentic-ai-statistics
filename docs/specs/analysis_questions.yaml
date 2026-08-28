@@ -1,4 +1,4 @@
-version: "1.0"
+version: "1.1"
 dataset: phase5b-main-v2
 planned_valid_runs: 100
 credit_required: false
@@ -24,7 +24,7 @@ questions:
     estimand: classification and measurement-boundary inventory
     method: data_dictionary
     uncertainty: none
-    outputs: [data_dictionary.md]
+    outputs: [data_dictionary.md, q01_data_dictionary.json]
     acceptance: [every variable has type, unit, range, and measured-or-derived status]
   - id: Q02
     question: What distribution does each run-level outcome have?
@@ -33,7 +33,7 @@ questions:
     estimand: marginal empirical distributions
     method: [summary_statistics, empirical_cdf, histogram]
     uncertainty: bootstrap_or_interval_where_defined
-    outputs: [q02_run_level_distributions.csv]
+    outputs: [q02_scalar_distributions.json, q02_scalar_distributions.csv]
     acceptance: [aggregates reconcile to valid run count]
   - id: Q03
     question: Are repeated runs stable?
@@ -42,7 +42,7 @@ questions:
     estimand: batch-level drift diagnostics
     method: [batch_table, batch_plot]
     uncertainty: descriptive_intervals
-    outputs: [q03_batch_stability.csv]
+    outputs: [q03_batch_stability.json, q03_batch_stability.csv]
     acceptance: [batch labels reconcile to campaign manifest]
   - id: Q04
     question: Does workload vary with experimental condition?

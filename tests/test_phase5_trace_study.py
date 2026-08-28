@@ -28,6 +28,7 @@ from mcp_traffic_analysis.trace_study.analysis import (
     plugin_entropy,
     post_rejection_behavior,
     repeated_tool_count,
+    scalar_distributions,
     state_sequence,
     wilson_interval,
 )
@@ -417,6 +418,7 @@ async def test_trace_study_api_lists_details_and_allowlisted_tables(tmp_path: Pa
     )
     (tables / "paths.csv").write_text("count\n1\n", encoding="utf-8")
     (tables / "tool_usage.csv").write_text("tool_name\nget_alert\n", encoding="utf-8")
+    (campaign / "q02_scalar_distributions.json").write_text("{}", encoding="utf-8")
     app = create_app(
         agent_root=tmp_path / "phase3",
         behavior_root=tmp_path / "phase4",
@@ -433,11 +435,53 @@ async def test_trace_study_api_lists_details_and_allowlisted_tables(tmp_path: Pa
         secondary = await client.get(
             "/api/trace-study/campaigns/study-v1/tables/tool_usage.csv"
         )
+        artifact = await client.get(
+            "/api/trace-study/campaigns/study-v1/artifacts/q02_scalar_distributions.json"
+        )
         invalid = await client.get("/api/trace-study/campaigns/study-v1/tables/secret.txt")
         missing = await client.get("/api/trace-study/campaigns/missing")
     assert listed.status_code == 200
     assert detail.json()["campaign_id"] == "study-v1"
     assert table.status_code == 200
     assert secondary.status_code == 200
+    assert artifact.status_code == 200
     assert invalid.status_code == 422
     assert missing.status_code == 404
+
+
+def test_scalar_distributions_preserve_run_level_unit() -> None:
+    rows = [
+        {
+            "mcp_call_count": 2,
+            "model_call_count": 1,
+            "total_latency_ms": 10.0,
+            "model_latency_ms": 8.0,
+            "mcp_latency_ms": 1.0,
+            "orchestration_latency_ms": 1.0,
+            "total_tokens": 100,
+            "request_frame_bytes": 20,
+            "response_frame_bytes": 40,
+            "estimated_cost_usd": 0.01,
+            "task_success": True,
+        },
+        {
+            "mcp_call_count": 4,
+            "model_call_count": 2,
+            "total_latency_ms": 20.0,
+            "model_latency_ms": 16.0,
+            "mcp_latency_ms": 2.0,
+            "orchestration_latency_ms": 2.0,
+            "total_tokens": 200,
+            "request_frame_bytes": 30,
+            "response_frame_bytes": 50,
+            "estimated_cost_usd": 0.02,
+            "task_success": False,
+        },
+    ]
+    summaries = scalar_distributions(rows)
+    calls = next(item for item in summaries if item["field"] == "mcp_call_count")
+    success = next(item for item in summaries if item["field"] == "task_success")
+    assert calls["n"] == 2
+    assert calls["mean"] == 3.0
+    assert success["successes"] == 1
+    assert success["failures"] == 1
