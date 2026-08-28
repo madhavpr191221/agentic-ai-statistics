@@ -174,6 +174,162 @@ Among the 71 successful runs, the agent made a median of five calls beyond the f
 
 The frame-byte values are exact local stdio MCP/JSON-RPC bytes. They are not HTTP, TLS, TCP, or IP packet sizes.
 
+## Phase 12C: what the trajectories tell us
+
+The scalar results above say how much work a run used. The trajectory keeps the
+order of that work. For run $r$, write
+
+$$
+\mathbf X_r=(X_{r1},X_{r2},\ldots,X_{rN_r}),
+$$
+
+where each $X_{rt}$ is an observable tool/action state and $N_r$ is the number
+of actions in that run. Two runs can have the same call count and still have
+different trajectories.
+
+### 1. How many different paths occurred?
+
+There were **22 distinct complete paths** in the 100 runs. **13 paths occurred
+only once**, while the most common path occurred **55 times**. Thus the modal
+path covered **55%** of all runs.
+
+The empirical path probability is
+
+$$
+\widehat P(\mathbf X=x)
+=\frac{\#\{r:\mathbf X_r=x\}}{100}.
+$$
+
+The path entropy was **2.700 bits**, with a descriptive bootstrap interval of
+**2.066 to 2.971 bits**. Entropy is only a compact summary; the path-frequency
+table is the primary result.
+
+### 2. What did the common paths do?
+
+The most common successful path was, in abbreviated form:
+
+```text
+inspect evidence → inspect metrics → inspect dependencies → search logs
+→ inspect recent changes → read runbook → attempt restart (rejected)
+→ escalate (rejected) → read runbook → escalate → success
+```
+
+It occurred in 55 runs. The second-most-common path occurred in 13 runs and
+was identical until the rejected escalation, but then escalated again without
+reading the runbook and failed.
+
+This is the clearest practical distinction in the data:
+
+```text
+rejected escalation → read runbook → escalate again → success
+rejected escalation → escalate again immediately → failure
+```
+
+This is an observed association. The next action was chosen by the agent, not
+randomly assigned by the experiment.
+
+### 3. Did successful runs follow the shortest valid path?
+
+No. The five-call oracle was the shortest valid solution, but **0 of 71
+successful runs** followed it exactly. For successful runs,
+
+$$
+E_r=N_r-N_r^*,
+$$
+
+where $N_r^*$ is the oracle length. The median excess was **5 calls**, with an
+observed range of **4 to 6 calls**.
+
+So “success” and “efficiency” are different outcomes here. The agent usually
+succeeded after extra investigation and an unnecessary restart attempt.
+
+### 4. Where did paths first diverge?
+
+Let $D_r$ be the first observable position at which the run differs from the
+oracle. The median $D_r$ was **step 2** for both successful and failed runs;
+both groups ranged from steps **2 to 3**.
+
+Therefore, early divergence alone did not explain the outcome. The more useful
+distinction appeared later, after the rejected escalation.
+
+### 5. What events followed other events?
+
+The transition table records what was observed immediately after each state. For
+example:
+
+$$
+\widehat P(\text{escalate after rejected restart})
+\approx0.951,
+$$
+
+$$
+\widehat P(\text{read runbook after rejected escalation})=0.71,
+$$
+
+and
+
+$$
+\widehat P(\text{retry escalation after rejected escalation})=0.29.
+$$
+
+These are empirical transition frequencies. They are **not yet transition
+probabilities of a fitted Markov chain**, because the next action may depend on
+the entire previous history rather than only the immediately preceding state.
+
+### 6. Which tools dominated the paths?
+
+| Tool | Invocations | Share of all invocations | Runs using it |
+|---|---:|---:|---:|
+| `escalate_incident` | 200 | 20.4% | 100 |
+| `get_runbook` | 171 | 17.4% | 100 |
+| `restart_service` | 102 | 10.4% | 100 |
+| `get_dependencies` | 101 | 10.3% | 100 |
+| `get_alert` | 100 | 10.2% | 100 |
+| `get_metrics` | 100 | 10.2% | 100 |
+| `search_logs` | 100 | 10.2% | 100 |
+| `get_recent_changes` | 97 | 9.9% | 97 |
+| `update_incident` | 9 | 0.9% | 9 |
+
+Escalation and runbook calls dominate because recovery requires an escalation,
+rejection handling, and a second escalation. The tool table counts nested
+events; it does not turn those events into independent experimental units.
+
+### 7. The statistical interpretation
+
+The analysis has a deliberate hierarchy:
+
+$$
+\text{trajectory distribution}
+\longrightarrow
+\text{path summaries}
+\longrightarrow
+\text{scalar outcomes}.
+$$
+
+The trajectory contains the most information. Call count, latency, cost, and
+success are scalar summaries or projections of that trajectory. We report the
+scalars first because they are easiest to interpret, then use trajectories to
+explain why runs differ.
+
+### 8. What we can and cannot conclude
+
+We can conclude that this agent, under this fixed synthetic Orders-recovery
+setup, generated one dominant path plus a long tail of less common paths. The
+post-rejection choice visibly separated successful and failed traces.
+
+We cannot conclude that:
+
+- reading a runbook causes success in production;
+- this is the reliability of AI agents generally;
+- the paths form a Markov process;
+- the traces reveal private model reasoning; or
+- the recorded stdio frames are network packets.
+
+The combined trajectory metadata and question contract are available in
+`q09_q14_trajectory_analysis.json`; the underlying tables are `paths.csv`,
+`transitions.csv`, `divergence.csv`, `path_concentration.csv`, and
+`tool_usage.csv` under the campaign's `tables/` directory.
+
 The 100 valid observations account for an estimated USD 3.6000. Excluded provider-error attempts account for another estimated USD 0.01385 because two failed attempts had already made model calls before quota exhaustion. Total recorded attempted cost is therefore USD 3.6139.
 
 ### Acquisition audit
