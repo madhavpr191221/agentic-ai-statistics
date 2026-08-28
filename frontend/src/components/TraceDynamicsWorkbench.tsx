@@ -20,6 +20,14 @@ function measured(value: number | null | undefined, digits = 1) {
   return value === null || value === undefined ? 'Unavailable' : value.toFixed(digits)
 }
 
+function scalarValue(field: string, value: number | null | undefined) {
+  if (value === null || value === undefined) return 'Unavailable'
+  if (field === 'estimated_cost_usd') return `$${value.toFixed(4)}`
+  if (field === 'total_tokens' || field.endsWith('_bytes')) return value.toFixed(0)
+  if (field === 'task_success') return percentage(value)
+  return measured(value)
+}
+
 export function TraceDynamicsWorkbench() {
   const [campaigns, setCampaigns] = useState<TraceStudyAnalysis[]>([])
   const [campaignId, setCampaignId] = useState('')
@@ -87,7 +95,7 @@ export function TraceDynamicsWorkbench() {
         <p className="eyebrow">Phase 8 · scalar baseline</p>
         <h2>Start with one run and its basic measurements</h2>
         <p>Each fresh run is one observation. These summaries describe the distributions of scalar outcomes before we study complete execution paths.</p>
-        <div className="table-scroll"><table className="data-table"><thead><tr><th>Measure</th><th>Type</th><th>Unit</th><th>n</th><th>Missing</th><th>Mean</th><th>Median</th><th>Q1–Q3</th><th>Range</th></tr></thead><tbody>{campaign.scalar_distributions.map((row) => <tr key={row.field}><td>{row.label}</td><td>{row.type}</td><td>{row.unit}</td><td>{row.n}</td><td>{row.missing}</td><td>{measured(row.mean)}</td><td>{measured(row.median)}</td><td>{measured(row.q1)}–{measured(row.q3)}</td><td>{measured(row.minimum)}–{measured(row.maximum)}</td></tr>)}</tbody></table></div>
+        <div className="table-scroll"><table className="data-table"><thead><tr><th>Measure</th><th>Type</th><th>Unit</th><th>n</th><th>Missing</th><th>Mean</th><th>Median</th><th>Q1–Q3</th><th>Range</th></tr></thead><tbody>{campaign.scalar_distributions.map((row) => <tr key={row.field}><td>{row.label}</td><td>{row.type}</td><td>{row.unit}</td><td>{row.n}</td><td>{row.missing}</td><td>{scalarValue(row.field, row.mean)}</td><td>{scalarValue(row.field, row.median)}</td><td>{scalarValue(row.field, row.q1)}–{scalarValue(row.field, row.q3)}</td><td>{scalarValue(row.field, row.minimum)}–{scalarValue(row.field, row.maximum)}</td></tr>)}</tbody></table></div>
         <div className="download-row"><a href={`/api/trace-study/campaigns/${campaign.campaign_id}/artifacts/q01_data_dictionary.json`}>Download data dictionary</a><a href={`/api/trace-study/campaigns/${campaign.campaign_id}/artifacts/q02_scalar_distributions.json`}>Download scalar distributions</a><a href={`/api/trace-study/campaigns/${campaign.campaign_id}/artifacts/q03_batch_stability.json`}>Download batch stability</a></div>
         <p className="method-note">Statuses are defined in the data dictionary. Local stdio frame bytes are measured application data, not network packets; estimated cost is derived.</p>
       </section> : null}
