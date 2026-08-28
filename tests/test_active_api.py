@@ -20,6 +20,7 @@ async def test_health_describes_active_measurement_boundary(tmp_path: Path) -> N
         response = await client.get("/api/health")
 
     assert response.status_code == 200
+    assert response.json()["phase"] == "5"
     assert response.json()["measurement_boundary"] == "agent_model_and_stdio_mcp"
 
 

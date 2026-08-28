@@ -1,4 +1,4 @@
-"""FastAPI application for the measured Phase 3 and Phase 4 agent studies."""
+"""FastAPI application for the measured agent-performance studies."""
 
 from __future__ import annotations
 
@@ -23,6 +23,7 @@ from mcp_traffic_analysis.incidents.repository import IncidentRepository
 from mcp_traffic_analysis.incidents.runner import run_incident
 from mcp_traffic_analysis.incidents.world import INCOMING_MESSAGES, oracle_sequence
 from mcp_traffic_analysis.incidents.world import SCENARIOS as INCIDENT_SCENARIOS
+from mcp_traffic_analysis.trace_study.repository import TraceStudyRepository
 
 AgentTable = Literal[
     "runs.csv",
@@ -50,6 +51,18 @@ BehaviorTable = Literal[
     "model_calls.csv",
     "model_calls.parquet",
 ]
+TraceStudyTable = Literal[
+    "runs.csv",
+    "runs.parquet",
+    "traces.csv",
+    "traces.parquet",
+    "paths.csv",
+    "paths.parquet",
+    "transitions.csv",
+    "transitions.parquet",
+    "post_rejection_outcomes.csv",
+    "post_rejection_outcomes.parquet",
+]
 
 
 def _campaign_table(root: Path, campaign_id: str, table_name: str) -> Path:
@@ -69,19 +82,22 @@ def create_app(
     *,
     agent_root: Path = Path("artifacts/phase3"),
     behavior_root: Path = Path("artifacts/phase4"),
+    trace_study_root: Path = Path("artifacts/phase5"),
     frontend_dist: Path = Path("frontend/dist"),
     serve_frontend: bool = True,
 ) -> FastAPI:
     incident_repository = IncidentRepository(agent_root)
     behavior_repository = BehaviorRepository(behavior_root)
+    trace_study_repository = TraceStudyRepository(trace_study_root)
     agent_available = bool(os.getenv("OPENAI_API_KEY") or Path(".env").is_file())
     api = FastAPI(
         title="MCP Traffic Analysis",
-        version="0.5.0",
+        version="0.6.0",
         description="Local API for measured IT-incident agent experiments.",
     )
     api.state.incident_repository = incident_repository
     api.state.behavior_repository = behavior_repository
+    api.state.trace_study_repository = trace_study_repository
     api.add_middleware(
         CORSMiddleware,
         allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
@@ -94,7 +110,7 @@ def create_app(
     async def health() -> dict[str, object]:
         return {
             "status": "ok",
-            "phase": "4",
+            "phase": "5",
             "measurement_boundary": "agent_model_and_stdio_mcp",
             "agent_available": agent_available,
         }
@@ -157,6 +173,24 @@ def create_app(
         campaign_id: str, table_name: BehaviorTable
     ) -> FileResponse:
         path = _campaign_table(behavior_repository.root, campaign_id, table_name)
+        return FileResponse(path, filename=table_name)
+
+    @api.get("/api/trace-study/campaigns")
+    async def list_trace_study_campaigns() -> list[dict[str, object]]:
+        return trace_study_repository.list_campaigns()
+
+    @api.get("/api/trace-study/campaigns/{campaign_id}")
+    async def get_trace_study_campaign(campaign_id: str) -> dict[str, object]:
+        try:
+            return trace_study_repository.campaign(campaign_id)
+        except KeyError as error:
+            raise HTTPException(status_code=404, detail="trace-study campaign not found") from error
+
+    @api.get("/api/trace-study/campaigns/{campaign_id}/tables/{table_name}")
+    async def trace_study_campaign_table(
+        campaign_id: str, table_name: TraceStudyTable
+    ) -> FileResponse:
+        path = _campaign_table(trace_study_repository.root, campaign_id, table_name)
         return FileResponse(path, filename=table_name)
 
     @api.get("/api/agent/scenarios")

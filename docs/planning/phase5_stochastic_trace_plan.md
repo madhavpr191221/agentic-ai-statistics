@@ -24,7 +24,7 @@ Reanalyse the 90 Phase 4 main-study runs without making model calls. Use them to
 
 Collect 100 new live runs with the incident, recovery structure, incoming message, instructions, tools, simulated world, model identifier, scoring, and stdio MCP transport held fixed. Every observation uses a fresh agent and MCP session. Acquisition uses ten resumable batches of ten runs and records batch, execution order, timestamps, configuration fingerprint, calls, actions, latency, tokens, bytes, cost, and outcome.
 
-Before collection, validate the five-call oracle without model cost and collect three paid smoke observations that are excluded from analysis. Refuse to resume a campaign if the frozen configuration changes. Apply a $5 estimated-cost guard; an interrupted campaign remains explicitly incomplete.
+Before collection, validate the five-call oracle without model cost and collect three paid smoke observations that are excluded from analysis. Refuse to resume a campaign if the frozen configuration changes. Apply a USD 5 estimated-cost guard; an interrupted campaign remains explicitly incomplete.
 
 ## Primary reliability analysis
 

@@ -188,3 +188,112 @@ export interface BehaviorCampaignAnalysis {
   }>
   notes?: string[]
 }
+
+export interface TraceStudyAnalysis {
+  schema_version: string
+  campaign_id: string
+  study_stage: 'exploratory' | 'smoke' | 'main'
+  created_at_utc: string
+  experimental_unit: string
+  n_runs: number
+  planned_runs?: number
+  campaign_complete?: boolean
+  new_model_calls?: number
+  source_campaign_id?: string
+  total_estimated_cost_usd?: number
+  scientific_estimated_cost_usd?: number
+  excluded_attempt_estimated_cost_usd?: number
+  excluded_attempts?: number
+  excluded_provider_attempts?: number
+  excluded_measurement_attempts?: number
+  excluded_provider_failure_types?: Record<string, number>
+  primary_question: string
+  focused_condition: {
+    scenario_id: IncidentScenarioId
+    task_structure: TaskStructure
+  }
+  post_rejection_analysis: {
+    focused_runs: number
+    classified_runs: number
+    unclassified_runs: number
+    counts: Record<'read_runbook_first' | 'retried_first', {
+      success: number
+      failure: number
+    }>
+    failure_rate_read_runbook_first: number | null
+    failure_rate_read_runbook_first_wilson_95: [number, number] | null
+    failure_rate_retried_first: number | null
+    failure_rate_retried_first_wilson_95: [number, number] | null
+    failure_risk_difference_retry_minus_read: number | null
+    failure_risk_difference_newcombe_95: [number, number] | null
+    fisher_exact_two_sided_p: number | null
+    interpretation_limit: string
+  }
+  focused_measurements: Record<string, {
+    n: number
+    median: number | null
+    q1: number | null
+    q3: number | null
+    minimum: number | null
+    maximum: number | null
+  }>
+  measurement_boundary: string
+  condition_summaries: Array<{
+    scenario_id: IncidentScenarioId
+    task_structure: TaskStructure
+    n_runs: number
+    successes: number
+    unique_paths: number
+    singleton_paths: number
+    modal_path_count: number
+    modal_path_proportion: number
+    path_entropy_bits: number
+    path_entropy_bootstrap_95: [number, number] | null
+    exact_oracle_successes: number
+    successful_excess_calls: {
+      n: number
+      mean: number | null
+      median: number | null
+      q1: number | null
+      q3: number | null
+      minimum: number | null
+      maximum: number | null
+    }
+  }>
+  path_summary: Array<{
+    scenario_id: IncidentScenarioId
+    task_structure: TaskStructure
+    state_sequence: string
+    count: number
+    proportion: number
+  }>
+  transition_summary: Array<{
+    scenario_id: IncidentScenarioId
+    task_structure: TaskStructure
+    source_state: string
+    target_state: string
+    count: number
+    probability: number
+  }>
+  batch_summaries: Array<{
+    batch: number
+    n_runs: number
+    success_rate: number
+    read_runbook_first_rate: number
+    mean_mcp_calls: number
+  }>
+  trace_examples: Array<{
+    run_id: string
+    scenario_id: IncidentScenarioId
+    task_structure: TaskStructure
+    task_success: boolean
+    batch: number | null
+    execution_order: number | null
+    tool_sequence: string
+    state_sequence: string
+    oracle_sequence: string
+    post_rejection_behavior: string
+    first_oracle_divergence: number | null
+  }>
+  notes: string[]
+}

@@ -48,6 +48,12 @@ from mcp_traffic_analysis.incidents.world import (
 from mcp_traffic_analysis.transport.models import FrameDirection, TransportFrame
 
 MODEL_ID = "gpt-5.6-sol"
+AGENT_INSTRUCTIONS = (
+    "Resolve the synthetic IT incident using only MCP evidence and actions. "
+    "Gather evidence before acting. Never invent evidence IDs. Return every material "
+    "evidence ID. Do not claim resolution unless an action "
+    "tool accepted the exact target. The orders-api must not be restarted."
+)
 INPUT_USD_PER_MILLION = 4.0
 CACHED_INPUT_USD_PER_MILLION = 0.40
 OUTPUT_USD_PER_MILLION = 20.0
@@ -252,19 +258,13 @@ async def run_incident(
             max_retry_attempts=0,
         )
         definition = SCENARIOS[scenario]
-        instructions = (
-            "Resolve the synthetic IT incident using only MCP evidence and actions. "
-            "Gather evidence before acting. Never invent evidence IDs. Return every material "
-            "evidence ID. Do not claim resolution unless an action "
-            "tool accepted the exact target. The orders-api must not be restarted."
-        )
         client = AsyncOpenAI(max_retries=0, timeout=120.0)
         model = OpenAIResponsesModel(model=MODEL_ID, openai_client=client)
         try:
             async with server:
                 agent: Agent[Any] = Agent(
                     name="IT incident responder",
-                    instructions=instructions,
+                    instructions=AGENT_INSTRUCTIONS,
                     model=model,
                     mcp_servers=[server],
                     output_type=IncidentResult,

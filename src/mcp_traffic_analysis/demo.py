@@ -16,6 +16,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--agent-root", type=Path, default=Path("artifacts/phase3"))
     parser.add_argument("--behavior-root", type=Path, default=Path("artifacts/phase4"))
+    parser.add_argument("--trace-study-root", type=Path, default=Path("artifacts/phase5"))
     parser.add_argument("--frontend-dist", type=Path, default=Path("frontend/dist"))
     parser.add_argument("--api-only", action="store_true")
     return parser
@@ -26,6 +27,7 @@ def main(argv: list[str] | None = None) -> int:
     app = create_app(
         agent_root=args.agent_root,
         behavior_root=args.behavior_root,
+        trace_study_root=args.trace_study_root,
         frontend_dist=args.frontend_dist,
         serve_frontend=not args.api_only,
     )

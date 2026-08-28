@@ -5,7 +5,7 @@ The repository has two permanent branches:
 - `demo` is the tested integration branch;
 - `main` is the released branch.
 
-Work branches are temporary. They are deleted after their tested contents are released; the merge commits preserve their history.
+Each completed phase keeps its named `phase/...` branch for inspection.
 
 ## Development flow
 
@@ -14,13 +14,11 @@ flowchart LR
     A[Create work branch from demo] --> B[Implement one bounded change]
     B --> C[Run full validation gate]
     C --> D[No-FF merge into demo]
-    D --> E[Push demo]
-    E --> F[No-FF release merge into main]
-    F --> G[Fast-forward demo to main]
-    G --> H[Delete merged work branch]
+    D --> E[Push phase branch and demo]
+    E --> F[Preserve phase branch]
 ```
 
-Do not merge an untested work branch. Do not rewrite branch history.
+Do not merge an untested phase branch. Do not rewrite history, delete the phase branch, or merge to `main` without explicit direction.
 
 ## Run the active demo
 
@@ -32,7 +30,9 @@ npm run demo
 
 Open `http://127.0.0.1:8000`.
 
-The default **Behavior study** surface runs a credit-free scripted validation. Select **Real model measurement** only when a hosted-model observation is intended.
+The default **Trace dynamics** surface explains the Phase 5 practical question using saved campaign evidence. It never launches a paid campaign.
+
+The **Behavior study** surface runs a credit-free scripted validation. Select **Real model measurement** only when a hosted-model observation is intended.
 
 The **Incident Agent** surface runs one live model-driven incident. All remediation remains synthetic.
 
@@ -58,21 +58,17 @@ npm run test:e2e
 git diff --check
 ```
 
-The gate must verify measurement logic, API behavior, React components, production compilation, and both browser workflows.
+The gate must verify measurement logic, API behavior, React components, production compilation, and all browser workflows.
 
-## Release sequence
+## Phase integration sequence
 
-After a clean merge into `demo`:
+After the full gate passes on the phase branch:
 
 ```powershell
-git switch main
-git pull --ff-only origin main
-git merge --no-ff demo
-git push origin main
-
 git switch demo
-git merge --ff-only main
+git merge --no-ff phase/05-stochastic-traces
 git push origin demo
+git push origin phase/05-stochastic-traces
 ```
 
-Delete only branches proven to be ancestors of the released `main` commit. Keep `main` and `demo` synchronized immediately after a release.
+`main` remains unchanged until the user explicitly requests a release.
