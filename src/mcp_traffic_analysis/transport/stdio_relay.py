@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any, BinaryIO
 from uuid import UUID, uuid4
 
-from mcp_traffic_analysis.measurement.transport_models import (
+from mcp_traffic_analysis.transport.models import (
     FrameDirection,
     FrameMessageType,
     TransportFrame,
@@ -107,11 +107,7 @@ def _pump(
 
 
 def relay(args: argparse.Namespace) -> int:
-    child_args = (
-        list(args.server_arg)
-        if args.server_arg
-        else ["--manifest", str(args.manifest), "--events", str(args.events)]
-    )
+    child_args = list(args.server_arg)
     process = subprocess.Popen(
         [
             args.python,
@@ -147,12 +143,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--python", required=True)
     parser.add_argument("--run-id", required=True)
-    parser.add_argument("--manifest", type=Path)
-    parser.add_argument("--events", type=Path)
     parser.add_argument("--frames", type=Path, required=True)
     parser.add_argument(
         "--server-module",
-        default="mcp_traffic_analysis.fixtures.stdio_server",
+        required=True,
         help="Python module launched behind the transparent relay.",
     )
     parser.add_argument(

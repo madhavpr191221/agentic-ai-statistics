@@ -20,6 +20,12 @@ class IncidentScenario(StrEnum):
     ORDERS_API_OUTAGE = "orders_api_outage"
 
 
+class TaskStructure(StrEnum):
+    SEQUENTIAL = "sequential"
+    BRANCHING = "branching"
+    RECOVERY = "recovery"
+
+
 class ScenarioDefinition(StrictModel):
     id: IncidentScenario
     label: str
@@ -49,7 +55,34 @@ class ActionRecord(StrictModel):
     target: str
     accepted: bool
     prohibited: bool
+    expected_rejection: bool = False
     result: str
+
+
+class BehaviorTraceStep(StrictModel):
+    sequence: int
+    tool_name: str
+    classification: Literal[
+        "oracle", "expected_rejection", "extra", "unexpected_rejection", "prohibited"
+    ]
+
+
+class BehaviorMetadata(StrictModel):
+    task_structure: TaskStructure
+    incoming_message: str
+    oracle_sequence: list[str]
+    observed_sequence: list[str]
+    oracle_call_count: int
+    excess_mcp_calls: int | None
+    normalized_oracle_distance: float
+    expected_rejections: int
+    unexpected_rejections: int
+    trace_steps: list[BehaviorTraceStep]
+    execution_mode: Literal["live_measurement", "scripted_validation"]
+    request_frame_bytes: int | None
+    response_frame_bytes: int | None
+    block: int | None = None
+    execution_order: int | None = None
 
 
 class ScoreCard(StrictModel):
@@ -113,8 +146,15 @@ class IncidentRunDetail(StrictModel):
     score: ScoreCard
     actions: list[ActionRecord]
     agent_events: list[AgentEvent]
+    behavior: BehaviorMetadata | None = None
 
 
 class IncidentRunRequest(StrictModel):
     scenario: IncidentScenario
+    mode: Literal["live", "deterministic"] = "live"
+
+
+class BehaviorRunRequest(StrictModel):
+    scenario: IncidentScenario
+    task_structure: TaskStructure
     mode: Literal["live", "deterministic"] = "live"

@@ -14,9 +14,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8000)
-    parser.add_argument("--artifact-root", type=Path, default=Path("artifacts/phase1a"))
-    parser.add_argument("--campaign-root", type=Path, default=Path("artifacts/phase2"))
     parser.add_argument("--agent-root", type=Path, default=Path("artifacts/phase3"))
+    parser.add_argument("--behavior-root", type=Path, default=Path("artifacts/phase4"))
     parser.add_argument("--frontend-dist", type=Path, default=Path("frontend/dist"))
     parser.add_argument("--api-only", action="store_true")
     return parser
@@ -25,9 +24,8 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     app = create_app(
-        artifact_root=args.artifact_root,
-        campaign_root=args.campaign_root,
         agent_root=args.agent_root,
+        behavior_root=args.behavior_root,
         frontend_dist=args.frontend_dist,
         serve_frontend=not args.api_only,
     )

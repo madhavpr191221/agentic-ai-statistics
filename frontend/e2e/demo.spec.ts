@@ -1,47 +1,14 @@
 import { expect, test } from '@playwright/test'
 
-test('runs a successful trace and exposes measured statistics', async ({ page }) => {
+test('runs a concrete Phase 4 task without model cost', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByTestId('app-ready')).toBeVisible()
-  await page.getByRole('button', { name: 'Phase 1 traces' }).click()
-  await page.getByLabel('Scenario').selectOption('echo')
-  await page.getByLabel('Repetitions').fill('3')
-  await page.getByRole('button', { name: 'Run experiment' }).click()
-  await expect(page.getByRole('status')).toContainText('Validated echo trace')
-  await expect(page.getByTestId('metric-tool-calls')).toContainText('3')
-  await expect(page.getByTestId('statistics-panel')).toBeVisible()
-  await expect(page.getByTestId('event-table')).toContainText('tools/call')
-})
-
-test('shows concurrency and retains classified failure traces', async ({ page }) => {
-  await page.goto('/')
-  await page.getByRole('button', { name: 'Phase 1 traces' }).click()
-  await page.getByLabel('Scenario').selectOption('concurrent')
-  await page.getByRole('button', { name: 'Run experiment' }).click()
-  await expect(page.getByTestId('metric-tool-calls')).toContainText('3')
-  // The three concurrent tool calls must be visible; client discovery may add spans.
-  await expect.poll(() => page.getByTestId('trace-timeline').getByTestId('timeline-span').count())
-    .toBeGreaterThanOrEqual(3)
-  await page.getByLabel('Scenario').selectOption('backend_exception')
-  await page.getByRole('button', { name: 'Run experiment' }).click()
-  await expect(page.getByTestId('metric-failures')).toContainText('1')
-  await expect(page.getByTestId('event-table')).toContainText('backend_exception')
-  await page.reload()
-  await page.getByRole('button', { name: 'Phase 1 traces' }).click()
-  await expect(page.getByTestId('metric-failures')).toContainText('1')
-})
-
-test('measures a real stdio run with exact frame bytes', async ({ page }) => {
-  await page.goto('/')
-  await page.getByRole('button', { name: 'Statistical study' }).click()
-  await page.getByLabel('Transport').selectOption('stdio')
-  await page.getByLabel('Payload size').selectOption('64')
-  await page.getByLabel('Service time').selectOption('0')
-  await page.getByLabel('Calls per run').fill('2')
-  await page.getByRole('button', { name: 'Run controlled experiment' }).click()
-  await expect(page.getByTestId('phase2-result')).toBeVisible()
-  await expect(page.getByTestId('metric-response-bytes')).not.toContainText('Unavailable')
-  await expect(page.getByTestId('phase2-call-table')).toContainText('Request frame')
+  await expect(page.getByTestId('behavior-workbench')).toBeVisible()
+  await expect(page.getByText('Simulated incoming incident ticket')).toBeVisible()
+  await page.getByLabel('Task structure').selectOption('recovery')
+  await page.getByRole('button', { name: 'Run task' }).click()
+  await expect(page.getByText(/Scripted structural validation/)).toBeVisible()
+  await expect(page.getByText('Five-call oracle')).toBeVisible()
+  await expect(page.getByText('expected rejection')).toBeVisible()
 })
 
 test('renders a scored incident agent trace without spending API credit', async ({ page }) => {
@@ -61,6 +28,7 @@ test('renders a scored incident agent trace without spending API credit', async 
     }
   })
   await page.goto('/')
+  await page.getByRole('button', { name: 'Incident Agent' }).click()
   await page.getByRole('button', { name: 'Run real agent' }).click()
   await expect(page.getByText('checkout deployment defect')).toBeVisible()
   await expect(page.getByText('3 ordered MCP calls')).toBeVisible()
