@@ -2,6 +2,8 @@
 
 This document follows one active experiment from the browser to the saved statistical artifact. The repository contains the Phase 3 incident agent, Phase 4 task-structure experiment, and Phase 5 stochastic-trace study.
 
+For a screen-by-screen explanation of what the user sees and what each number means, read [`UI_GUIDE.md`](UI_GUIDE.md).
+
 ## One-run overview
 
 ```mermaid
@@ -37,6 +39,8 @@ sequenceDiagram
 - `TraceDynamicsWorkbench` uses `/api/trace-study/*` for Phase 5;
 - `IncidentWorkbench` uses `/api/agent/*` for Phase 3;
 - `BehaviorWorkbench` uses `/api/behavior/*` for Phase 4.
+
+The Behavior workbench's Phase 10 section reads the same saved Phase 4 campaign and displays Q04 workload summaries and count-model artifacts. The Trace Dynamics workbench's Phase 8 section begins with scalar run-level distributions before showing path-level summaries.
 
 The browser can launch one run. It cannot launch a repeated paid campaign. Campaign collection remains an explicit CLI operation.
 
