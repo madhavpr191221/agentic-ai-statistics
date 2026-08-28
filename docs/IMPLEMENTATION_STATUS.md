@@ -48,6 +48,15 @@ The [Phase 6A statistical analysis roadmap](planning/phase6_statistical_analysis
 
 The specification-driven statistical program is documented in `docs/specs/`: an authoritative specification, question registry, data dictionary, and traceability matrix. These documentation artifacts do not require new model calls.
 
+### Phase 12: statistical study layer
+
+Phase 12A is a specification phase with no new model calls. It formalizes the
+distinction between an observability measurement layer and this repository's
+statistical study layer. The run is the experimental unit; scalar outcomes are
+analyzed first, followed by variable-length trajectory distributions and only
+then any stochastic-process model. See `docs/specs/analysis_contracts.md` and
+`docs/planning/phase12_statistical_study_layer_plan.md`.
+
 ### Phase 8 scalar statistical baseline
 
 Phase 8 implements Q01–Q03 from the specification using only the saved Phase 5 campaign. It adds run-level scalar distributions, an explicit scalar data dictionary, batch-stability summaries, downloadable JSON/CSV artifacts, a read-only artifact route, and a Scalar Baseline section in the React workbench. Q04 and later remain specified but pending.
