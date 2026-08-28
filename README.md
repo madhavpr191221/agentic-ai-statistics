@@ -158,11 +158,11 @@ These results are descriptive. Ten observations per scenario are not enough for 
 
 ## Phase 4 main result
 
-The completed balanced campaign used 90 fresh agent runs: three tickets, three hidden task structures, and ten randomized blocks. Recovery structure increased expected MCP calls by about 20.5% relative to sequential structure (HC3 95% interval: 16.7% to 24.4%; Holm-adjusted $p=4.52\times10^{-30}$). Branching showed no detectable call-count difference.
+The completed balanced campaign used 90 fresh agent runs: three tickets, three hidden task structures, and ten repetitions of every combination. Recovery structure increased expected MCP calls by about 20.5% relative to sequential structure. The 95% confidence interval ranged from 16.7% to 24.4%. Branching showed no detectable call-count difference.
 
 Overall success was 85/90. All five failures occurred in the orders recovery condition and shared the same path-dependent mistake: the agent retried escalation without rereading a runbook after the task state changed. This is why the study records ordered traces rather than only final answers.
 
-See [`docs/results/phase4_task_structure_main_results.md`](docs/results/phase4_task_structure_main_results.md) for the design, model, secondary outcomes, trace variability, limitations, and artifact checksums.
+See [`docs/results/phase4_task_structure_results.md`](docs/results/phase4_task_structure_results.md) for the pilot, main result, statistical explanations, trace variability, limitations, and artifact checksums.
 
 ## Run the workbench
 
@@ -300,8 +300,7 @@ Automated agent tests use a deterministic credit-free path. Browser tests do not
 - [`docs/phase3_it_incident_agent.md`](docs/phase3_it_incident_agent.md) — frozen Phase 3 protocol and measurement boundary.
 - [`docs/phase4_task_structure.md`](docs/phase4_task_structure.md) — plain-language Phase 4 methods, commands, and interpretation.
 - [`docs/planning/phase4_task_structure_plan.md`](docs/planning/phase4_task_structure_plan.md) — frozen concrete-task design and statistical plan.
-- [`docs/results/phase4_task_structure_pilot_results.md`](docs/results/phase4_task_structure_pilot_results.md) — corrected 27-run pilot, invalid-v1 audit, and frozen main-study model rule.
-- [`docs/results/phase4_task_structure_main_results.md`](docs/results/phase4_task_structure_main_results.md) — completed 90-run main result, reliability audit, and reproducibility record.
+- [`docs/results/phase4_task_structure_results.md`](docs/results/phase4_task_structure_results.md) — the single Phase 4 pilot and main result, with unfamiliar statistical terms explained in place.
 - [`docs/results/phase3_incident_pilot_results.md`](docs/results/phase3_incident_pilot_results.md) — corrected pilot results and invalid-pilot audit.
 - [`docs/phase2_statistical_baseline.md`](docs/phase2_statistical_baseline.md) — controlled factorial design and models.
 - [`docs/results/phase2_baseline_results.md`](docs/results/phase2_baseline_results.md) — completed 960-run Phase 2 result memo.

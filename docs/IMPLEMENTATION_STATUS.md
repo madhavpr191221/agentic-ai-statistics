@@ -20,7 +20,7 @@ The phase branch is preserved for inspection. `main` remains unchanged until an 
 - A React **Behavior study** surface that distinguishes scripted validation from live measurement.
 - Dedicated run, call, action, trace, transition, CSV, Parquet, API, and campaign artifacts.
 
-The implementation, credit-free validation, three live smoke runs, corrected 27-run pilot, and separate 90-run main campaign are complete. Recovery structure increased expected MCP calls by about 20.5% relative to sequential structure; branching showed no detectable call-count difference. All five failures occurred in the orders recovery condition and exposed one repeatable path-dependent mistake. The full result is documented in [`results/phase4_task_structure_main_results.md`](results/phase4_task_structure_main_results.md).
+The implementation, credit-free validation, three live smoke runs, corrected 27-run pilot, and separate 90-run main campaign are complete. Recovery structure increased expected MCP calls by about 20.5% relative to sequential structure; branching showed no detectable call-count difference. All five failures occurred in the orders recovery condition and exposed one repeatable path-dependent mistake. The full pilot and main result are consolidated in [`results/phase4_task_structure_results.md`](results/phase4_task_structure_results.md).
 
 ## Project objective
 
