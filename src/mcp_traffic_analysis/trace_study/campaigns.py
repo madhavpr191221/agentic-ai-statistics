@@ -67,6 +67,28 @@ def _write_tables(directory: Path, tables: dict[str, pd.DataFrame]) -> None:
         frame.to_parquet(table_directory / f"{name}.parquet", index=False)
 
 
+def _write_scalar_artifacts(directory: Path, analysis: dict[str, Any]) -> None:
+    """Write the Phase 8 scalar baseline as explicit, downloadable artifacts."""
+    _write_json(directory / "q01_data_dictionary.json", {
+        "schema_version": "8.0.0",
+        "campaign_id": analysis["campaign_id"],
+        "n_runs": analysis["n_runs"],
+        "variables": analysis["scalar_data_dictionary"],
+    })
+    _write_json(directory / "q02_scalar_distributions.json", {
+        "schema_version": "8.0.0",
+        "campaign_id": analysis["campaign_id"],
+        "n_runs": analysis["n_runs"],
+        "distributions": analysis["scalar_distributions"],
+    })
+    _write_json(directory / "q03_batch_stability.json", {
+        "schema_version": "8.0.0",
+        "campaign_id": analysis["campaign_id"],
+        "n_runs": analysis["n_runs"],
+        "batches": analysis["batch_summaries"],
+    })
+
+
 def frozen_configuration() -> dict[str, Any]:
     scenario_definition = SCENARIOS[FOCUSED_SCENARIO].model_dump(mode="json")
     for field in (
@@ -247,6 +269,7 @@ def analyze_collected_campaign(campaign_directory: Path) -> dict[str, Any]:
     )
     _write_json(campaign_directory / "analysis.json", analysis)
     _write_tables(campaign_directory, tables)
+    _write_scalar_artifacts(campaign_directory, analysis)
     return analysis
 
 
@@ -283,6 +306,7 @@ def reanalyze_phase4(
     _write_json(campaign_directory / "campaign_manifest.json", manifest)
     _write_json(campaign_directory / "analysis.json", analysis)
     _write_tables(campaign_directory, tables)
+    _write_scalar_artifacts(campaign_directory, analysis)
     return campaign_directory
 
 

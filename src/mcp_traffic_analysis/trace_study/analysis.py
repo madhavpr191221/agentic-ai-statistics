@@ -189,6 +189,77 @@ def _numeric_summary(rows: list[dict[str, Any]], field: str) -> dict[str, Any]:
     }
 
 
+def _scalar_definition(
+    field: str, label: str, value_type: str, unit: str, status: str
+) -> dict[str, str]:
+    return {"field": field, "label": label, "type": value_type, "unit": unit, "status": status}
+
+
+SCALAR_FIELD_DEFINITIONS: tuple[dict[str, str], ...] = (
+    _scalar_definition("mcp_call_count", "MCP call count", "count", "calls", "measured"),
+    _scalar_definition("model_call_count", "Model call count", "count", "calls", "measured"),
+    _scalar_definition("total_latency_ms", "Total latency", "continuous", "ms", "measured"),
+    _scalar_definition("model_latency_ms", "Model latency", "continuous", "ms", "measured"),
+    _scalar_definition("mcp_latency_ms", "MCP latency", "continuous", "ms", "measured"),
+    _scalar_definition(
+        "orchestration_latency_ms", "Orchestration latency", "continuous", "ms", "measured"
+    ),
+    _scalar_definition("total_tokens", "Total tokens", "count", "tokens", "measured"),
+    _scalar_definition(
+        "request_frame_bytes", "Request frame bytes", "count", "bytes", "measured_local_stdio"
+    ),
+    _scalar_definition(
+        "response_frame_bytes", "Response frame bytes", "count", "bytes", "measured_local_stdio"
+    ),
+    _scalar_definition("estimated_cost_usd", "Estimated cost", "continuous", "USD", "derived"),
+    _scalar_definition("task_success", "Task success", "binary", "proportion", "measured_outcome"),
+)
+
+
+def _scalar_summary(rows: list[dict[str, Any]], definition: dict[str, str]) -> dict[str, Any]:
+    field = definition["field"]
+    values = [float(row[field]) for row in rows if row.get(field) is not None]
+    numeric = _numeric_summary(rows, field)
+    mean = sum(values) / len(values) if values else None
+    variance = (
+        sum((value - mean) ** 2 for value in values) / (len(values) - 1)
+        if mean is not None and len(values) > 1
+        else None
+    )
+    ordered = sorted(values)
+    empirical = [
+        {"value": value, "probability": index / len(ordered)}
+        for index, value in enumerate(ordered, start=1)
+    ]
+    result: dict[str, Any] = {
+        **definition,
+        "n": len(values),
+        "missing": len(rows) - len(values),
+        "mean": mean,
+        "sample_sd": math.sqrt(variance) if variance is not None else None,
+        "empirical_cdf": empirical,
+    }
+    result.update(numeric)
+    if field == "task_success":
+        successes = sum(bool(row[field]) for row in rows if row.get(field) is not None)
+        result["successes"] = successes
+        result["failures"] = len(values) - successes
+        result["proportion"] = successes / len(values) if values else None
+    return result
+
+
+def scalar_distributions(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Return auditable scalar run-level distributions before path analysis."""
+    return [_scalar_summary(rows, definition) for definition in SCALAR_FIELD_DEFINITIONS]
+
+
+def scalar_data_dictionary() -> list[dict[str, str]]:
+    return [
+        dict(definition, level="scalar run variable")
+        for definition in SCALAR_FIELD_DEFINITIONS
+    ]
+
+
 def _pearson(values: list[float], other: list[float]) -> float | None:
     if len(values) != len(other) or len(values) < 2:
         return None
@@ -417,6 +488,7 @@ def analyze_details(
             "exact_oracle_path": tools == behavior.oracle_sequence,
             "post_rejection_behavior": post_behavior,
             "total_latency_ms": detail.measurement.total_latency_ms,
+            "model_call_count": detail.measurement.model_call_count,
             "model_latency_ms": detail.measurement.model_latency_ms,
             "mcp_latency_ms": detail.measurement.mcp_latency_ms,
             "server_handler_latency_ms": detail.measurement.server_handler_latency_ms,
@@ -566,6 +638,12 @@ def analyze_details(
                 / len(group),
                 "mean_mcp_calls": sum(int(row["mcp_call_count"]) for row in group)
                 / len(group),
+                "mean_total_latency_ms": sum(float(row["total_latency_ms"]) for row in group)
+                / len(group),
+                "mean_total_tokens": sum(float(row["total_tokens"]) for row in group)
+                / len(group),
+                "mean_estimated_cost_usd": sum(float(row["estimated_cost_usd"]) for row in group)
+                / len(group),
             }
         )
 
@@ -590,6 +668,8 @@ def analyze_details(
         "created_at_utc": datetime.now(UTC).isoformat(),
         "experimental_unit": "one fresh agent run and MCP session",
         "n_runs": len(run_rows),
+        "scalar_data_dictionary": scalar_data_dictionary(),
+        "scalar_distributions": scalar_distributions(run_rows),
         "focused_condition": {
             "scenario_id": FOCUSED_SCENARIO,
             "task_structure": FOCUSED_STRUCTURE,
@@ -633,6 +713,14 @@ def analyze_details(
     }
     return analysis, {
         "runs": pd.DataFrame(run_rows),
+        "q01_data_dictionary": pd.DataFrame(scalar_data_dictionary()),
+        "q02_scalar_distributions": pd.DataFrame(
+            [
+                {key: value for key, value in summary.items() if key != "empirical_cdf"}
+                for summary in scalar_distributions(run_rows)
+            ]
+        ),
+        "q03_batch_stability": pd.DataFrame(batch_summaries),
         "traces": pd.DataFrame(trace_rows),
         "paths": pd.DataFrame(path_rows),
         "transitions": pd.DataFrame(transition_rows),

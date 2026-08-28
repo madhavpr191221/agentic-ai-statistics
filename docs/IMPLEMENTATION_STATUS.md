@@ -2,7 +2,7 @@
 
 Status date: **2026-08-28**
 
-Release version: **0.6.0**
+Release version: **0.8.0**
 
 Permanent branches: **`demo`** and **`main`**
 
@@ -47,6 +47,10 @@ Phase 6A reuses the completed Phase 5B artifacts without model calls. It adds pa
 The [Phase 6A statistical analysis roadmap](planning/phase6_statistical_analysis_roadmap.md) documents the small-question learning sequence and interpretation rules.
 
 The specification-driven statistical program is documented in `docs/specs/`: an authoritative specification, question registry, data dictionary, and traceability matrix. These documentation artifacts do not require new model calls.
+
+### Phase 8 scalar statistical baseline
+
+Phase 8 implements Q01–Q03 from the specification using only the saved Phase 5 campaign. It adds run-level scalar distributions, an explicit scalar data dictionary, batch-stability summaries, downloadable JSON/CSV artifacts, a read-only artifact route, and a Scalar Baseline section in the React workbench. Q04 and later remain specified but pending.
 
 ## Measurement boundary
 

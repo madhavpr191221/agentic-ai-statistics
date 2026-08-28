@@ -73,6 +73,11 @@ TraceStudyTable = Literal[
     "path_concentration.csv",
     "path_concentration.parquet",
 ]
+TraceStudyArtifact = Literal[
+    "q01_data_dictionary.json",
+    "q02_scalar_distributions.json",
+    "q03_batch_stability.json",
+]
 
 
 def _campaign_table(root: Path, campaign_id: str, table_name: str) -> Path:
@@ -102,7 +107,7 @@ def create_app(
     agent_available = bool(os.getenv("OPENAI_API_KEY") or Path(".env").is_file())
     api = FastAPI(
         title="MCP Traffic Analysis",
-        version="0.7.0",
+        version="0.8.0",
         description="Local API for measured IT-incident agent experiments.",
     )
     api.state.incident_repository = incident_repository
@@ -202,6 +207,20 @@ def create_app(
     ) -> FileResponse:
         path = _campaign_table(trace_study_repository.root, campaign_id, table_name)
         return FileResponse(path, filename=table_name)
+
+    @api.get("/api/trace-study/campaigns/{campaign_id}/artifacts/{artifact_name}")
+    async def trace_study_artifact(
+        campaign_id: str, artifact_name: TraceStudyArtifact
+    ) -> FileResponse:
+        if not campaign_id or any(character in campaign_id for character in "/\\.."):
+            raise HTTPException(status_code=404, detail="campaign not found")
+        campaign_directory = (trace_study_repository.root / f"campaign-{campaign_id}").resolve()
+        if campaign_directory.parent != trace_study_repository.root.resolve():
+            raise HTTPException(status_code=404, detail="campaign not found")
+        path = campaign_directory / artifact_name
+        if not path.is_file():
+            raise HTTPException(status_code=404, detail="campaign artifact not found")
+        return FileResponse(path, filename=artifact_name)
 
     @api.get("/api/agent/scenarios")
     async def agent_scenarios() -> list[dict[str, object]]:
