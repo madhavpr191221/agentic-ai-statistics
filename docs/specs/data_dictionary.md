@@ -31,6 +31,20 @@ The primary unit is one fresh agent run. Action and MCP-call records are nested 
 | `excess_mcp_calls` | discrete count or undefined | successful run | Calls minus oracle length | derived |
 | `source_state` / `target_state` | categorical | nested event | Adjacent states in a run | derived nested measurement |
 
+## Random-object level
+
+The `Statistical type` column describes each field's values. The following level tells us which random object it belongs to:
+
+| Level | Examples | How it is used first |
+|---|---|---|
+| Scalar run variable | `mcp_call_count`, `total_latency_ms`, `total_tokens`, `estimated_cost_usd`, `task_success` | Estimate ordinary distributions and group summaries |
+| Run-level random vector | all scalar outcomes for one `run_id` | Preserve relationships among outcomes without changing the unit |
+| Random finite sequence | `tool_sequence`, `state_sequence` | Estimate path frequencies, lengths, divergence, and variability |
+| Timed marked event sequence | nested MCP events with timestamps, outcomes, bytes, and latency | Study ordering and event timing; events remain nested in the run |
+| Derived scalar functional | `excess_mcp_calls`, `repeated_tool_count`, `normalized_oracle_distance` | Summarize a path after the primary scalar/path objects are defined |
+
+The analysis begins with the scalar run variables. Sequence-level analysis adds information rather than replacing those basic distributions.
+
 ## Scope limitations
 
 The current recorder does not provide per-tool latency or per-tool bytes. It also does not measure HTTP, TLS, TCP, IP, queue waiting, utilization, or Internet RTT.

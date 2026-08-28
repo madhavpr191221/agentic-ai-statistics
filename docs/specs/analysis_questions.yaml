@@ -3,6 +3,19 @@ dataset: phase5b-main-v2
 planned_valid_runs: 100
 credit_required: false
 unit: run
+foundations:
+  - id: F01
+    principle: Scalar run-level random variables come first.
+    acceptance: [call count, latency, tokens, cost, and success have distributions before path models are used]
+  - id: F02
+    principle: A trajectory has random finite length.
+    acceptance: [path probability includes length or an explicit terminal state]
+  - id: F03
+    principle: An empirical path distribution is not automatically a Markov model.
+    acceptance: [transition frequencies are labeled descriptive unless a Markov assumption is separately justified]
+  - id: F04
+    principle: Scalar outcomes are functionals or projections of a run and its trajectory.
+    acceptance: [sequence-level analysis supplements rather than replaces scalar summaries]
 questions:
   - id: Q01
     question: What is one observation?

@@ -12,6 +12,58 @@ This project studies variation across repeated agent executions. Statistical ana
 
 The primary experimental unit is one fresh agent run. Tool calls and actions are nested observations inside a run; they are not independent experimental replicates.
 
+## Foundational random objects
+
+We start with ordinary scalar random variables. They are the simplest statistical objects and the first analyses to perform. For run $r$, examples are
+
+$$
+N_r=\text{MCP call count},\quad L_r=\text{total latency},\quad T_r=\text{token count},\quad C_r=\text{estimated cost},
+$$
+
+and
+
+$$
+Y_r=\begin{cases}1,&\text{success},\\0,&\text{failure}.\end{cases}
+$$
+
+Formally, a scalar variable is a mapping from an experimental outcome to a number (or, for $Y_r$, to one of two values). Its distribution answers basic questions such as $E[N]$, $P(Y=1)$, or the empirical distribution of $L$. These scalar distributions are not secondary: they are the first and most interpretable results.
+
+We can collect several scalar variables into a random vector,
+
+$$
+V_r=(N_r,L_r,T_r,C_r,Y_r).
+$$
+
+The richer object is the ordered execution trajectory,
+
+$$
+\mathbf X_r=(X_{r1},\ldots,X_{rN_r}),
+$$
+
+where $N_r$ is itself random and each $X_{rt}$ is an observable action/state. If the observable alphabet is $\mathcal A$, the variable-length trajectory space is
+
+$$
+\mathcal X=\bigcup_{n\geq 1}\mathcal A^n.
+$$
+
+For a variable-length path, its probability includes its length (or an explicit terminal `END` state):
+
+$$
+P(\mathbf X=x,N=n)=P(N=n)P(X_1=x_1\mid N=n)\prod_{t=2}^{n}P(X_t=x_t\mid X_1=x_1,\ldots,X_{t-1}=x_{t-1},N=n).
+$$
+
+This chain rule is always valid; it does not assume a Markov process. A first-order Markov model would make the additional, testable simplification $P(X_{t+1}\mid X_1,\ldots,X_t)=P(X_{t+1}\mid X_t)$.
+
+Events also occur at measured times. A run can therefore be represented as the finite marked event sequence
+
+$$
+\{(T_{ri},M_{ri})\}_{i=1}^{N_r},
+$$
+
+where $T_{ri}$ is event time and $M_{ri}$ contains marks such as tool, outcome, latency, and bytes. A continuous-time trajectory is a useful mathematical analogy—$X(\cdot)\in C([0,T],\mathbb R^d)$—but it is not what the current MCP recorder measures.
+
+Scalar outcomes are projections or functionals of the richer run object: for example, $N_r=g_N(\mathbf X_r)$ and $Y_r=g_Y(\mathbf X_r,\text{observed environment})$. We therefore analyze scalars first, then paths, without treating nested actions as independent runs.
+
 ## Statistical objects
 
 For run $r=1,\ldots,R$, define:
