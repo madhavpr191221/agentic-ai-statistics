@@ -18,7 +18,7 @@ Phase 4 therefore studies a distribution of agent traces rather than treating on
 
 The corrected 27-run pilot and separate 90-run main campaign are complete. In the main study, recovery structure increased expected MCP calls by about 20.5% relative to sequential structure. Branching did not show a detectable call-count difference. Overall success was 85/90, with all five failures concentrated in the orders recovery condition.
 
-The complete statistical interpretation and reproducibility record are in [`results/phase4_task_structure_main_results.md`](results/phase4_task_structure_main_results.md).
+The pilot, main result, plain-language statistical interpretation, and reproducibility record are consolidated in [`results/phase4_task_structure_results.md`](results/phase4_task_structure_results.md).
 
 ## The three tickets
 
