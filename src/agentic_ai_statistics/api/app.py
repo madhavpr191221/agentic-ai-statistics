@@ -51,6 +51,10 @@ BehaviorTable = Literal[
     "model_calls.csv",
     "model_calls.parquet",
 ]
+BehaviorArtifact = Literal[
+    "q04_workload_by_condition.json",
+    "q04_count_model.json",
+]
 TraceStudyTable = Literal[
     "runs.csv",
     "runs.parquet",
@@ -125,7 +129,7 @@ def create_app(
     async def health() -> dict[str, object]:
         return {
             "status": "ok",
-            "phase": "5",
+            "phase": "10",
             "measurement_boundary": "agent_model_and_stdio_mcp",
             "agent_available": agent_available,
         }
@@ -189,6 +193,20 @@ def create_app(
     ) -> FileResponse:
         path = _campaign_table(behavior_repository.root, campaign_id, table_name)
         return FileResponse(path, filename=table_name)
+
+    @api.get("/api/behavior/campaigns/{campaign_id}/artifacts/{artifact_name}")
+    async def behavior_campaign_artifact(
+        campaign_id: str, artifact_name: BehaviorArtifact
+    ) -> FileResponse:
+        if not campaign_id or any(character in campaign_id for character in "/\\.."):
+            raise HTTPException(status_code=404, detail="campaign not found")
+        campaign_directory = (behavior_repository.root / f"campaign-{campaign_id}").resolve()
+        if campaign_directory.parent != behavior_repository.root.resolve():
+            raise HTTPException(status_code=404, detail="campaign not found")
+        path = campaign_directory / artifact_name
+        if not path.is_file():
+            raise HTTPException(status_code=404, detail="campaign artifact not found")
+        return FileResponse(path, filename=artifact_name)
 
     @api.get("/api/trace-study/campaigns")
     async def list_trace_study_campaigns() -> list[dict[str, object]]:

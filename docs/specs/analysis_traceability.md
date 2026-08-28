@@ -16,7 +16,7 @@ This matrix is the review checklist for the specification. A question is complet
 | Q01 | Run and variable definitions | data dictionary and `q01_data_dictionary.json` | Scalar baseline | schema/range reconciliation |
 | Q02 | Run-level distributions | `q02_scalar_distributions.json` and CSV | Scalar baseline | aggregate totals and summary tests |
 | Q03 | Batch stability | `q03_batch_stability.json` and CSV | Batch stability | batch-manifest test |
-| Q04 | Workload by condition | condition summaries | behavior study | count-model checks |
+| Q04 | Workload by condition | Q04 workload summaries and count model | workload analysis | count-model and dispersion checks |
 | Q05 | Calls and runtime | latency association table | runtime section | correlation/regression test |
 | Q06 | Runtime components | latency components | where-runtime-goes section | decomposition accounting |
 | Q07 | Tokens and cost | token/cost summaries | performance section | unit and missing-value tests |

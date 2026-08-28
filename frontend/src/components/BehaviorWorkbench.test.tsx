@@ -34,3 +34,25 @@ test('grounds the behavior study in a concrete ticket and labels scripted data',
   expect(screen.getByText('Five-call oracle')).toBeInTheDocument()
   expect(screen.getAllByText('Unavailable', { selector: 'strong' })).toHaveLength(2)
 })
+
+test('shows the Q04 workload comparison from saved campaign data', async () => {
+  vi.mocked(api.listBehaviorConditions).mockResolvedValue([])
+  vi.mocked(api.listBehaviorRuns).mockResolvedValue([])
+  vi.mocked(api.listBehaviorCampaigns).mockResolvedValue([{
+    campaign_id: 'task-structure-main-v1', study_stage: 'main',
+    experimental_unit: 'one fresh agent run and MCP session', n_runs: 90,
+    primary_outcome: 'mcp_call_count', condition_summaries: [],
+    workload_by_structure: [
+      { task_structure: 'sequential', n_runs: 30, successes: 30, success_rate: 1,
+        mcp_call_count: { mean: 8.13, median: 8, q1: 8, q3: 8, minimum: 7, maximum: 10 },
+        model_call_count: { mean: 9, median: 9, q1: 8, q3: 10, minimum: 7, maximum: 11 },
+        total_latency_ms: { mean: 16000, median: 16000, q1: 14000, q3: 18000, minimum: 10000, maximum: 22000 },
+        total_tokens: { mean: 7500, median: 7500, q1: 7000, q3: 8000, minimum: 6000, maximum: 9000 },
+        estimated_cost_usd: { mean: 0.02, median: 0.02, q1: 0.01, q3: 0.03, minimum: 0.01, maximum: 0.04 } },
+    ],
+  }])
+  render(<BehaviorWorkbench />)
+  await waitFor(() => expect(screen.getByTestId('workload-analysis')).toBeInTheDocument())
+  expect(screen.getByText('Does task structure change agent workload?')).toBeInTheDocument()
+  expect(screen.getByText('Download workload summaries')).toBeInTheDocument()
+})

@@ -51,7 +51,7 @@ questions:
     estimand: conditional expected call count and ratios
     method: [group_summary, count_regression_if_justified]
     uncertainty: robust_interval_if_model_fitted
-    outputs: [q04_workload_by_condition.csv]
+    outputs: [q04_workload_by_condition.json, q04_workload_by_condition.csv, q04_count_model.json, q04_distribution_data.csv]
     acceptance: [run-level unit preserved, dispersion checked before model choice]
   - id: Q05
     question: Do more MCP calls associate with longer runtime?
