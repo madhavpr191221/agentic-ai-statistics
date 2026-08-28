@@ -68,24 +68,39 @@ def _write_tables(directory: Path, tables: dict[str, pd.DataFrame]) -> None:
 
 
 def _write_scalar_artifacts(directory: Path, analysis: dict[str, Any]) -> None:
-    """Write the Phase 8 scalar baseline as explicit, downloadable artifacts."""
+    """Write auditable scalar artifacts with their statistical contracts."""
     _write_json(directory / "q01_data_dictionary.json", {
-        "schema_version": "8.0.0",
+        "schema_version": "12.0.0",
+        "question_id": "Q01",
         "campaign_id": analysis["campaign_id"],
+        "unit": "run",
+        "measurement_status": "measured_metadata",
         "n_runs": analysis["n_runs"],
         "variables": analysis["scalar_data_dictionary"],
     })
     _write_json(directory / "q02_scalar_distributions.json", {
-        "schema_version": "8.0.0",
+        "schema_version": "12.0.0",
+        "question_id": "Q02",
         "campaign_id": analysis["campaign_id"],
+        "unit": "run",
+        "estimand": "marginal empirical distributions of run-level scalar outcomes",
+        "method": "summary statistics, empirical CDF, and reproducible bootstrap intervals",
+        "uncertainty": "percentile bootstrap for means and medians; Wilson interval for success",
         "n_runs": analysis["n_runs"],
         "distributions": analysis["scalar_distributions"],
+        "limitations": ["Results describe repeated runs under this campaign configuration."],
     })
     _write_json(directory / "q03_batch_stability.json", {
-        "schema_version": "8.0.0",
+        "schema_version": "12.0.0",
+        "question_id": "Q03",
         "campaign_id": analysis["campaign_id"],
+        "unit": "run",
+        "estimand": "descriptive outcome summaries by acquisition batch",
+        "method": "ordered batch table with Wilson intervals for proportions",
+        "uncertainty": "descriptive intervals; no time-series model",
         "n_runs": analysis["n_runs"],
         "batches": analysis["batch_summaries"],
+        "limitations": ["Batch comparisons diagnose possible drift but do not prove it."],
     })
 
 

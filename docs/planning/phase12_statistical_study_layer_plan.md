@@ -1,6 +1,6 @@
 # Phase 12: Statistical Study Layer
 
-Status: implemented as a specification phase; no new model calls
+Status: Phase 12A specification complete; Phase 12B scalar implementation in progress; no new model calls
 
 ## Purpose
 
@@ -56,4 +56,4 @@ flowchart LR
 
 ## Later implementation stages
 
-Phase 12A (this phase) defines the contracts. Phase 12B implements saved-data scalar analyses, Phase 12C implements trajectory analyses, and Phase 12D designs a small randomized intervention. A stochastic-process model is deferred until path-dependence diagnostics justify one.
+Phase 12A defined the contracts. Phase 12B implements saved-data scalar analyses, Phase 12C implements trajectory analyses, and Phase 12D designs a small randomized intervention. A stochastic-process model is deferred until path-dependence diagnostics justify one.

@@ -23,6 +23,7 @@ from agentic_ai_statistics.incidents.world import oracle_sequence
 from agentic_ai_statistics.trace_study.analysis import (
     analyze_details,
     bootstrap_entropy_interval,
+    bootstrap_interval,
     first_oracle_divergence,
     fisher_exact_two_sided,
     plugin_entropy,
@@ -485,3 +486,16 @@ def test_scalar_distributions_preserve_run_level_unit() -> None:
     assert calls["mean"] == 3.0
     assert success["successes"] == 1
     assert success["failures"] == 1
+
+
+def test_scalar_bootstrap_intervals_are_reproducible_and_bounded() -> None:
+    values = [1.0, 2.0, 4.0, 8.0]
+    first = bootstrap_interval(values, "mean", repetitions=200, seed=7)
+    second = bootstrap_interval(values, "mean", repetitions=200, seed=7)
+    assert first == second
+    assert first is not None
+    assert first[0] <= sum(values) / len(values) <= first[1]
+
+
+def test_scalar_bootstrap_handles_single_observation() -> None:
+    assert bootstrap_interval([3.5], "median") == [3.5, 3.5]

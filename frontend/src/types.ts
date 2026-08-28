@@ -228,9 +228,12 @@ export interface TraceStudyAnalysis {
     q1: number | null
     q3: number | null
     sample_sd: number | null
+    mean_bootstrap_95: [number, number] | null
+    median_bootstrap_95: [number, number] | null
     minimum: number | null
     maximum: number | null
     proportion?: number | null
+    proportion_wilson_95?: [number, number] | null
     successes?: number
     failures?: number
     empirical_cdf: Array<{ value: number; probability: number }>
@@ -317,11 +320,19 @@ export interface TraceStudyAnalysis {
   batch_summaries: Array<{
     batch: number
     n_runs: number
+    successes?: number
+    failures?: number
     success_rate: number
+    success_rate_wilson_95?: [number, number] | null
+    runbook_first?: number
     read_runbook_first_rate: number
+    read_runbook_first_rate_wilson_95?: [number, number] | null
     mean_mcp_calls: number
+    median_mcp_calls?: number | null
     mean_total_latency_ms?: number
+    median_total_latency_ms?: number | null
     mean_total_tokens?: number
+    median_total_tokens?: number | null
     mean_estimated_cost_usd?: number
   }>
   prefix_outcomes?: Array<{

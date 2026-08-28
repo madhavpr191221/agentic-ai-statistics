@@ -57,6 +57,11 @@ analyzed first, followed by variable-length trajectory distributions and only
 then any stochastic-process model. See `docs/specs/analysis_contracts.md` and
 `docs/planning/phase12_statistical_study_layer_plan.md`.
 
+Phase 12B adds reproducible bootstrap intervals for scalar means and medians,
+Wilson intervals for success proportions, richer per-batch summaries, and
+explicit Q01–Q03 artifact contracts. It reuses saved Phase 5 data and makes no
+new model calls.
+
 ### Phase 8 scalar statistical baseline
 
 Phase 8 implements Q01–Q03 from the specification using only the saved Phase 5 campaign. It adds run-level scalar distributions, an explicit scalar data dictionary, batch-stability summaries, downloadable JSON/CSV artifacts, a read-only artifact route, and a Scalar Baseline section in the React workbench. Q04 and later remain specified but pending.

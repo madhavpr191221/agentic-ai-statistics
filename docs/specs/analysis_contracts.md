@@ -43,7 +43,7 @@ $$
 N_r,\quad L_r,\quad T_r,\quad C_r,\quad Y_r.
 $$
 
-Required summaries include valid count, missing count, mean, median, spread, quantiles, and an empirical distribution. A scalar result describes repeated runs under the recorded setup; it is not a claim about all agents.
+Required summaries include valid count, missing count, mean, median, spread, quantiles, an empirical distribution, and a documented uncertainty interval where estimable. Scalar means and medians use a fixed-seed percentile bootstrap; binary success uses a Wilson interval. A scalar result describes repeated runs under the recorded setup; it is not a claim about all agents.
 
 ### Controlled comparisons (Q04)
 

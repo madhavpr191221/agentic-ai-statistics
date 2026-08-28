@@ -12,6 +12,11 @@ function interval(value: [number, number] | null) {
   return value === null ? 'Not estimable' : `${percentage(value[0])} to ${percentage(value[1])}`
 }
 
+function numericInterval(field: string, value: [number, number] | null | undefined) {
+  if (value === null || value === undefined) return 'Not estimable'
+  return `${scalarValue(field, value[0])} to ${scalarValue(field, value[1])}`
+}
+
 function shortState(value: string) {
   return value.replace('|', ' · ').replaceAll('_', ' ')
 }
@@ -94,8 +99,8 @@ export function TraceDynamicsWorkbench() {
       {campaign.scalar_distributions?.length ? <section className="panel" data-testid="scalar-baseline">
         <p className="eyebrow">Phase 8 · scalar baseline</p>
         <h2>Start with one run and its basic measurements</h2>
-        <p>Each fresh run is one observation. These summaries describe the distributions of scalar outcomes before we study complete execution paths.</p>
-        <div className="table-scroll"><table className="data-table"><thead><tr><th>Measure</th><th>Type</th><th>Unit</th><th>n</th><th>Missing</th><th>Mean</th><th>Median</th><th>Q1–Q3</th><th>Range</th></tr></thead><tbody>{campaign.scalar_distributions.map((row) => <tr key={row.field}><td>{row.label}</td><td>{row.type}</td><td>{row.unit}</td><td>{row.n}</td><td>{row.missing}</td><td>{scalarValue(row.field, row.mean)}</td><td>{scalarValue(row.field, row.median)}</td><td>{scalarValue(row.field, row.q1)}–{scalarValue(row.field, row.q3)}</td><td>{scalarValue(row.field, row.minimum)}–{scalarValue(row.field, row.maximum)}</td></tr>)}</tbody></table></div>
+        <p>Each fresh run is one observation. These summaries describe the distributions of scalar outcomes before we study complete execution paths. Intervals show sampling uncertainty within this campaign; they are not guarantees about all agents.</p>
+        <div className="table-scroll"><table className="data-table"><thead><tr><th>Measure</th><th>Type</th><th>Unit</th><th>n</th><th>Missing</th><th>Mean</th><th>Mean 95% interval</th><th>Median</th><th>Q1–Q3</th><th>Range</th></tr></thead><tbody>{campaign.scalar_distributions.map((row) => <tr key={row.field}><td>{row.label}</td><td>{row.type}</td><td>{row.unit}</td><td>{row.n}</td><td>{row.missing}</td><td>{scalarValue(row.field, row.mean)}</td><td>{row.field === 'task_success' ? interval(row.proportion_wilson_95 ?? null) : numericInterval(row.field, row.mean_bootstrap_95)}</td><td>{scalarValue(row.field, row.median)}</td><td>{scalarValue(row.field, row.q1)}–{scalarValue(row.field, row.q3)}</td><td>{scalarValue(row.field, row.minimum)}–{scalarValue(row.field, row.maximum)}</td></tr>)}</tbody></table></div>
         <div className="download-row"><a href={`/api/trace-study/campaigns/${campaign.campaign_id}/artifacts/q01_data_dictionary.json`}>Download data dictionary</a><a href={`/api/trace-study/campaigns/${campaign.campaign_id}/artifacts/q02_scalar_distributions.json`}>Download scalar distributions</a><a href={`/api/trace-study/campaigns/${campaign.campaign_id}/artifacts/q03_batch_stability.json`}>Download batch stability</a></div>
         <p className="method-note">Statuses are defined in the data dictionary. Local stdio frame bytes are measured application data, not network packets; estimated cost is derived.</p>
       </section> : null}
@@ -103,7 +108,7 @@ export function TraceDynamicsWorkbench() {
       {campaign.batch_summaries.length ? <section className="panel" data-testid="batch-stability">
         <p className="eyebrow">Q03 · stability diagnostic</p><h2>Do the repeated batches look stable?</h2>
         <p>These are descriptive comparisons across acquisition batches. They help us notice drift; they are not a time-series model.</p>
-        <div className="table-scroll"><table className="data-table"><thead><tr><th>Batch</th><th>Runs</th><th>Success rate</th><th>Runbook-first</th><th>Mean calls</th><th>Mean latency (ms)</th><th>Mean tokens</th></tr></thead><tbody>{campaign.batch_summaries.map((row) => <tr key={row.batch}><td>{row.batch}</td><td>{row.n_runs}</td><td>{percentage(row.success_rate)}</td><td>{percentage(row.read_runbook_first_rate)}</td><td>{measured(row.mean_mcp_calls)}</td><td>{measured(row.mean_total_latency_ms)}</td><td>{measured(row.mean_total_tokens, 0)}</td></tr>)}</tbody></table></div>
+        <div className="table-scroll"><table className="data-table"><thead><tr><th>Batch</th><th>Runs</th><th>Success rate</th><th>Success 95% interval</th><th>Runbook-first</th><th>Mean calls</th><th>Median calls</th><th>Mean latency (ms)</th><th>Median latency (ms)</th><th>Mean tokens</th></tr></thead><tbody>{campaign.batch_summaries.map((row) => <tr key={row.batch}><td>{row.batch}</td><td>{row.n_runs}</td><td>{percentage(row.success_rate)}</td><td>{interval(row.success_rate_wilson_95 ?? null)}</td><td>{percentage(row.read_runbook_first_rate)}</td><td>{measured(row.mean_mcp_calls)}</td><td>{measured(row.median_mcp_calls)}</td><td>{measured(row.mean_total_latency_ms)}</td><td>{measured(row.median_total_latency_ms)}</td><td>{measured(row.mean_total_tokens, 0)}</td></tr>)}</tbody></table></div>
       </section> : null}
 
       {campaign.campaign_complete === false ? <section className="panel campaign-warning" role="status">

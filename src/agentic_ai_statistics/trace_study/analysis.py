@@ -177,6 +177,40 @@ def _quantile(values: Sequence[float], probability: float) -> float | None:
     return ordered[lower] + (ordered[upper] - ordered[lower]) * (position - lower)
 
 
+def bootstrap_interval(
+    values: Sequence[float],
+    statistic: str,
+    *,
+    repetitions: int = 2000,
+    seed: int = 20260828,
+) -> list[float] | None:
+    """Return a reproducible percentile interval for a run-level statistic."""
+    if not values:
+        return None
+    if len(values) == 1:
+        value = float(values[0])
+        return [value, value]
+    randomizer = random.Random(seed)
+
+    def estimate(sample: Sequence[float]) -> float:
+        if statistic == "mean":
+            return sum(sample) / len(sample)
+        if statistic == "median":
+            median = _quantile(sample, 0.5)
+            assert median is not None
+            return median
+        raise ValueError(f"unsupported bootstrap statistic: {statistic}")
+
+    estimates = sorted(
+        estimate(randomizer.choices(list(values), k=len(values)))
+        for _ in range(repetitions)
+    )
+    return [
+        estimates[int(0.025 * (repetitions - 1))],
+        estimates[int(0.975 * (repetitions - 1))],
+    ]
+
+
 def _numeric_summary(rows: list[dict[str, Any]], field: str) -> dict[str, Any]:
     values = [float(row[field]) for row in rows if row[field] is not None]
     return {
@@ -237,6 +271,12 @@ def _scalar_summary(rows: list[dict[str, Any]], definition: dict[str, str]) -> d
         "missing": len(rows) - len(values),
         "mean": mean,
         "sample_sd": math.sqrt(variance) if variance is not None else None,
+        "mean_bootstrap_95": bootstrap_interval(
+            values, "mean", seed=20260828 + len(field)
+        ),
+        "median_bootstrap_95": bootstrap_interval(
+            values, "median", seed=20260928 + len(field)
+        ),
         "empirical_cdf": empirical,
     }
     result.update(numeric)
@@ -245,6 +285,7 @@ def _scalar_summary(rows: list[dict[str, Any]], definition: dict[str, str]) -> d
         result["successes"] = successes
         result["failures"] = len(values) - successes
         result["proportion"] = successes / len(values) if values else None
+        result["proportion_wilson_95"] = wilson_interval(successes, len(values))
     return result
 
 
@@ -627,21 +668,32 @@ def analyze_details(
     )
     for batch in batches:
         group = [row for row in focused_run_rows if row["batch"] == batch]
+        calls = [float(row["mcp_call_count"]) for row in group]
+        latencies = [float(row["total_latency_ms"]) for row in group]
+        tokens = [float(row["total_tokens"]) for row in group]
+        successes = sum(bool(row["task_success"]) for row in group)
+        runbook_first = sum(
+            row["post_rejection_behavior"] == "read_runbook_first" for row in group
+        )
         batch_summaries.append(
             {
                 "batch": batch,
                 "n_runs": len(group),
-                "success_rate": sum(bool(row["task_success"]) for row in group) / len(group),
-                "read_runbook_first_rate": sum(
-                    row["post_rejection_behavior"] == "read_runbook_first" for row in group
-                )
-                / len(group),
-                "mean_mcp_calls": sum(int(row["mcp_call_count"]) for row in group)
-                / len(group),
-                "mean_total_latency_ms": sum(float(row["total_latency_ms"]) for row in group)
-                / len(group),
-                "mean_total_tokens": sum(float(row["total_tokens"]) for row in group)
-                / len(group),
+                "successes": successes,
+                "failures": len(group) - successes,
+                "success_rate": successes / len(group),
+                "success_rate_wilson_95": wilson_interval(successes, len(group)),
+                "runbook_first": runbook_first,
+                "read_runbook_first_rate": runbook_first / len(group),
+                "read_runbook_first_rate_wilson_95": wilson_interval(
+                    runbook_first, len(group)
+                ),
+                "mean_mcp_calls": sum(calls) / len(calls),
+                "median_mcp_calls": _quantile(calls, 0.5),
+                "mean_total_latency_ms": sum(latencies) / len(latencies),
+                "median_total_latency_ms": _quantile(latencies, 0.5),
+                "mean_total_tokens": sum(tokens) / len(tokens),
+                "median_total_tokens": _quantile(tokens, 0.5),
                 "mean_estimated_cost_usd": sum(float(row["estimated_cost_usd"]) for row in group)
                 / len(group),
             }

@@ -76,6 +76,9 @@ Phase 12 defines the statistical study layer and reporting rules. Read the
 [analysis contracts](docs/specs/analysis_contracts.md) to see how each number
 maps to a question, estimand, data unit, uncertainty method, and limitation.
 
+Phase 12B adds uncertainty intervals to the scalar baseline and expands the
+batch-stability diagnostic, still using saved data only.
+
 For a complete explanation of every UI tab, number, chart, artifact, and measurement limitation, read the [UI guide](docs/UI_GUIDE.md).
 
 ## What crosses the measurement boundary?
