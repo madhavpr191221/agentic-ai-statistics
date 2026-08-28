@@ -187,7 +187,7 @@ Stage 5B is complete: all 100 scheduled run IDs have valid measurements, artifac
 ## Reproduce Stage 5A
 
 ```powershell
-uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.trace_study.campaigns reanalyze-phase4
+uv --cache-dir .uv-cache run --all-groups python -m agentic_ai_statistics.trace_study.campaigns reanalyze-phase4
 ```
 
 Generated tables are written below `artifacts/phase5/campaign-phase4-main-reanalysis-v1/`. They remain ignored by Git because they contain generated run-level artifacts.
@@ -197,7 +197,7 @@ Generated tables are written below `artifacts/phase5/campaign-phase4-main-reanal
 The completed campaign can be reanalysed without making a model call:
 
 ```powershell
-uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.trace_study.campaigns collect trace-orders-recovery-main-v2 --stage main --analyze-only
+uv --cache-dir .uv-cache run --all-groups python -m agentic_ai_statistics.trace_study.campaigns collect trace-orders-recovery-main-v2 --stage main --analyze-only
 ```
 
 ## Phase 6A: credit-free secondary analysis
@@ -213,7 +213,7 @@ The two observable post-rejection histories account for all 100 runs:
 | Read runbook first | 71 | 71 | 0 | 0% |
 | Retried first | 29 | 0 | 29 | 100% |
 
-The two empty categories—no expected rejection and no follow-up action—had zero observations. These are empirical prefix summaries, not a fitted stochastic model.
+The two empty categoriesâ€”no expected rejection and no follow-up actionâ€”had zero observations. These are empirical prefix summaries, not a fitted stochastic model.
 
 ### Tool usage
 

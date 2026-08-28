@@ -11,7 +11,7 @@ from typing import Any
 
 import pandas as pd  # type: ignore[import-untyped]
 
-from mcp_traffic_analysis.incidents.models import ActionRecord, IncidentRunDetail
+from agentic_ai_statistics.incidents.models import ActionRecord, IncidentRunDetail
 
 ACTION_TOOLS = frozenset(
     {"restart_service", "rollback_deployment", "escalate_incident"}

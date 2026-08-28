@@ -19,8 +19,8 @@ from dotenv import load_dotenv
 from openai import AsyncOpenAI
 from openai.types.shared import Reasoning
 
-from mcp_traffic_analysis.behavior.traces import classify_trace, normalized_oracle_distance
-from mcp_traffic_analysis.incidents.models import (
+from agentic_ai_statistics.behavior.traces import classify_trace, normalized_oracle_distance
+from agentic_ai_statistics.incidents.models import (
     ActionRecord,
     AgentEvent,
     BehaviorMetadata,
@@ -31,7 +31,7 @@ from mcp_traffic_analysis.incidents.models import (
     ModelCallMeasurement,
     TaskStructure,
 )
-from mcp_traffic_analysis.incidents.world import (
+from agentic_ai_statistics.incidents.world import (
     ACTION_TOOL,
     INCOMING_MESSAGES,
     SCENARIOS,
@@ -45,7 +45,7 @@ from mcp_traffic_analysis.incidents.world import (
     score,
     score_behavior,
 )
-from mcp_traffic_analysis.transport.models import FrameDirection, TransportFrame
+from agentic_ai_statistics.transport.models import FrameDirection, TransportFrame
 
 MODEL_ID = "gpt-5.6-sol"
 AGENT_INSTRUCTIONS = (
@@ -237,7 +237,7 @@ async def run_incident(
             )
         relay_args = [
             "-m",
-            "mcp_traffic_analysis.transport.stdio_relay",
+            "agentic_ai_statistics.transport.stdio_relay",
             "--python",
             sys.executable,
             "--run-id",
@@ -245,7 +245,7 @@ async def run_incident(
             "--frames",
             str(frames_path.resolve()),
             "--server-module",
-            "mcp_traffic_analysis.incidents.server",
+            "agentic_ai_statistics.incidents.server",
             "--server-arg=--state",
             f"--server-arg={state_path.resolve()}",
             "--server-arg=--events",

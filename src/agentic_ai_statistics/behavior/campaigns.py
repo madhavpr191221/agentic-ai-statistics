@@ -13,13 +13,13 @@ from uuid import NAMESPACE_URL, uuid5
 
 import pandas as pd  # type: ignore[import-untyped]
 
-from mcp_traffic_analysis.behavior.analysis import analyze_campaign
-from mcp_traffic_analysis.incidents.models import (
+from agentic_ai_statistics.behavior.analysis import analyze_campaign
+from agentic_ai_statistics.incidents.models import (
     IncidentRunDetail,
     IncidentScenario,
     TaskStructure,
 )
-from mcp_traffic_analysis.incidents.runner import MODEL_ID, run_incident
+from agentic_ai_statistics.incidents.runner import MODEL_ID, run_incident
 
 StudyStage = Literal["pilot", "main"]
 BLOCKS: dict[StudyStage, int] = {"pilot": 3, "main": 10}
@@ -42,7 +42,7 @@ def build_manifest(campaign_id: str, study_stage: StudyStage) -> dict[str, Any]:
             execution_order += 1
             run_id = uuid5(
                 NAMESPACE_URL,
-                f"mcp-traffic-analysis:{campaign_id}:{block}:{scenario.value}:{structure.value}",
+                f"agentic-ai-statistics:{campaign_id}:{block}:{scenario.value}:{structure.value}",
             )
             schedule.append(
                 {
@@ -147,7 +147,7 @@ async def run_campaign(
     for item in schedule:
         run_id = uuid5(
             NAMESPACE_URL,
-            f"mcp-traffic-analysis:{campaign_id}:{item['block']}:"
+            f"agentic-ai-statistics:{campaign_id}:{item['block']}:"
             f"{item['scenario_id']}:{item['task_structure']}",
         )
         detail_path = campaign_directory / f"incident-{run_id}" / "detail.json"

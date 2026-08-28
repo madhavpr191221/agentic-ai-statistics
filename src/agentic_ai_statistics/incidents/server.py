@@ -13,7 +13,7 @@ from typing import Any
 
 from fastmcp import FastMCP
 
-from mcp_traffic_analysis.incidents.world import apply_action, load_state, observe, save_state
+from agentic_ai_statistics.incidents.world import apply_action, load_state, observe, save_state
 
 
 def _append(path: Path, value: dict[str, Any]) -> None:

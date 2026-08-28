@@ -8,17 +8,17 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from mcp_traffic_analysis.api.app import create_app
-from mcp_traffic_analysis.behavior.analysis import fit_count_models, fit_success_model
-from mcp_traffic_analysis.behavior.campaigns import build_manifest, run_campaign
-from mcp_traffic_analysis.behavior.traces import (
+from agentic_ai_statistics.api.app import create_app
+from agentic_ai_statistics.behavior.analysis import fit_count_models, fit_success_model
+from agentic_ai_statistics.behavior.campaigns import build_manifest, run_campaign
+from agentic_ai_statistics.behavior.traces import (
     normalized_oracle_distance,
     path_entropy,
     transitions,
 )
-from mcp_traffic_analysis.incidents.models import IncidentResult, IncidentScenario, TaskStructure
-from mcp_traffic_analysis.incidents.runner import run_incident
-from mcp_traffic_analysis.incidents.world import (
+from agentic_ai_statistics.incidents.models import IncidentResult, IncidentScenario, TaskStructure
+from agentic_ai_statistics.incidents.runner import run_incident
+from agentic_ai_statistics.incidents.world import (
     SCENARIOS,
     apply_action,
     initial_state,

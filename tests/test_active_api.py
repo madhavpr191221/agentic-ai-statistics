@@ -4,7 +4,7 @@ from pathlib import Path
 
 import httpx
 
-from mcp_traffic_analysis.api.app import create_app
+from agentic_ai_statistics.api.app import create_app
 
 
 async def test_health_describes_active_measurement_boundary(tmp_path: Path) -> None:

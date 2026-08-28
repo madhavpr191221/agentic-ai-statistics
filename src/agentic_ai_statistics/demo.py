@@ -7,7 +7,7 @@ from pathlib import Path
 
 import uvicorn
 
-from mcp_traffic_analysis.api.app import create_app
+from agentic_ai_statistics.api.app import create_app
 
 
 def build_parser() -> argparse.ArgumentParser:

@@ -26,7 +26,7 @@ sequenceDiagram
     A-->>U: Trace, score, latency, tokens, bytes, cost
 ```
 
-The “traffic” is application-layer JSON-RPC moving through operating-system pipes between the Python agent process and a child MCP-server process. It is not an IP packet and does not travel over the Internet. The model API connection is outside the present packet-measurement boundary.
+The â€œtrafficâ€ is application-layer JSON-RPC moving through operating-system pipes between the Python agent process and a child MCP-server process. It is not an IP packet and does not travel over the Internet. The model API connection is outside the present packet-measurement boundary.
 
 ## Experimental unit
 
@@ -89,7 +89,7 @@ The 30-run pilot reports pooled and per-scenario success proportions with Wilson
 Start the demo, open **Incident Agent**, select a scenario, and press **Run real agent**. The ignored `.env` file must contain `OPENAI_API_KEY`.
 
 ```powershell
-uv run python -m mcp_traffic_analysis.agent_campaigns incident-pilot-v2
+uv run python -m agentic_ai_statistics.agent_campaigns incident-pilot-v2
 ```
 
 Automated tests use `mode="deterministic"` and never call a hosted model.

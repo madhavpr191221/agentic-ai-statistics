@@ -1,4 +1,4 @@
-# MCP Traffic Analysis
+# Agentic AI Statistics
 
 A statistical performance study of MCP-based AI agents.
 
@@ -59,7 +59,7 @@ Phase 6A performs credit-free secondary analysis of those 100 saved runs: partia
 
 For the step-by-step statistical learning sequence, see the [Phase 6A statistical analysis roadmap](docs/planning/phase6_statistical_analysis_roadmap.md).
 
-Phase 8 begins the executable statistical baseline without new model calls. It treats scalar run-level quantities—calls, latency, tokens, cost, and success—as the first objects, exposes their distributions and batch-stability diagnostics in the Scalar Baseline view, and provides downloadable Q01–Q03 artifacts.
+Phase 8 begins the executable statistical baseline without new model calls. It treats scalar run-level quantitiesâ€”calls, latency, tokens, cost, and successâ€”as the first objects, exposes their distributions and batch-stability diagnostics in the Scalar Baseline view, and provides downloadable Q01â€“Q03 artifacts.
 
 The complete specification-driven statistical program is defined in the [statistical analysis specification](docs/specs/statistical_analysis_spec.md), [question registry](docs/specs/analysis_questions.yaml), [data dictionary](docs/specs/data_dictionary.md), and [traceability matrix](docs/specs/analysis_traceability.md).
 
@@ -79,7 +79,7 @@ flowchart LR
     API --> Artifacts[Run and campaign artifacts]
 ```
 
-The relay records newline-delimited MCP/JSON-RPC frames and forwards the same bytes unchanged. These are application-layer frames—not HTTP, TLS, TCP, or IP packets.
+The relay records newline-delimited MCP/JSON-RPC frames and forwards the same bytes unchanged. These are application-layer framesâ€”not HTTP, TLS, TCP, or IP packets.
 
 For run $r$, the main recorded quantities include
 
@@ -119,9 +119,9 @@ Open `http://127.0.0.1:8000`.
 
 The UI has three active surfaces:
 
-- **Trace dynamics** — connect the rejected-action story to counts, probabilities, uncertainty, paths, and efficiency;
-- **Behavior study** — compare sequential, branching, and recovery tasks;
-- **Incident Agent** — run and inspect one measured agent trace.
+- **Trace dynamics** â€” connect the rejected-action story to counts, probabilities, uncertainty, paths, and efficiency;
+- **Behavior study** â€” compare sequential, branching, and recovery tasks;
+- **Incident Agent** â€” run and inspect one measured agent trace.
 
 Scripted validation spends no model credit. Live mode uses the hosted model and measured stdio transport. Repeated paid campaigns remain CLI-only.
 
@@ -130,20 +130,20 @@ Scripted validation spends no model credit. Live mode uses the hosted model and 
 Phase 3:
 
 ```powershell
-uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.agent_campaigns incident-pilot-v2
+uv --cache-dir .uv-cache run --all-groups python -m agentic_ai_statistics.agent_campaigns incident-pilot-v2
 ```
 
 Phase 4 credit-free design validation:
 
 ```powershell
-uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.behavior.campaigns task-structure-pilot-check --stage pilot --mode deterministic
+uv --cache-dir .uv-cache run --all-groups python -m agentic_ai_statistics.behavior.campaigns task-structure-pilot-check --stage pilot --mode deterministic
 ```
 
 Phase 4 live pilot or main campaign:
 
 ```powershell
-uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.behavior.campaigns task-structure-pilot-v2 --stage pilot
-uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.behavior.campaigns task-structure-main-v1 --stage main
+uv --cache-dir .uv-cache run --all-groups python -m agentic_ai_statistics.behavior.campaigns task-structure-pilot-v2 --stage pilot
+uv --cache-dir .uv-cache run --all-groups python -m agentic_ai_statistics.behavior.campaigns task-structure-main-v1 --stage main
 ```
 
 Use `--resume` after interruption or `--analyze-only` to rebuild derived tables without model calls.
@@ -151,14 +151,14 @@ Use `--resume` after interruption or `--analyze-only` to rebuild derived tables 
 Phase 5 credit-free reanalysis:
 
 ```powershell
-uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.trace_study.campaigns reanalyze-phase4
+uv --cache-dir .uv-cache run --all-groups python -m agentic_ai_statistics.trace_study.campaigns reanalyze-phase4
 ```
 
 Phase 5 smoke and main collection are intentionally CLI-only:
 
 ```powershell
-uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.trace_study.campaigns collect trace-orders-recovery-smoke-v1 --stage smoke
-uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.trace_study.campaigns collect trace-orders-recovery-main-v2 --stage main --analyze-only
+uv --cache-dir .uv-cache run --all-groups python -m agentic_ai_statistics.trace_study.campaigns collect trace-orders-recovery-smoke-v1 --stage smoke
+uv --cache-dir .uv-cache run --all-groups python -m agentic_ai_statistics.trace_study.campaigns collect trace-orders-recovery-main-v2 --stage main --analyze-only
 ```
 
 Use `--resume` after an interruption. Collection freezes a configuration fingerprint and applies a USD 5 estimated-cost guard by default.
@@ -186,11 +186,11 @@ Run and campaign detail endpoints and allow-listed CSV/Parquet downloads are als
 frontend/src/components/IncidentWorkbench.tsx  Phase 3 UI
 frontend/src/components/BehaviorWorkbench.tsx  Phase 4 UI and analysis
 frontend/src/components/TraceDynamicsWorkbench.tsx  Phase 5 practical statistics UI
-src/mcp_traffic_analysis/api/app.py            active HTTP API
-src/mcp_traffic_analysis/incidents/             agent, MCP server, and task world
-src/mcp_traffic_analysis/behavior/              Phase 4 campaigns and models
-src/mcp_traffic_analysis/trace_study/           Phase 5 paths and reliability analysis
-src/mcp_traffic_analysis/transport/             exact stdio frame recorder
+src/agentic_ai_statistics/api/app.py            active HTTP API
+src/agentic_ai_statistics/incidents/             agent, MCP server, and task world
+src/agentic_ai_statistics/behavior/              Phase 4 campaigns and models
+src/agentic_ai_statistics/trace_study/           Phase 5 paths and reliability analysis
+src/agentic_ai_statistics/transport/             exact stdio frame recorder
 ```
 
 Read [CODE_FLOW.md](docs/CODE_FLOW.md) for the execution path and [DEMO_WORKFLOW.md](docs/DEMO_WORKFLOW.md) for the branch and release process.

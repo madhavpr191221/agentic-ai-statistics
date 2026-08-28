@@ -8,9 +8,9 @@ from uuid import uuid4
 import httpx
 import pytest
 
-import mcp_traffic_analysis.trace_study.campaigns as campaign_module
-from mcp_traffic_analysis.api.app import create_app
-from mcp_traffic_analysis.incidents.models import (
+import agentic_ai_statistics.trace_study.campaigns as campaign_module
+from agentic_ai_statistics.api.app import create_app
+from agentic_ai_statistics.incidents.models import (
     ActionRecord,
     BehaviorMetadata,
     IncidentRunDetail,
@@ -19,8 +19,8 @@ from mcp_traffic_analysis.incidents.models import (
     ScoreCard,
     TaskStructure,
 )
-from mcp_traffic_analysis.incidents.world import oracle_sequence
-from mcp_traffic_analysis.trace_study.analysis import (
+from agentic_ai_statistics.incidents.world import oracle_sequence
+from agentic_ai_statistics.trace_study.analysis import (
     analyze_details,
     bootstrap_entropy_interval,
     first_oracle_divergence,
@@ -32,7 +32,7 @@ from mcp_traffic_analysis.trace_study.analysis import (
     state_sequence,
     wilson_interval,
 )
-from mcp_traffic_analysis.trace_study.campaigns import (
+from agentic_ai_statistics.trace_study.campaigns import (
     analyze_collected_campaign,
     build_manifest,
     configuration_fingerprint,

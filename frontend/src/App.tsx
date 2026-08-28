@@ -12,7 +12,7 @@ export default function App() {
       <header className="site-header">
         <div>
           <p className="eyebrow">Performance analysis of agentic AI systems</p>
-          <h1>MCP Traffic Analysis</h1>
+          <h1>Agentic AI Statistics</h1>
           <p className="header-copy">
             Measure real agent traces, protocol traffic, task success, and stochastic path
             variability in controlled IT incidents.

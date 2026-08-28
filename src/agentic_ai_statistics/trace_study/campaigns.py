@@ -14,18 +14,18 @@ from uuid import NAMESPACE_URL, uuid5
 
 import pandas as pd  # type: ignore[import-untyped]
 
-from mcp_traffic_analysis.incidents.models import (
+from agentic_ai_statistics.incidents.models import (
     IncidentRunDetail,
     IncidentScenario,
     TaskStructure,
 )
-from mcp_traffic_analysis.incidents.runner import (
+from agentic_ai_statistics.incidents.runner import (
     AGENT_INSTRUCTIONS,
     MODEL_ID,
     run_incident,
 )
-from mcp_traffic_analysis.incidents.world import INCOMING_MESSAGES, SCENARIOS, oracle_sequence
-from mcp_traffic_analysis.trace_study.analysis import analyze_details
+from agentic_ai_statistics.incidents.world import INCOMING_MESSAGES, SCENARIOS, oracle_sequence
+from agentic_ai_statistics.trace_study.analysis import analyze_details
 
 StudyStage = Literal["exploratory", "smoke", "main"]
 FOCUSED_SCENARIO = IncidentScenario.ORDERS_API_OUTAGE
@@ -146,7 +146,7 @@ def build_manifest(
         batch = (execution_order - 1) // 10 + 1
         run_id = uuid5(
             NAMESPACE_URL,
-            f"mcp-traffic-analysis:phase5:{campaign_id}:{execution_order}",
+            f"agentic-ai-statistics:phase5:{campaign_id}:{execution_order}",
         )
         schedule.append(
             {
@@ -374,7 +374,7 @@ async def run_campaign(
             mode=mode,
             run_id=uuid5(
                 NAMESPACE_URL,
-                f"mcp-traffic-analysis:phase5:{campaign_id}:{item['execution_order']}",
+                f"agentic-ai-statistics:phase5:{campaign_id}:{item['execution_order']}",
             ),
             execution_order=int(item["execution_order"]),
             block=int(item["batch"]),
