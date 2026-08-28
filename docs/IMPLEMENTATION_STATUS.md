@@ -40,6 +40,10 @@ The main study found approximately 20.5% more expected MCP calls under recovery 
 
 Stage 5A has reanalysed all 90 Phase 4 observations without new model calls. Stage 5B is complete with 100 valid runs. Seventeen provider-error attempts from the earlier quota interruption are retained for audit but excluded from scientific analysis.
 
+### Phase 6A credit-free secondary analysis
+
+Phase 6A reuses the completed Phase 5B artifacts without model calls. It adds partial-history outcome tables, tool-usage counts, latency-component summaries, divergence-by-outcome, path concentration, downloadable tables, and corresponding UI sections.
+
 ## Measurement boundary
 
 The active system measures model activity and local newline-delimited MCP/JSON-RPC frames crossing a stdio relay. Request and response byte counts are exact at that boundary.

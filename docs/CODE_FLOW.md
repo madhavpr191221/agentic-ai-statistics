@@ -204,6 +204,8 @@ For the primary practical comparison, the code finds the first expected escalati
 
 The same module constructs complete state paths, one-step transitions, repeated-tool counts, first oracle divergence, bootstrap entropy intervals, and successful-run excess calls. It does not fit a Markov model.
 
+Phase 6A derives secondary summaries from those same run rows: observed prefix/outcome tables, tool invocation counts, latency-component shares and correlations, divergence by final outcome, and cumulative path coverage. These summaries reuse saved artifacts and never launch model calls. Per-tool bytes and latency remain unavailable because the recorder stores them at run level.
+
 Phase 5 collection writes a configuration fingerprint before model calls. Resumption is rejected if the frozen model, prompt, scenario, tools, oracle, or settings change. Three smoke observations and the historical pilot are never pooled with the 100-run main campaign.
 
 Provider failures are not agent failures. A valid scientific observation must pass correlation reconciliation and must not have a provider exception such as `RateLimitError`. The collector stops immediately on such an exception. It preserves the failed attempt for audit, excludes it from every scientific table, and retries the same scheduled run ID on resume. Cost accounting separately reports valid-run cost, excluded-attempt cost, and their total.

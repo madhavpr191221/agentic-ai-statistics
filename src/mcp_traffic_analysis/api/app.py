@@ -62,6 +62,16 @@ TraceStudyTable = Literal[
     "transitions.parquet",
     "post_rejection_outcomes.csv",
     "post_rejection_outcomes.parquet",
+    "tool_usage.csv",
+    "tool_usage.parquet",
+    "latency_components.csv",
+    "latency_components.parquet",
+    "divergence.csv",
+    "divergence.parquet",
+    "prefix_outcomes.csv",
+    "prefix_outcomes.parquet",
+    "path_concentration.csv",
+    "path_concentration.parquet",
 ]
 
 
@@ -92,7 +102,7 @@ def create_app(
     agent_available = bool(os.getenv("OPENAI_API_KEY") or Path(".env").is_file())
     api = FastAPI(
         title="MCP Traffic Analysis",
-        version="0.6.0",
+        version="0.7.0",
         description="Local API for measured IT-incident agent experiments.",
     )
     api.state.incident_repository = incident_repository

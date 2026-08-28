@@ -189,6 +189,135 @@ def _numeric_summary(rows: list[dict[str, Any]], field: str) -> dict[str, Any]:
     }
 
 
+def _pearson(values: list[float], other: list[float]) -> float | None:
+    if len(values) != len(other) or len(values) < 2:
+        return None
+    mean_left = sum(values) / len(values)
+    mean_right = sum(other) / len(other)
+    numerator = sum(
+        (left - mean_left) * (right - mean_right)
+        for left, right in zip(values, other, strict=True)
+    )
+    left_scale = math.sqrt(sum((value - mean_left) ** 2 for value in values))
+    right_scale = math.sqrt(sum((value - mean_right) ** 2 for value in other))
+    if left_scale == 0 or right_scale == 0:
+        return None
+    return numerator / (left_scale * right_scale)
+
+
+def _prefix_summary(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    focused = [
+        row for row in rows
+        if row["scenario_id"] == FOCUSED_SCENARIO
+        and row["task_structure"] == FOCUSED_STRUCTURE
+    ]
+    categories = (
+        "read_runbook_first",
+        "retried_first",
+        "no_expected_rejection",
+        "no_follow_up_action",
+    )
+    summaries: list[dict[str, Any]] = []
+    for category in categories:
+        group = [row for row in focused if row["post_rejection_behavior"] == category]
+        failures = sum(not bool(row["task_success"]) for row in group)
+        summaries.append({
+            "prefix": category,
+            "n_runs": len(group),
+            "successes": len(group) - failures,
+            "failures": failures,
+            "failure_rate": failures / len(group) if group else None,
+            "failure_rate_wilson_95": wilson_interval(failures, len(group)),
+        })
+    return summaries
+
+
+def _tool_usage_summary(tool_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for row in tool_rows:
+        grouped[str(row["tool_name"])].append(row)
+    total_calls = len(tool_rows)
+    return [
+        {
+            "tool_name": tool,
+            "invocations": len(group),
+            "invocation_proportion": len(group) / total_calls if total_calls else 0.0,
+            "runs": len({str(row["run_id"]) for row in group}),
+            "successful_runs": len({str(row["run_id"]) for row in group if row["task_success"]}),
+        }
+        for tool, group in sorted(grouped.items(), key=lambda item: (-len(item[1]), item[0]))
+    ]
+
+
+def _latency_decomposition(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    total = [float(row["total_latency_ms"]) for row in rows]
+    components = (
+        "model_latency_ms",
+        "mcp_latency_ms",
+        "server_handler_latency_ms",
+        "orchestration_latency_ms",
+    )
+    summaries: list[dict[str, Any]] = []
+    for component in components:
+        values = [float(row[component]) for row in rows]
+        shares = [
+            value / total_value if total_value else None
+            for value, total_value in zip(values, total, strict=True)
+        ]
+        share_values = [float(value) for value in shares if value is not None]
+        summaries.append({
+            "component": component,
+            **_numeric_summary(rows, component),
+            "median_share_of_total": _quantile(share_values, 0.5),
+            "correlation_with_total": _pearson(values, total),
+        })
+    return summaries
+
+
+def _divergence_summary(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    summaries: list[dict[str, Any]] = []
+    groups = (
+        ("success", [row for row in rows if row["task_success"]]),
+        ("failure", [row for row in rows if not row["task_success"]]),
+    )
+    for outcome, group in groups:
+        values = [
+            float(row["first_oracle_divergence"])
+            for row in group
+            if row["first_oracle_divergence"] is not None
+        ]
+        summaries.append(
+            {
+                "outcome": outcome,
+                "n_runs": len(values),
+                "median": _quantile(values, 0.5),
+                "q1": _quantile(values, 0.25),
+                "q3": _quantile(values, 0.75),
+                "minimum": min(values) if values else None,
+                "maximum": max(values) if values else None,
+            }
+        )
+    return summaries
+
+
+def _path_concentration(path_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    ordered = sorted(path_rows, key=lambda row: (-int(row["count"]), str(row["state_sequence"])))
+    total = sum(int(row["count"]) for row in ordered)
+    cumulative = 0
+    result: list[dict[str, Any]] = []
+    for rank, row in enumerate(ordered, start=1):
+        cumulative += int(row["count"])
+        result.append(
+            {
+                "rank": rank,
+                "state_sequence": row["state_sequence"],
+                "count": row["count"],
+                "cumulative_proportion": cumulative / total if total else 0.0,
+            }
+        )
+    return result
+
+
 def _post_rejection_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
     focused = [
         row
@@ -252,6 +381,7 @@ def analyze_details(
     trace_rows: list[dict[str, Any]] = []
     transition_rows: list[dict[str, Any]] = []
     post_rows: list[dict[str, Any]] = []
+    tool_rows: list[dict[str, Any]] = []
     path_counts: Counter[tuple[str, str, str]] = Counter()
 
     for detail in details:
@@ -287,12 +417,20 @@ def analyze_details(
             "exact_oracle_path": tools == behavior.oracle_sequence,
             "post_rejection_behavior": post_behavior,
             "total_latency_ms": detail.measurement.total_latency_ms,
+            "model_latency_ms": detail.measurement.model_latency_ms,
+            "mcp_latency_ms": detail.measurement.mcp_latency_ms,
+            "server_handler_latency_ms": detail.measurement.server_handler_latency_ms,
+            "orchestration_latency_ms": detail.measurement.orchestration_latency_ms,
             "total_tokens": detail.measurement.total_tokens,
             "request_frame_bytes": behavior.request_frame_bytes,
             "response_frame_bytes": behavior.response_frame_bytes,
             "estimated_cost_usd": detail.measurement.estimated_cost_usd,
         }
         run_rows.append(row)
+        tool_rows.extend(
+            common | {"tool_name": tool, "task_success": detail.score.task_success}
+            for tool in tools
+        )
         trace_rows.append(
             common
             | {
@@ -431,6 +569,20 @@ def analyze_details(
             }
         )
 
+    prefix_rows = _prefix_summary(run_rows)
+    focused_latency_rows = [
+        row for row in run_rows
+        if row["scenario_id"] == FOCUSED_SCENARIO
+        and row["task_structure"] == FOCUSED_STRUCTURE
+    ]
+    latency_rows = _latency_decomposition(focused_latency_rows)
+    divergence_rows = _divergence_summary(focused_latency_rows)
+    concentration_rows = _path_concentration([
+        row for row in path_rows
+        if row["scenario_id"] == FOCUSED_SCENARIO
+        and row["task_structure"] == FOCUSED_STRUCTURE
+    ])
+
     analysis: dict[str, Any] = {
         "schema_version": "5.0.0",
         "campaign_id": campaign_id,
@@ -447,6 +599,7 @@ def analyze_details(
             "before rereading the runbook?"
         ),
         "post_rejection_analysis": _post_rejection_summary(run_rows),
+        "prefix_outcomes": prefix_rows,
         "focused_measurements": {
             field: _numeric_summary(focused_run_rows, field)
             for field in (
@@ -466,6 +619,10 @@ def analyze_details(
         "path_summary": path_rows,
         "transition_summary": transition_summary,
         "batch_summaries": batch_summaries,
+        "tool_usage": _tool_usage_summary(tool_rows),
+        "latency_decomposition": latency_rows,
+        "divergence_by_outcome": divergence_rows,
+        "path_concentration": concentration_rows,
         "trace_examples": trace_rows,
         "notes": [
             "Counts and percentages are shown before statistical summaries.",
@@ -480,4 +637,9 @@ def analyze_details(
         "paths": pd.DataFrame(path_rows),
         "transitions": pd.DataFrame(transition_rows),
         "post_rejection_outcomes": pd.DataFrame(post_rows),
+        "tool_usage": pd.DataFrame(_tool_usage_summary(tool_rows)),
+        "latency_components": pd.DataFrame(latency_rows),
+        "divergence": pd.DataFrame(divergence_rows),
+        "prefix_outcomes": pd.DataFrame(prefix_rows),
+        "path_concentration": pd.DataFrame(concentration_rows),
     }

@@ -195,6 +195,29 @@ def test_primary_table_connects_behavior_to_failure() -> None:
     assert len(tables["post_rejection_outcomes"]) == 10
 
 
+def test_secondary_summaries_reconcile_to_run_and_call_totals() -> None:
+    details = [
+        *[_detail(success=True, read_runbook_first=True) for _ in range(5)],
+        *[_detail(success=False, read_runbook_first=False) for _ in range(5)],
+    ]
+    analysis, tables = analyze_details(
+        details, campaign_id="secondary-example", study_stage="test"
+    )
+
+    assert sum(row["n_runs"] for row in analysis["prefix_outcomes"]) == 10
+    assert sum(row["invocations"] for row in analysis["tool_usage"]) == sum(
+        detail.measurement.mcp_call_count for detail in details
+    )
+    assert {row["outcome"] for row in analysis["divergence_by_outcome"]} == {
+        "success",
+        "failure",
+    }
+    assert len(analysis["latency_decomposition"]) == 4
+    assert len(tables["tool_usage"]) > 0
+    assert len(tables["latency_components"]) == 4
+    assert len(tables["prefix_outcomes"]) == 4
+
+
 def test_frozen_main_manifest_has_ten_batches_of_ten() -> None:
     manifest = build_manifest("trace-main-v1", "main")
     assert manifest["planned_runs"] == 100
@@ -393,6 +416,7 @@ async def test_trace_study_api_lists_details_and_allowlisted_tables(tmp_path: Pa
         encoding="utf-8",
     )
     (tables / "paths.csv").write_text("count\n1\n", encoding="utf-8")
+    (tables / "tool_usage.csv").write_text("tool_name\nget_alert\n", encoding="utf-8")
     app = create_app(
         agent_root=tmp_path / "phase3",
         behavior_root=tmp_path / "phase4",
@@ -406,10 +430,14 @@ async def test_trace_study_api_lists_details_and_allowlisted_tables(tmp_path: Pa
         listed = await client.get("/api/trace-study/campaigns")
         detail = await client.get("/api/trace-study/campaigns/study-v1")
         table = await client.get("/api/trace-study/campaigns/study-v1/tables/paths.csv")
+        secondary = await client.get(
+            "/api/trace-study/campaigns/study-v1/tables/tool_usage.csv"
+        )
         invalid = await client.get("/api/trace-study/campaigns/study-v1/tables/secret.txt")
         missing = await client.get("/api/trace-study/campaigns/missing")
     assert listed.status_code == 200
     assert detail.json()["campaign_id"] == "study-v1"
     assert table.status_code == 200
+    assert secondary.status_code == 200
     assert invalid.status_code == 422
     assert missing.status_code == 404

@@ -55,6 +55,8 @@ The credit-free Stage 5A reanalysis uses the 90 saved Phase 4 runs. In its ten f
 
 Phase 5 also reports complete path frequencies, entropy, one-step transition counts, oracle divergence, and excess calls. It does not infer private model reasoning or claim that the traces form a Markov chain. See [the Phase 5 study guide](docs/phase5_stochastic_traces.md) and [single Phase 5 result document](docs/results/phase5_stochastic_trace_results.md).
 
+Phase 6A performs credit-free secondary analysis of those 100 saved runs: partial-history failure tables, tool usage, runtime decomposition, oracle divergence, and path concentration. It makes no new model calls and keeps run-level summaries primary.
+
 ## What crosses the measurement boundary?
 
 ```mermaid
@@ -216,6 +218,7 @@ git diff --check
 - [Phase 5 method](docs/phase5_stochastic_traces.md)
 - [Phase 5 frozen plan](docs/planning/phase5_stochastic_trace_plan.md)
 - [Phase 5 results](docs/results/phase5_stochastic_trace_results.md)
+- [Phase 6A plan](docs/planning/phase6_credit_free_analysis_plan.md)
 
 ## Current limits
 

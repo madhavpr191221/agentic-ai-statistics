@@ -181,3 +181,41 @@ The completed campaign can be reanalysed without making a model call:
 ```powershell
 uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.trace_study.campaigns collect trace-orders-recovery-main-v2 --stage main --analyze-only
 ```
+
+## Phase 6A: credit-free secondary analysis
+
+Phase 6A made no model calls. It reused the 100 valid Stage 5B runs and asked where the observed differences appear in the trace, which tools dominate the work, and how the measured runtime is divided.
+
+### Partial-history result
+
+The two observable post-rejection histories account for all 100 runs:
+
+| Observed history | Runs | Successes | Failures | Failure rate |
+|---|---:|---:|---:|---:|
+| Read runbook first | 71 | 71 | 0 | 0% |
+| Retried first | 29 | 0 | 29 | 100% |
+
+The two empty categories—no expected rejection and no follow-up action—had zero observations. These are empirical prefix summaries, not a fitted stochastic model.
+
+### Tool usage
+
+The most frequently invoked tools were `escalate_incident` (200 invocations), `get_runbook` (171), `restart_service` (102), `get_dependencies` (101), `get_alert` (100), `get_metrics` (100), and `search_logs` (100). `update_incident` appeared 9 times. Per-tool request bytes and latency are unavailable because the current recorder stores those quantities at run level.
+
+### Runtime decomposition
+
+The median measured runtime was approximately 19.57 seconds. Its median component shares were approximately:
+
+| Component | Median time | Median share of total |
+|---|---:|---:|
+| Model | 18.32 s | 93.7% |
+| MCP client time | 57.1 ms | 0.29% |
+| Server handler time | 5.6 ms | 0.03% |
+| Orchestration | 1.18 s | 6.0% |
+
+These are measured local runtime components. They do not estimate queue waiting, network transmission, or Internet latency.
+
+### Divergence and path concentration
+
+The median first oracle divergence was step 2 for both successful and failed traces. The 100 valid traces had 22 distinct paths overall, with 13 singleton paths. The most common path covered 55% of runs and path entropy was 2.70 bits.
+
+Phase 6A adds detail to the Phase 5 result but does not change its interpretation. The synthetic world still makes the runbook-first and retry-first branches strongly associated with outcome, and the observed branch was not randomized.

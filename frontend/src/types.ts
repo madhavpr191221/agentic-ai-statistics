@@ -282,6 +282,41 @@ export interface TraceStudyAnalysis {
     read_runbook_first_rate: number
     mean_mcp_calls: number
   }>
+  prefix_outcomes?: Array<{
+    prefix: string
+    n_runs: number
+    successes: number
+    failures: number
+    failure_rate: number | null
+    failure_rate_wilson_95: [number, number] | null
+  }>
+  tool_usage?: Array<{
+    tool_name: string
+    invocations: number
+    invocation_proportion: number
+    runs: number
+    successful_runs: number
+  }>
+  latency_decomposition?: Array<{
+    component: string
+    n: number
+    median: number | null
+    q1: number | null
+    q3: number | null
+    minimum: number | null
+    maximum: number | null
+    median_share_of_total: number | null
+    correlation_with_total: number | null
+  }>
+  divergence_by_outcome?: Array<{
+    outcome: string
+    n_runs: number
+    median: number | null
+    q1: number | null
+    q3: number | null
+    minimum: number | null
+    maximum: number | null
+  }>
   trace_examples: Array<{
     run_id: string
     scenario_id: IncidentScenarioId
