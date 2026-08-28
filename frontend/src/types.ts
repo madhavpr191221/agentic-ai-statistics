@@ -317,6 +317,12 @@ export interface TraceStudyAnalysis {
     minimum: number | null
     maximum: number | null
   }>
+  path_concentration?: Array<{
+    rank: number
+    state_sequence: string
+    count: number
+    cumulative_proportion: number
+  }>
   trace_examples: Array<{
     run_id: string
     scenario_id: IncidentScenarioId
