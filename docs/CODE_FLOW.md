@@ -18,6 +18,11 @@ absorbing-process summary. It makes no model calls: the analysis layer counts
 state movements and solves the transient system when possible, producing
 `q17_absorbing_process.json` for the API and UI.
 
+Phase 15 reads a training campaign and a separate test campaign. It estimates
+three fixed next-state predictors, scores each complete test run, and writes
+`q18_held_out_trajectory_prediction.json`. The UI loads that artifact through
+the read-only trace-study repository.
+
 ## One-run overview
 
 ```mermaid

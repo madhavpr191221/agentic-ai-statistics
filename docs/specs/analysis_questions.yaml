@@ -170,3 +170,12 @@ questions:
     uncertainty: exploratory_model_status_and_sparse_cell_warnings
     outputs: [q17_absorbing_process.json]
     acceptance: [observational_and_assigned_policy_subsets_are_separate, no_universal_markov_claim, holding_times_marked_unavailable_without_timestamps]
+  - id: Q18
+    question: Can fixed stochastic models predict next observable states on new runs?
+    unit: run_with_nested_state_events
+    variables: [state_sequence, model, log_loss, accuracy, brier_score]
+    estimand: held-out run-level predictive performance and paired model differences
+    method: [fixed_training_campaign, held_out_test_campaign, smoothed_state_models]
+    uncertainty: run_level_resampling_deferred_until_campaign_completion
+    outputs: [q18_held_out_trajectory_prediction.json]
+    acceptance: [training_and_test_campaigns_are_separate, transitions_are_nested_within_runs, metrics_are_labeled_inferred]

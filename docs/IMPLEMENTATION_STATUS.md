@@ -90,6 +90,20 @@ unavailable because the current trace artifact has ordering but not per-event
 timestamps. The process model is inferred from measured traces and does not
 claim a universal Markov property.
 
+### Phase 15: held-out trajectory prediction
+
+Phase 15 adds fixed global, current-state, and short-history predictors for
+compact observable state paths. Existing traces are training data and a
+separate same-configuration campaign is the held-out test set. The artifact and
+UI report run-level log loss, accuracy, Brier score, and paired comparisons.
+The live holdout campaign is cost-guarded and its completion status is retained
+in the campaign manifest.
+
+The 60-run holdout completed at an estimated $2.1515. The history-aware model
+achieved 0.536 mean run log loss and 87.9% accuracy, versus 0.779 and 71.6% for
+the current-state model. The paired log-loss difference was -0.243 (95%
+run-level bootstrap interval -0.280 to -0.209).
+
 ### Phase 8 scalar statistical baseline
 
 Phase 8 implements Q01–Q03 from the specification using only the saved Phase 5 campaign. It adds run-level scalar distributions, an explicit scalar data dictionary, batch-stability summaries, downloadable JSON/CSV artifacts, a read-only artifact route, and a Scalar Baseline section in the React workbench. Q04 and later remain specified but pending.

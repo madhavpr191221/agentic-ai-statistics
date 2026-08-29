@@ -282,4 +282,12 @@ that the entire agent is truly Markovian. See
 [`phase14_stochastic_process_plan.md`](docs/planning/phase14_stochastic_process_plan.md)
 and [`phase14_stochastic_process_spec.md`](docs/specs/phase14_stochastic_process_spec.md).
 
+### Phase 15: held-out trajectory prediction
+
+Phase 15 tests whether stochastic models predict observable actions on new
+runs. It compares a global baseline, a current-state model, and a short-history
+model using held-out log loss, accuracy, and Brier score. Existing runs train
+the models; a separate same-configuration campaign tests them. This measures
+predictability of recorded paths, not private reasoning or general AI behavior.
+
 The permanent branches are `demo` for tested integration and `main` for released work.

@@ -55,6 +55,21 @@ const analysis: TraceStudyAnalysis = {
     { run_id: 'failure-run', scenario_id: 'orders_api_outage', task_structure: 'recovery', task_success: false, batch: 1, execution_order: 2, tool_sequence: 'escalate_incident > escalate_incident', state_sequence: 'START > escalate_incident|expected_rejection > escalate_incident|unexpected_rejection > END_FAILURE', oracle_sequence: 'get_alert > get_dependencies > escalate_incident > get_runbook > escalate_incident', post_rejection_behavior: 'retried_first', first_oracle_divergence: 1 },
   ],
   notes: [],
+  prediction: {
+    schema_version: '15.0.0', training_campaign_id: 'train', test_campaign_id: 'test',
+    training_runs: 4, test_runs: 2, state_vocabulary: ['START', 'END_SUCCESS'],
+    model_comparison: [{
+      model: 'history_aware', n_runs: 2, n_transitions: 4, mean_run_log_loss: 0.5,
+      mean_run_accuracy: 0.8, mean_run_brier_score: 0.2,
+      mean_run_log_loss_bootstrap_95: [0.3, 0.7], mean_run_accuracy_bootstrap_95: [0.6, 1],
+      mean_run_brier_score_bootstrap_95: [0.1, 0.3],
+    }],
+    paired_log_loss_comparisons: [{
+      better_model: 'history_aware', baseline_model: 'current_state',
+      mean_log_loss_difference: -0.2, mean_log_loss_difference_bootstrap_95: [-0.3, -0.1],
+    }],
+    limitations: [],
+  },
 }
 
 test('connects the practical rejection choice to counts and failure percentages', async () => {
@@ -66,6 +81,7 @@ test('connects the practical rejection choice to counts and failure percentages'
   expect(screen.getByText('Observed difference: 100.0%')).toBeInTheDocument()
   expect(screen.getByText('Successful run')).toBeInTheDocument()
   expect(screen.getByText('Failed run')).toBeInTheDocument()
+  expect(screen.getByText('Can the models predict new observable actions?')).toBeInTheDocument()
   expect(screen.getAllByTestId('plotly-chart')).toHaveLength(1)
 })
 

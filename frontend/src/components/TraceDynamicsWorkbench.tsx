@@ -109,6 +109,17 @@ export function TraceDynamicsWorkbench() {
         <div className="download-row"><a href={`/api/trace-study/campaigns/${campaign.campaign_id}/artifacts/q17_absorbing_process.json`}>Download Phase 14 process artifact</a></div>
       </section> : null}
 
+      {campaign.prediction ? <section className="panel" data-testid="prediction-analysis">
+        <p className="eyebrow">Phase 15 · held-out prediction</p>
+        <h2>Can the models predict new observable actions?</h2>
+        <p>The models were trained on one campaign and evaluated on a separate campaign. Lower log loss is better: it means the model assigned higher probability to the action that actually occurred.</p>
+        <div className="study-facts"><span><strong>{campaign.prediction.training_runs}</strong> training runs</span><span><strong>{campaign.prediction.test_runs}</strong> held-out runs</span><span><strong>{campaign.prediction.state_vocabulary.length}</strong> states</span></div>
+        <div className="table-scroll"><table className="data-table"><thead><tr><th>Model</th><th>Transitions</th><th>Mean log loss</th><th>95% interval</th><th>Accuracy</th><th>Brier score</th></tr></thead><tbody>{campaign.prediction.model_comparison.map((row) => <tr key={row.model}><td>{row.model.replaceAll('_', ' ')}</td><td>{row.n_transitions}</td><td>{measured(row.mean_run_log_loss, 3)}</td><td>{numericInterval('prediction', row.mean_run_log_loss_bootstrap_95)}</td><td>{percentage(row.mean_run_accuracy)}</td><td>{measured(row.mean_run_brier_score, 3)}</td></tr>)}</tbody></table></div>
+        <div className="table-scroll"><table className="data-table"><thead><tr><th>Comparison</th><th>Mean log-loss difference</th><th>95% interval</th></tr></thead><tbody>{campaign.prediction.paired_log_loss_comparisons.map((row) => <tr key={`${row.better_model}-${row.baseline_model}`}><td>{row.better_model.replaceAll('_', ' ')} vs {row.baseline_model.replaceAll('_', ' ')}</td><td>{measured(row.mean_log_loss_difference, 3)}</td><td>{numericInterval('prediction', row.mean_log_loss_difference_bootstrap_95)}</td></tr>)}</tbody></table></div>
+        <p className="method-note">These are inferred predictive scores, not measurements of private reasoning. They apply only to the held-out campaign configuration.</p>
+        <div className="download-row"><a href={`/api/trace-study/campaigns/${campaign.campaign_id}/artifacts/q18_held_out_trajectory_prediction.json`}>Download prediction artifact</a></div>
+      </section> : null}
+
       {campaign.primary_intervention_result && campaign.intervention_arms ? <section className="panel primary-result" data-testid="intervention-result">
         <p className="eyebrow">Phase 13 · randomized policy intervention</p>
         <h2>Does assigning runbook-first recovery improve success?</h2>
