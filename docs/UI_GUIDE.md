@@ -180,6 +180,14 @@ quantities. Natural-policy and assigned-policy traces are shown separately, and
 holding times are marked unavailable because the current artifact has no
 per-event timestamps.
 
+### 10b. Phase 15 held-out prediction
+
+The prediction panel compares a global-majority, current-state, and short-history
+predictor. The training campaign estimates their probabilities; the separate
+test campaign evaluates them. Log loss measures how much probability the model
+gave to what actually happened, so lower is better. These scores are inferred
+model diagnostics, not direct measurements of the agent.
+
 ### 11. Action efficiency
 
 The efficiency panel compares successful paths with the shortest valid oracle. For a successful run,

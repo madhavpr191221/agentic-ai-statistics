@@ -445,4 +445,30 @@ export interface TraceStudyAnalysis {
       limitations: string[]
     }>
   }
+  prediction?: {
+    schema_version: string
+    training_campaign_id: string
+    test_campaign_id: string
+    training_runs: number
+    test_runs: number
+    state_vocabulary: string[]
+    model_comparison: Array<{
+      model: string
+      n_runs: number
+      n_transitions: number
+      mean_run_log_loss: number | null
+      mean_run_accuracy: number | null
+      mean_run_brier_score: number | null
+      mean_run_log_loss_bootstrap_95: [number, number] | null
+      mean_run_accuracy_bootstrap_95: [number, number] | null
+      mean_run_brier_score_bootstrap_95: [number, number] | null
+    }>
+    paired_log_loss_comparisons: Array<{
+      better_model: string
+      baseline_model: string
+      mean_log_loss_difference: number | null
+      mean_log_loss_difference_bootstrap_95: [number, number] | null
+    }>
+    limitations: string[]
+  }
 }

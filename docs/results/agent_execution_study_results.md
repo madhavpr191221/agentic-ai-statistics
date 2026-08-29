@@ -274,6 +274,29 @@ distribution, not evidence that private reasoning is Markovian. Holding-time
 modeling is not estimable because the current artifact records ordering but not
 per-event timestamps.
 
+## Result 11: held-out trajectory prediction
+
+Phase 15 trained three fixed predictors on the existing 100-run natural-policy
+campaign and evaluated them on 60 new same-configuration runs (652 held-out
+state transitions). Lower log loss is better.
+
+| Predictor | Mean run log loss (95% bootstrap interval) | Accuracy | Brier score |
+|---|---:|---:|---:|
+| Global majority | 23.414 (23.153–23.717) | 15.3% | 1.695 |
+| Current state | 0.779 (0.672–0.894) | 71.6% | 0.400 |
+| Previous + current state | **0.536 (0.449–0.628)** | **87.9%** | **0.227** |
+
+Adding the current state greatly improved prediction over the global baseline.
+Adding one previous state improved mean log loss by **0.243** relative to the
+current-state model (95% bootstrap interval for the difference: −0.280 to
+−0.209). This indicates that recent observable history contains predictive
+information beyond the current compact state, under this frozen incident and
+model configuration.
+
+This is a predictive result, not a causal or universal claim. The test campaign
+cost an estimated **$2.1515**, below the $3.00 guard. The models predict
+observable state transitions; they do not predict private reasoning.
+
 ## Technical evidence
 
 - [Phase 3 pilot results](phase3_incident_pilot_results.md)
@@ -285,3 +308,4 @@ per-event timestamps.
 - [Trajectory artifact](../../artifacts/phase5/campaign-trace-orders-recovery-main-v2/q09_q14_trajectory_analysis.json)
 - [Randomized intervention artifact](../../artifacts/phase5/campaign-intervention-orders-recovery-v1/q16_randomized_intervention.json)
 - [Phase 14 process artifact](../../artifacts/phase5/campaign-trace-orders-recovery-main-v2/q17_absorbing_process.json)
+- [Phase 15 prediction artifact](../../artifacts/phase5/campaign-trace-orders-recovery-prediction-v1/q18_held_out_trajectory_prediction.json)
