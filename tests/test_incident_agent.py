@@ -6,11 +6,11 @@ from pathlib import Path
 import httpx
 from agents.mcp import MCPServerStdio
 
-from mcp_traffic_analysis.agent_campaigns import normalized_edit_distance, wilson
-from mcp_traffic_analysis.api.app import create_app
-from mcp_traffic_analysis.incidents.models import IncidentResult, IncidentScenario
-from mcp_traffic_analysis.incidents.runner import run_incident
-from mcp_traffic_analysis.incidents.world import (
+from agentic_ai_statistics.agent_campaigns import normalized_edit_distance, wilson
+from agentic_ai_statistics.api.app import create_app
+from agentic_ai_statistics.incidents.models import IncidentResult, IncidentScenario
+from agentic_ai_statistics.incidents.runner import run_incident
+from agentic_ai_statistics.incidents.world import (
     SCENARIOS,
     apply_action,
     initial_state,
@@ -100,7 +100,7 @@ async def test_incident_stdio_server_exposes_typed_tools(tmp_path: Path) -> None
             "command": sys.executable,
             "args": [
                 "-m",
-                "mcp_traffic_analysis.incidents.server",
+                "agentic_ai_statistics.incidents.server",
                 "--state",
                 str(state),
                 "--events",

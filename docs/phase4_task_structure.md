@@ -84,21 +84,21 @@ Open `http://127.0.0.1:8000` and select **Behavior study**. Start with **Scripte
 Credit-free campaign validation:
 
 ```powershell
-uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.behavior.campaigns `
+uv --cache-dir .uv-cache run --all-groups python -m agentic_ai_statistics.behavior.campaigns `
   task-structure-pilot-check --stage pilot --mode deterministic
 ```
 
 Paid pilot:
 
 ```powershell
-uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.behavior.campaigns `
+uv --cache-dir .uv-cache run --all-groups python -m agentic_ai_statistics.behavior.campaigns `
   task-structure-pilot-v1 --stage pilot
 ```
 
 Paid main study, only after the pilot protocol is frozen:
 
 ```powershell
-uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.behavior.campaigns `
+uv --cache-dir .uv-cache run --all-groups python -m agentic_ai_statistics.behavior.campaigns `
   task-structure-main-v1 --stage main
 ```
 
@@ -121,4 +121,4 @@ The three tasks are fixed synthetic examples. Scenario terms control their diffe
 
 This phase does not measure queue waiting, arrival processes, utilization, HTTP/TLS/TCP/IP behavior, or production reliability.
 
-The primary count analysis uses a Poisson log-mean model with HC3 robust covariance. “Poisson” specifies the mean link used to estimate call ratios; the robust covariance avoids assuming that the empirical call-count variance must equal its mean. A negative-binomial sensitivity fit is attempted only when Pearson dispersion exceeds 1.25.
+The primary count analysis uses a Poisson log-mean model with HC3 robust covariance. â€œPoissonâ€ specifies the mean link used to estimate call ratios; the robust covariance avoids assuming that the empirical call-count variance must equal its mean. A negative-binomial sensitivity fit is attempted only when Pearson dispersion exceeds 1.25.

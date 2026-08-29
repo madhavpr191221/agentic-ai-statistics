@@ -95,6 +95,14 @@ export function BehaviorWorkbench() {
       </section>
       <section className="panel ticket-card"><p className="eyebrow">Simulated incoming incident ticket</p><h2>{condition?.label ?? 'Choose a task'}</h2><blockquote>{condition?.incoming_message ?? 'Loading the frozen task bank…'}</blockquote><p className="field-note">This is synthetic. The application does not read Outlook or contact a production system.</p></section>
 
+      {latestCampaign?.workload_by_structure?.length ? <section className="panel" data-testid="workload-analysis">
+        <p className="eyebrow">Phase 10 · Q04 workload analysis</p><h2>Does task structure change agent workload?</h2>
+        <p>Each row summarizes fresh runs. Recovery, branching, and sequential are compared using MCP calls first; the other columns are secondary outcomes.</p>
+        <div className="table-scroll"><table className="data-table"><thead><tr><th>Structure</th><th>Runs</th><th>Success</th><th>Mean MCP calls</th><th>Median MCP calls</th><th>Mean latency (s)</th><th>Mean tokens</th><th>Mean cost</th></tr></thead><tbody>{latestCampaign.workload_by_structure.map((row) => <tr key={row.task_structure}><td>{row.task_structure}</td><td>{row.n_runs}</td><td>{row.successes}/{row.n_runs}</td><td>{format(row.mcp_call_count.mean ?? 0, 2)}</td><td>{format(row.mcp_call_count.median ?? 0, 2)}</td><td>{format((row.total_latency_ms.mean ?? 0) / 1000, 2)}</td><td>{format(row.total_tokens.mean ?? 0, 0)}</td><td>${format(row.estimated_cost_usd.mean ?? 0, 4)}</td></tr>)}</tbody></table></div>
+        <div className="download-row"><a href={`/api/behavior/campaigns/${latestCampaign.campaign_id}/artifacts/q04_workload_by_condition.json`}>Download workload summaries</a><a href={`/api/behavior/campaigns/${latestCampaign.campaign_id}/artifacts/q04_count_model.json`}>Download count model</a></div>
+        <p className="method-note">The count model adjusts for incident identity and randomized block. Ratios describe expected call counts; they are not automatically causal effects.</p>
+      </section> : null}
+
       {!active?.behavior ? <section className="panel welcome-panel"><p className="eyebrow">Start here</p><h2>Run a matched task condition</h2><p>Use scripted validation to inspect the five-call oracle without model cost, or choose a live run to observe a stochastic agent trace.</p></section> : <>
         <section className="metric-grid behavior-metrics">
           <div className="panel metric-card"><span>Task success</span><strong>{active.score.task_success ? 'Yes' : 'No'}</strong></div>

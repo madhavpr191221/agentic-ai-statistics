@@ -179,6 +179,17 @@ export interface BehaviorCampaignAnalysis {
     values: number[]
     ecdf: Array<{ value: number; probability: number }>
   }>
+  workload_by_structure?: Array<{
+    task_structure: TaskStructure
+    n_runs: number
+    successes: number
+    success_rate: number
+    mcp_call_count: { mean: number | null; median: number | null; q1: number | null; q3: number | null; minimum: number | null; maximum: number | null }
+    model_call_count: { mean: number | null; median: number | null; q1: number | null; q3: number | null; minimum: number | null; maximum: number | null }
+    total_latency_ms: { mean: number | null; median: number | null; q1: number | null; q3: number | null; minimum: number | null; maximum: number | null }
+    total_tokens: { mean: number | null; median: number | null; q1: number | null; q3: number | null; minimum: number | null; maximum: number | null }
+    estimated_cost_usd: { mean: number | null; median: number | null; q1: number | null; q3: number | null; minimum: number | null; maximum: number | null }
+  }>
   transition_summary?: Array<{
     task_structure: TaskStructure
     source_tool: string
@@ -187,4 +198,277 @@ export interface BehaviorCampaignAnalysis {
     probability: number
   }>
   notes?: string[]
+}
+
+export interface TraceStudyAnalysis {
+  schema_version: string
+  campaign_id: string
+  study_stage: 'exploratory' | 'smoke' | 'main'
+  created_at_utc: string
+  experimental_unit: string
+  n_runs: number
+  scalar_data_dictionary?: Array<{
+    field: string
+    label: string
+    type: string
+    unit: string
+    status: string
+    level: string
+  }>
+  scalar_distributions?: Array<{
+    field: string
+    label: string
+    type: string
+    unit: string
+    status: string
+    n: number
+    missing: number
+    mean: number | null
+    median: number | null
+    q1: number | null
+    q3: number | null
+    sample_sd: number | null
+    mean_bootstrap_95: [number, number] | null
+    median_bootstrap_95: [number, number] | null
+    minimum: number | null
+    maximum: number | null
+    proportion?: number | null
+    proportion_wilson_95?: [number, number] | null
+    successes?: number
+    failures?: number
+    empirical_cdf: Array<{ value: number; probability: number }>
+  }>
+  planned_runs?: number
+  campaign_complete?: boolean
+  new_model_calls?: number
+  source_campaign_id?: string
+  total_estimated_cost_usd?: number
+  scientific_estimated_cost_usd?: number
+  excluded_attempt_estimated_cost_usd?: number
+  excluded_attempts?: number
+  excluded_provider_attempts?: number
+  excluded_measurement_attempts?: number
+  excluded_provider_failure_types?: Record<string, number>
+  primary_question: string
+  focused_condition: {
+    scenario_id: IncidentScenarioId
+    task_structure: TaskStructure
+  }
+  post_rejection_analysis: {
+    focused_runs: number
+    classified_runs: number
+    unclassified_runs: number
+    counts: Record<'read_runbook_first' | 'retried_first', {
+      success: number
+      failure: number
+    }>
+    failure_rate_read_runbook_first: number | null
+    failure_rate_read_runbook_first_wilson_95: [number, number] | null
+    failure_rate_retried_first: number | null
+    failure_rate_retried_first_wilson_95: [number, number] | null
+    failure_risk_difference_retry_minus_read: number | null
+    failure_risk_difference_newcombe_95: [number, number] | null
+    fisher_exact_two_sided_p: number | null
+    interpretation_limit: string
+  }
+  focused_measurements: Record<string, {
+    n: number
+    median: number | null
+    q1: number | null
+    q3: number | null
+    minimum: number | null
+    maximum: number | null
+  }>
+  measurement_boundary: string
+  condition_summaries: Array<{
+    scenario_id: IncidentScenarioId
+    task_structure: TaskStructure
+    n_runs: number
+    successes: number
+    unique_paths: number
+    singleton_paths: number
+    modal_path_count: number
+    modal_path_proportion: number
+    path_entropy_bits: number
+    path_entropy_bootstrap_95: [number, number] | null
+    exact_oracle_successes: number
+    successful_excess_calls: {
+      n: number
+      mean: number | null
+      median: number | null
+      q1: number | null
+      q3: number | null
+      minimum: number | null
+      maximum: number | null
+    }
+  }>
+  path_summary: Array<{
+    scenario_id: IncidentScenarioId
+    task_structure: TaskStructure
+    state_sequence: string
+    count: number
+    proportion: number
+  }>
+  transition_summary: Array<{
+    scenario_id: IncidentScenarioId
+    task_structure: TaskStructure
+    source_state: string
+    target_state: string
+    count: number
+    probability: number
+  }>
+  batch_summaries: Array<{
+    batch: number
+    n_runs: number
+    successes?: number
+    failures?: number
+    success_rate: number
+    success_rate_wilson_95?: [number, number] | null
+    runbook_first?: number
+    read_runbook_first_rate: number
+    read_runbook_first_rate_wilson_95?: [number, number] | null
+    mean_mcp_calls: number
+    median_mcp_calls?: number | null
+    mean_total_latency_ms?: number
+    median_total_latency_ms?: number | null
+    mean_total_tokens?: number
+    median_total_tokens?: number | null
+    mean_estimated_cost_usd?: number
+  }>
+  prefix_outcomes?: Array<{
+    prefix: string
+    n_runs: number
+    successes: number
+    failures: number
+    failure_rate: number | null
+    failure_rate_wilson_95: [number, number] | null
+  }>
+  tool_usage?: Array<{
+    tool_name: string
+    invocations: number
+    invocation_proportion: number
+    runs: number
+    successful_runs: number
+  }>
+  latency_decomposition?: Array<{
+    component: string
+    n: number
+    median: number | null
+    q1: number | null
+    q3: number | null
+    minimum: number | null
+    maximum: number | null
+    median_share_of_total: number | null
+    correlation_with_total: number | null
+  }>
+  divergence_by_outcome?: Array<{
+    outcome: string
+    n_runs: number
+    median: number | null
+    q1: number | null
+    q3: number | null
+    minimum: number | null
+    maximum: number | null
+  }>
+  path_concentration?: Array<{
+    rank: number
+    state_sequence: string
+    count: number
+    cumulative_proportion: number
+  }>
+  trace_examples: Array<{
+    run_id: string
+    scenario_id: IncidentScenarioId
+    task_structure: TaskStructure
+    task_success: boolean
+    batch: number | null
+    execution_order: number | null
+    tool_sequence: string
+    state_sequence: string
+    oracle_sequence: string
+    post_rejection_behavior: string
+    first_oracle_divergence: number | null
+  }>
+  notes: string[]
+  intervention_arms?: Array<{
+    arm: 'control' | 'runbook_first'
+    assigned_runs: number
+    successes: number
+    failures: number
+    success_rate: number | null
+    success_rate_wilson_95: [number, number] | null
+    mean_mcp_calls: number | null
+    mean_total_latency_ms: number | null
+    mean_total_tokens: number | null
+  }>
+  primary_intervention_result?: {
+    treatment_success_rate: number | null
+    control_success_rate: number | null
+    risk_difference: number | null
+    risk_difference_newcombe_95: [number, number] | null
+    fisher_exact_two_sided_p: number | null
+  }
+  causal_interpretation_limit?: string
+  stochastic_process?: {
+    schema_version: string
+    analysis: string
+    unit: string
+    state_definition: string
+    measurement_status: string
+    timing_status: string
+    subsets: Array<{
+      arm: string
+      n_runs: number
+      states: string[]
+      transient_states: string[]
+      absorbing_states: string[]
+      transition_summary: Array<{
+        source_state: string
+        target_state: string
+        count: number
+        probability: number
+      }>
+      absorption: {
+        success_probability: number | null
+        failure_probability: number | null
+        expected_steps_to_absorption: number | null
+        expected_visits_from_start: Record<string, number>
+      }
+      history_diagnostic: {
+        method: string
+        comparisons: number
+        weighted_absolute_difference: number | null
+        interpretation: string
+      }
+      holding_times: { available: boolean; reason: string }
+      uncertainty: { available: boolean; reason: string }
+      limitations: string[]
+    }>
+  }
+  prediction?: {
+    schema_version: string
+    training_campaign_id: string
+    test_campaign_id: string
+    training_runs: number
+    test_runs: number
+    state_vocabulary: string[]
+    model_comparison: Array<{
+      model: string
+      n_runs: number
+      n_transitions: number
+      mean_run_log_loss: number | null
+      mean_run_accuracy: number | null
+      mean_run_brier_score: number | null
+      mean_run_log_loss_bootstrap_95: [number, number] | null
+      mean_run_accuracy_bootstrap_95: [number, number] | null
+      mean_run_brier_score_bootstrap_95: [number, number] | null
+    }>
+    paired_log_loss_comparisons: Array<{
+      better_model: string
+      baseline_model: string
+      mean_log_loss_difference: number | null
+      mean_log_loss_difference_bootstrap_95: [number, number] | null
+    }>
+    limitations: string[]
+  }
 }

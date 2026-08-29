@@ -1,0 +1,181 @@
+version: "1.2"
+dataset: phase5b-main-v2
+planned_valid_runs: 100
+credit_required: false
+unit: run
+foundations:
+  - id: F01
+    principle: Scalar run-level random variables come first.
+    acceptance: [call count, latency, tokens, cost, and success have distributions before path models are used]
+  - id: F02
+    principle: A trajectory has random finite length.
+    acceptance: [path probability includes length or an explicit terminal state]
+  - id: F03
+    principle: An empirical path distribution is not automatically a Markov model.
+    acceptance: [transition frequencies are labeled descriptive unless a Markov assumption is separately justified]
+  - id: F04
+    principle: Scalar outcomes are functionals or projections of a run and its trajectory.
+    acceptance: [sequence-level analysis supplements rather than replaces scalar summaries]
+questions:
+  - id: Q01
+    question: What is one observation?
+    unit: run
+    variables: [run_id, scenario_id, task_structure, tool_sequence, success]
+    estimand: classification and measurement-boundary inventory
+    method: data_dictionary
+    uncertainty: none
+    outputs: [data_dictionary.md, q01_data_dictionary.json]
+    acceptance: [every variable has type, unit, range, and measured-or-derived status]
+  - id: Q02
+    question: What distribution does each run-level outcome have?
+    unit: run
+    variables: [mcp_call_count, total_latency_ms, total_tokens, request_frame_bytes, response_frame_bytes, estimated_cost_usd]
+    estimand: marginal empirical distributions
+    method: [summary_statistics, empirical_cdf, histogram]
+    uncertainty: bootstrap_or_interval_where_defined
+    outputs: [q02_scalar_distributions.json, q02_scalar_distributions.csv]
+    acceptance: [aggregates reconcile to valid run count]
+  - id: Q03
+    question: Are repeated runs stable?
+    unit: run
+    variables: [batch, success, mcp_call_count, total_latency_ms, path_entropy]
+    estimand: batch-level drift diagnostics
+    method: [batch_table, batch_plot]
+    uncertainty: descriptive_intervals
+    outputs: [q03_batch_stability.json, q03_batch_stability.csv]
+    acceptance: [batch labels reconcile to campaign manifest]
+  - id: Q04
+    question: Does workload vary with experimental condition?
+    unit: run
+    variables: [task_structure, scenario_id, mcp_call_count]
+    estimand: conditional expected call count and ratios
+    method: [group_summary, count_regression_if_justified]
+    uncertainty: robust_interval_if_model_fitted
+    outputs: [q04_workload_by_condition.json, q04_workload_by_condition.csv, q04_count_model.json, q04_distribution_data.csv]
+    acceptance: [run-level unit preserved, dispersion checked before model choice]
+  - id: Q05
+    question: Do more MCP calls associate with longer runtime?
+    unit: run
+    variables: [mcp_call_count, total_latency_ms]
+    estimand: association between calls and total latency
+    method: [scatter_plot, correlation, descriptive_linear_regression]
+    uncertainty: confidence_interval_for_association
+    outputs: [q05_latency_vs_calls.csv]
+    acceptance: [interpretation says association, not causation]
+  - id: Q06
+    question: Where does runtime go?
+    unit: run
+    variables: [model_latency_ms, mcp_latency_ms, server_handler_latency_ms, orchestration_latency_ms, total_latency_ms]
+    estimand: component distributions and shares
+    method: [component_summary, share_summary]
+    uncertainty: descriptive_intervals
+    outputs: [q06_latency_decomposition.csv]
+    acceptance: [handler time is labeled nested within MCP time]
+  - id: Q07
+    question: What explains tokens and cost?
+    unit: run
+    variables: [total_tokens, estimated_cost_usd, mcp_call_count, total_latency_ms]
+    estimand: observed token-cost-workload associations
+    method: [scatter_plot, rank_correlation]
+    uncertainty: confidence_interval_if_reported
+    outputs: [q07_tokens_cost.csv]
+    acceptance: [no unsupported causal wording]
+  - id: Q08
+    question: Which observable histories associate with failure?
+    unit: run
+    variables: [post_rejection_behavior, task_success]
+    estimand: conditional failure rates by history
+    method: [contingency_table, wilson_interval, newcombe_interval, fisher_exact]
+    uncertainty: exact_or_score_intervals
+    outputs: [q08_history_failure.csv]
+    acceptance: [perfect separation is reported directly]
+  - id: Q09
+    question: What is the distribution of complete paths?
+    unit: run
+    variables: [state_sequence, task_success]
+    estimand: empirical path distribution and entropy
+    method: [path_frequency, entropy, bootstrap_entropy]
+    uncertainty: bootstrap_interval
+    outputs: [q09_path_distribution.csv]
+    acceptance: [entropy is labeled as a summary, not the primary object]
+  - id: Q10
+    question: What events follow other events?
+    unit: nested_event
+    variables: [source_state, target_state, transition_order]
+    estimand: observed adjacent-state transition frequencies
+    method: [transition_count, row_normalization]
+    uncertainty: descriptive_only
+    outputs: [q10_transitions.csv]
+    acceptance: [no Markov assumption is claimed]
+  - id: Q11
+    question: How much extra work occurs?
+    unit: successful_run
+    variables: [mcp_call_count, oracle_call_count, excess_mcp_calls, repeated_tool_count]
+    estimand: successful-run excess action distribution
+    method: [oracle_comparison, summary_statistics]
+    uncertainty: descriptive_intervals
+    outputs: [q11_excess_work.csv]
+    acceptance: [failed runs do not receive fabricated excess values]
+  - id: Q12
+    question: When does a trace first diverge?
+    unit: run
+    variables: [first_oracle_divergence, task_success]
+    estimand: divergence-position distribution by outcome
+    method: [group_summary]
+    uncertainty: descriptive_intervals
+    outputs: [q12_divergence.csv]
+    acceptance: [position is labeled observable sequence index]
+  - id: Q13
+    question: Which tools dominate work?
+    unit: nested_event
+    variables: [tool_name, run_id, task_success]
+    estimand: tool invocation share and run coverage
+    method: [tool_aggregation]
+    uncertainty: descriptive_only
+    outputs: [q13_tool_usage.csv]
+    acceptance: [per-tool bytes and latency remain unavailable]
+  - id: Q14
+    question: Are path, workload, and failure related?
+    unit: run
+    variables: [path_family, mcp_call_count, total_latency_ms, task_success]
+    estimand: group differences by observed path family
+    method: [group_summary, effect_sizes]
+    uncertainty: descriptive_intervals
+    outputs: [q14_path_workload_failure.csv]
+    acceptance: [path family is not treated as randomized]
+  - id: Q15
+    question: What would a causal experiment require?
+    unit: future_run
+    variables: [assigned_action, task_success]
+    estimand: intervention contrast
+    method: design_only
+    uncertainty: not_applicable
+    outputs: [q15_intervention_design.md]
+    acceptance: [no causal estimate is reported from Phase 5]
+  - id: Q16
+    question: Does assigning runbook-first recovery improve success?
+    unit: run
+    variables: [intervention_arm, task_success, mcp_call_count, total_latency_ms, total_tokens]
+    estimand: intention-to-treat success-rate difference, runbook-first minus normal policy
+    method: [randomized_assignment, success_proportion, risk_difference, fisher_exact]
+    uncertainty: newcombe_interval_for_risk_difference_and_wilson_arm_intervals
+    outputs: [q16_randomized_intervention.json, intervention_arms.csv, intervention_primary.csv]
+    acceptance: [assignment precedes outcome, arms are balanced, causal wording is limited to the tested policy and setup]
+  - id: Q17
+    question: Can observable agent traces be summarized by a small absorbing process?
+    unit: run_with_nested_state_events
+    variables: [state_sequence, intervention_arm, task_success]
+    estimand: transition frequencies, absorption probabilities, expected steps, and state visits
+    method: [compact_state_mapping, absorbing_chain, history_diagnostic]
+    uncertainty: exploratory_model_status_and_sparse_cell_warnings
+    outputs: [q17_absorbing_process.json]
+    acceptance: [observational_and_assigned_policy_subsets_are_separate, no_universal_markov_claim, holding_times_marked_unavailable_without_timestamps]
+  - id: Q18
+    question: Can fixed stochastic models predict next observable states on new runs?
+    unit: run_with_nested_state_events
+    variables: [state_sequence, model, log_loss, accuracy, brier_score]
+    estimand: held-out run-level predictive performance and paired model differences
+    method: [fixed_training_campaign, held_out_test_campaign, smoothed_state_models]
+    uncertainty: run_level_resampling_deferred_until_campaign_completion
+    outputs: [q18_held_out_trajectory_prediction.json]
+    acceptance: [training_and_test_campaigns_are_separate, transitions_are_nested_within_runs, metrics_are_labeled_inferred]

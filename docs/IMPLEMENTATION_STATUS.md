@@ -2,7 +2,7 @@
 
 Status date: **2026-08-28**
 
-Release version: **0.5.0**
+Release version: **0.8.0**
 
 Permanent branches: **`demo`** and **`main`**
 
@@ -29,6 +29,89 @@ Permanent branches: **`demo`** and **`main`**
 
 The main study found approximately 20.5% more expected MCP calls under recovery than sequential structure. Branching showed no detectable call-count difference. Overall success was 85/90.
 
+### Phase 5 stochastic trace study
+
+- Tool-and-outcome states with explicit start, terminal-success, and terminal-failure states.
+- Direct classification of whether the runbook was read before another post-rejection action.
+- Two-by-two outcome counts, Wilson intervals, a Newcombe risk-difference interval, and Fisher's exact test.
+- Complete path frequencies, singleton counts, bootstrap entropy intervals, transitions, divergence, repeated tools, and successful-run excess calls.
+- Frozen focused campaign with configuration fingerprint, resumability, batches, pilot/main separation, and a USD 5 estimated-cost guard.
+- Read-only trace-study API and a practical React trace-dynamics workbench.
+
+Stage 5A has reanalysed all 90 Phase 4 observations without new model calls. Stage 5B is complete with 100 valid runs. Seventeen provider-error attempts from the earlier quota interruption are retained for audit but excluded from scientific analysis.
+
+### Phase 6A credit-free secondary analysis
+
+Phase 6A reuses the completed Phase 5B artifacts without model calls. It adds partial-history outcome tables, tool-usage counts, latency-component summaries, divergence-by-outcome, path concentration, downloadable tables, and corresponding UI sections.
+
+The [Phase 6A statistical analysis roadmap](planning/phase6_statistical_analysis_roadmap.md) documents the small-question learning sequence and interpretation rules.
+
+The specification-driven statistical program is documented in `docs/specs/`: an authoritative specification, question registry, data dictionary, and traceability matrix. These documentation artifacts do not require new model calls.
+
+The reader-facing synthesis of the main empirical findings is
+[`results/agent_execution_study_results.md`](results/agent_execution_study_results.md).
+Phase-specific result files remain as technical provenance and audit records.
+
+### Phase 12: statistical study layer
+
+Phase 12A is a specification phase with no new model calls. It formalizes the
+distinction between an observability measurement layer and this repository's
+statistical study layer. The run is the experimental unit; scalar outcomes are
+analyzed first, followed by variable-length trajectory distributions and only
+then any stochastic-process model. See `docs/specs/analysis_contracts.md` and
+`docs/planning/phase12_statistical_study_layer_plan.md`.
+
+Phase 12B adds reproducible bootstrap intervals for scalar means and medians,
+Wilson intervals for success proportions, richer per-batch summaries, and
+explicit Q01–Q03 artifact contracts. It reuses saved Phase 5 data and makes no
+new model calls.
+
+Phase 12C adds an explicit Q09–Q14 trajectory-analysis artifact contract. It
+packages complete-path frequencies, entropy/concentration, descriptive
+transitions, oracle divergence, excess work, tool usage, and path-family
+comparisons while preserving the run-level denominator and the no-Markov/no-
+causal-claim limits.
+
+### Phase 13: randomized recovery-policy intervention
+
+Completed with 60 valid live runs (30 normal-policy control, 30 assigned
+runbook-first). Success was 20/30 versus 30/30; the intention-to-treat
+success-rate difference was 33.3 percentage points with Newcombe 95% interval
+15.2–51.2 points. The campaign stayed below the $3.00 guard and is documented
+in the combined results report and `q16_randomized_intervention.json`.
+
+### Phase 14: small stochastic-process model
+
+Phase 14 adds a no-new-calls exploratory absorbing-process analysis over the
+existing compact observable state paths. It reports separate natural-policy and
+assigned-policy subsets, transition counts, absorption probabilities, expected
+steps/visits, and a first-versus-richer-history diagnostic. Holding times remain
+unavailable because the current trace artifact has ordering but not per-event
+timestamps. The process model is inferred from measured traces and does not
+claim a universal Markov property.
+
+### Phase 15: held-out trajectory prediction
+
+Phase 15 adds fixed global, current-state, and short-history predictors for
+compact observable state paths. Existing traces are training data and a
+separate same-configuration campaign is the held-out test set. The artifact and
+UI report run-level log loss, accuracy, Brier score, and paired comparisons.
+The live holdout campaign is cost-guarded and its completion status is retained
+in the campaign manifest.
+
+The 60-run holdout completed at an estimated $2.1515. The history-aware model
+achieved 0.536 mean run log loss and 87.9% accuracy, versus 0.779 and 71.6% for
+the current-state model. The paired log-loss difference was -0.243 (95%
+run-level bootstrap interval -0.280 to -0.209).
+
+### Phase 8 scalar statistical baseline
+
+Phase 8 implements Q01–Q03 from the specification using only the saved Phase 5 campaign. It adds run-level scalar distributions, an explicit scalar data dictionary, batch-stability summaries, downloadable JSON/CSV artifacts, a read-only artifact route, and a Scalar Baseline section in the React workbench. Q04 and later remain specified but pending.
+
+### Phase 10 workload by task condition
+
+Phase 10 implements Q04 using the saved 90-run Phase 4 main campaign. It publishes workload summaries by sequential, branching, and recovery structure, the pre-specified Poisson count model with HC3 covariance, dispersion diagnostics, downloadable Q04 artifacts, and a workload comparison in the Behavior workbench. No new model calls are required.
+
 ## Measurement boundary
 
 The active system measures model activity and local newline-delimited MCP/JSON-RPC frames crossing a stdio relay. Request and response byte counts are exact at that boundary.
@@ -38,11 +121,12 @@ It does not measure HTTP, TLS, TCP, IP, Internet RTT, queue waiting, arrival pro
 ## Active software
 
 ```text
-frontend/src/components/     Phase 3 and Phase 4 workbenches
+frontend/src/components/     Phase 3, Phase 4, and Phase 5 workbenches
 api/app.py                   active HTTP routes and artifact downloads
 incidents/                   agent runner, MCP server, task state, scoring
 behavior/                    Phase 4 design, campaigns, traces, models
 transport/                   exact stdio relay and frame contract
+trace_study/                 Phase 5 analysis and focused campaigns
 agent_campaigns.py           Phase 3 repeated campaign
 ```
 
@@ -53,18 +137,19 @@ The earlier calibration applications and their public routes have been retired. 
 - `/api/health`
 - `/api/agent/*`
 - `/api/behavior/*`
+- `/api/trace-study/*`
 
 There are no compatibility stubs for the retired routes.
 
 ## Artifact policy
 
-Generated run and campaign artifacts remain ignored by Git under `artifacts/phase3/` and `artifacts/phase4/`. The application does not delete or migrate existing local data during the 0.5.0 cleanup.
+Generated run and campaign artifacts remain ignored by Git under `artifacts/phase3/`, `artifacts/phase4/`, and `artifacts/phase5/`. Phase 5 reads but does not rewrite Phase 4 raw observations.
 
 ## Validation policy
 
 Every release must pass the Python unit/integration suite, Ruff, strict mypy, React tests, production build, Playwright workflows, uv lock verification, and `git diff --check`.
 
-The transport suite must cross the real relay and incident subprocess without model credit. UI workflows must cover both active surfaces.
+The transport suite must cross the real relay and incident subprocess without model credit. UI workflows must cover all three active surfaces.
 
 ## Documentation
 
@@ -75,3 +160,6 @@ The transport suite must cross the real relay and incident subprocess without mo
 - [`phase4_task_structure.md`](phase4_task_structure.md): Phase 4 method.
 - [`planning/phase4_task_structure_plan.md`](planning/phase4_task_structure_plan.md): frozen Phase 4 design.
 - [`results/phase4_task_structure_results.md`](results/phase4_task_structure_results.md): consolidated Phase 4 results.
+- [`phase5_stochastic_traces.md`](phase5_stochastic_traces.md): Phase 5 method in practical language.
+- [`planning/phase5_stochastic_trace_plan.md`](planning/phase5_stochastic_trace_plan.md): frozen Phase 5 protocol.
+- [`results/phase5_stochastic_trace_results.md`](results/phase5_stochastic_trace_results.md): single Phase 5 result document.

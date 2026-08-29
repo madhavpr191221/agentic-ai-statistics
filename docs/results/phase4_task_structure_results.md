@@ -1,5 +1,8 @@
 # Phase 4 Results: Does Task Structure Change Agent Behavior?
 
+For the concise combined study findings, start with
+[`agent_execution_study_results.md`](agent_execution_study_results.md).
+
 Status: **complete**
 
 Main campaign: **`task-structure-main-v1`**, completed on 2026-08-27
@@ -101,7 +104,7 @@ The variables on the right are called **covariates**. A covariate is simply a re
 | Randomized block | Adjustment variable | Categorical blocking factor | Block labels 1 through 10 | Converted into nine binary indicators, with block 1 as the reference |
 | $\mu_r$ | Model-produced expected call count | Positive continuous quantity | Any value greater than zero | Not observed directly; calculated by the fitted model |
 
-**Nominal categorical** means that the values name different groups but have no natural numerical order. For example, recovery is not “larger than” branching in the way that 20 seconds is larger than 10 seconds.
+**Nominal categorical** means that the values name different groups but have no natural numerical order. For example, recovery is not â€œlarger thanâ€ branching in the way that 20 seconds is larger than 10 seconds.
 
 Although blocks are labelled 1 to 10, block was **not** treated as a continuous number. The model did not assume that moving from block 1 to block 2 had the same effect as moving from block 8 to block 9. Each block was treated as its own category.
 
@@ -156,7 +159,7 @@ $$
 
 which is far below 1. A negative-binomial model adds extra variance and was therefore unsuitable here.
 
-We used a Poisson model to estimate the average call ratios and **HC3 robust standard errors** for uncertainty. “Robust standard errors” means that the confidence intervals were calculated in a way that does not require the observed variance to match the Poisson variance exactly. The frozen rule said to fit a negative-binomial sensitivity model only if the dispersion estimate exceeded 1.25. It did not, so that model was not fitted.
+We used a Poisson model to estimate the average call ratios and **HC3 robust standard errors** for uncertainty. â€œRobust standard errorsâ€ means that the confidence intervals were calculated in a way that does not require the observed variance to match the Poisson variance exactly. The frozen rule said to fit a negative-binomial sensitivity model only if the dispersion estimate exceeded 1.25. It did not, so that model was not fitted.
 
 ## What happened in the five failed runs?
 
@@ -237,7 +240,7 @@ We have not shown that the numerical effect applies to all models, agents, or re
 The main analysis can be rebuilt without making new model calls:
 
 ```powershell
-uv --cache-dir .uv-cache run --all-groups python -m mcp_traffic_analysis.behavior.campaigns task-structure-main-v1 --stage main --analyze-only
+uv --cache-dir .uv-cache run --all-groups python -m agentic_ai_statistics.behavior.campaigns task-structure-main-v1 --stage main --analyze-only
 ```
 
 The analyzed local artifacts had these SHA-256 checksums:
@@ -247,4 +250,3 @@ The analyzed local artifacts had these SHA-256 checksums:
 | `campaign_manifest.json` | `60e0cb8d8658427f62226724d02e929cf2de902fe381850f38aaf5596ffe2233` |
 | `analysis.json` | `f4f8edfa67726de7884ef8fd12dbe37f4cfe61d3c8b94e91fc0c98aade81aaaa` |
 | `tables/runs.csv` | `b9552bfbc1f68904452cda52db73db1daf1f333120249c16339a281f7f0b56a4` |
-

@@ -9,9 +9,9 @@ import pytest
 from agents.mcp import MCPServerStdio
 from pydantic import ValidationError
 
-from mcp_traffic_analysis.incidents.models import IncidentScenario
-from mcp_traffic_analysis.incidents.world import initial_state, save_state
-from mcp_traffic_analysis.transport.models import (
+from agentic_ai_statistics.incidents.models import IncidentScenario
+from agentic_ai_statistics.incidents.world import initial_state, save_state
+from agentic_ai_statistics.transport.models import (
     FrameDirection,
     FrameMessageType,
     TransportFrame,
@@ -45,7 +45,7 @@ async def test_relay_records_exact_incident_server_frames(tmp_path: Path) -> Non
     save_state(state_path, initial_state(IncidentScenario.CHECKOUT_FAILURES))
     relay_args = [
         "-m",
-        "mcp_traffic_analysis.transport.stdio_relay",
+        "agentic_ai_statistics.transport.stdio_relay",
         "--python",
         sys.executable,
         "--run-id",
@@ -53,7 +53,7 @@ async def test_relay_records_exact_incident_server_frames(tmp_path: Path) -> Non
         "--frames",
         str(frames_path),
         "--server-module",
-        "mcp_traffic_analysis.incidents.server",
+        "agentic_ai_statistics.incidents.server",
         "--server-arg=--state",
         f"--server-arg={state_path}",
         "--server-arg=--events",
