@@ -170,6 +170,16 @@ inspect alert → read runbook
 
 and reports row-normalized frequencies. These are observed transition summaries. The UI does not claim that the agent is a Markov chain.
 
+### 10a. Phase 14 stochastic process
+
+The Phase 14 panel groups the compact states into an exploratory absorbing
+process. “Eventual success” means the fitted process reaches `END_SUCCESS` from
+`START`; “expected steps” is the fitted average number of transitions before
+termination. These are inferred from recorded paths, not directly measured
+quantities. Natural-policy and assigned-policy traces are shown separately, and
+holding times are marked unavailable because the current artifact has no
+per-event timestamps.
+
 ### 11. Action efficiency
 
 The efficiency panel compares successful paths with the shortest valid oracle. For a successful run,

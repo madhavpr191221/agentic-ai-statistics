@@ -80,6 +80,16 @@ success-rate difference was 33.3 percentage points with Newcombe 95% interval
 15.2–51.2 points. The campaign stayed below the $3.00 guard and is documented
 in the combined results report and `q16_randomized_intervention.json`.
 
+### Phase 14: small stochastic-process model
+
+Phase 14 adds a no-new-calls exploratory absorbing-process analysis over the
+existing compact observable state paths. It reports separate natural-policy and
+assigned-policy subsets, transition counts, absorption probabilities, expected
+steps/visits, and a first-versus-richer-history diagnostic. Holding times remain
+unavailable because the current trace artifact has ordering but not per-event
+timestamps. The process model is inferred from measured traces and does not
+claim a universal Markov property.
+
 ### Phase 8 scalar statistical baseline
 
 Phase 8 implements Q01–Q03 from the specification using only the saved Phase 5 campaign. It adds run-level scalar distributions, an explicit scalar data dictionary, batch-stability summaries, downloadable JSON/CSV artifacts, a read-only artifact route, and a Scalar Baseline section in the React workbench. Q04 and later remain specified but pending.

@@ -33,6 +33,7 @@ from agentic_ai_statistics.trace_study.analysis import (
     newcombe_difference_interval,
     wilson_interval,
 )
+from agentic_ai_statistics.trace_study.stochastic import stochastic_analysis
 
 StudyStage = Literal["exploratory", "smoke", "main"]
 FOCUSED_SCENARIO = IncidentScenario.ORDERS_API_OUTAGE
@@ -148,6 +149,25 @@ def _write_trajectory_artifact(directory: Path, analysis: dict[str, Any]) -> Non
         "batches": analysis["batch_summaries"],
         "limitations": ["Batch comparisons diagnose possible drift but do not prove it."],
     })
+
+
+def _attach_stochastic_analysis(analysis: dict[str, Any]) -> None:
+    analysis["stochastic_process"] = stochastic_analysis(analysis["trace_examples"])
+
+
+def _write_stochastic_artifact(directory: Path, analysis: dict[str, Any]) -> None:
+    process = analysis.get("stochastic_process")
+    if process is not None:
+        _write_json(directory / "q17_absorbing_process.json", {
+            **process,
+            "question_id": "Q17",
+            "estimands": [
+                "observable transition frequencies",
+                "eventual success and failure absorption probabilities",
+                "expected steps to absorption",
+                "history-dependence diagnostic",
+            ],
+        })
 
 
 def frozen_configuration() -> dict[str, Any]:
@@ -344,11 +364,12 @@ def analyze_collected_campaign(campaign_directory: Path) -> dict[str, Any]:
         campaign_id=str(manifest["campaign_id"]),
         study_stage=str(manifest["study_stage"]),
     )
-    analysis["planned_runs"] = int(manifest["planned_runs"])
-    analysis["campaign_complete"] = len(details) == int(manifest["planned_runs"])
-    analysis["configuration_fingerprint_sha256"] = manifest[
+    planned_runs = int(manifest.get("planned_runs", len(details)))
+    analysis["planned_runs"] = planned_runs
+    analysis["campaign_complete"] = len(details) == planned_runs
+    analysis["configuration_fingerprint_sha256"] = manifest.get(
         "configuration_fingerprint_sha256"
-    ]
+    )
     scientific_cost = sum(
         detail.measurement.estimated_cost_usd for detail in details
     )
@@ -373,10 +394,12 @@ def analyze_collected_campaign(campaign_directory: Path) -> dict[str, Any]:
             ).items()
         )
     )
+    _attach_stochastic_analysis(analysis)
     _write_json(campaign_directory / "analysis.json", analysis)
     _write_tables(campaign_directory, tables)
     _write_scalar_artifacts(campaign_directory, analysis)
     _write_trajectory_artifact(campaign_directory, analysis)
+    _write_stochastic_artifact(campaign_directory, analysis)
     return analysis
 
 
@@ -451,12 +474,14 @@ def analyze_intervention_campaign(campaign_directory: Path) -> dict[str, Any]:
             "model, prompt, tools, and synthetic Orders incident."
         ),
     })
+    _attach_stochastic_analysis(analysis)
     tables["intervention_arms"] = pd.DataFrame(arm_rows)
     tables["intervention_primary"] = pd.DataFrame([primary])
     _write_json(campaign_directory / "analysis.json", analysis)
     _write_tables(campaign_directory, tables)
     _write_scalar_artifacts(campaign_directory, analysis)
     _write_trajectory_artifact(campaign_directory, analysis)
+    _write_stochastic_artifact(campaign_directory, analysis)
     _write_json(campaign_directory / "q16_randomized_intervention.json", {
         "schema_version": "13.0.0",
         "question_id": "Q16",
@@ -502,11 +527,13 @@ def reanalyze_phase4(
     analysis["source_campaign_id"] = source_manifest["campaign_id"]
     analysis["campaign_complete"] = True
     analysis["new_model_calls"] = 0
+    _attach_stochastic_analysis(analysis)
     _write_json(campaign_directory / "campaign_manifest.json", manifest)
     _write_json(campaign_directory / "analysis.json", analysis)
     _write_tables(campaign_directory, tables)
     _write_scalar_artifacts(campaign_directory, analysis)
     _write_trajectory_artifact(campaign_directory, analysis)
+    _write_stochastic_artifact(campaign_directory, analysis)
     return campaign_directory
 
 

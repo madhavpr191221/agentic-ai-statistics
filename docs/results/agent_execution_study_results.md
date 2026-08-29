@@ -216,9 +216,8 @@ Under controlled synthetic incident conditions, the agent generated a fairly
 stable workload and latency distribution but meaningful variation in its
 execution paths. Failures concentrated in one observable post-rejection
 behavior, while successful runs were usually inefficient relative to the
-shortest valid solution. The next scientifically meaningful step is a small
-controlled intervention, not a larger dashboard or an unsupported stochastic
-process model.
+shortest valid solution. Phase 14 adds a deliberately small exploratory process
+model; its purpose is model assessment, not a universal claim about agents.
 
 ## Result 9: randomized recovery-policy intervention
 
@@ -261,6 +260,20 @@ The intervention arm also had lower descriptive workload and latency:
 These secondary differences are descriptive. The primary pre-specified causal
 claim concerns task success.
 
+## Result 10: exploratory absorbing-process analysis
+
+Phase 14 fits a compact absorbing process to recorded observable state paths.
+`START` is initial, tool-and-outcome states are transient, and
+`END_SUCCESS`/`END_FAILURE` are absorbing. Natural-policy and assigned-policy
+traces are analyzed separately.
+
+The output reports transition frequencies, eventual absorption probabilities,
+expected steps, expected visits, and a first-order versus richer-history
+diagnostic. This is an exploratory approximation to the observed trace
+distribution, not evidence that private reasoning is Markovian. Holding-time
+modeling is not estimable because the current artifact records ordering but not
+per-event timestamps.
+
 ## Technical evidence
 
 - [Phase 3 pilot results](phase3_incident_pilot_results.md)
@@ -271,3 +284,4 @@ claim concerns task success.
 - [Analysis contracts](../specs/analysis_contracts.md)
 - [Trajectory artifact](../../artifacts/phase5/campaign-trace-orders-recovery-main-v2/q09_q14_trajectory_analysis.json)
 - [Randomized intervention artifact](../../artifacts/phase5/campaign-intervention-orders-recovery-v1/q16_randomized_intervention.json)
+- [Phase 14 process artifact](../../artifacts/phase5/campaign-trace-orders-recovery-main-v2/q17_absorbing_process.json)

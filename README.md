@@ -271,4 +271,15 @@ The project does not yet measure:
 
 Empirical path entropy and transition frequencies describe the observed traces. They do not by themselves establish a Markov or queueing model.
 
+### Phase 14: small stochastic-process model
+
+Phase 14 uses saved traces to fit an exploratory absorbing process over compact
+observable states. It reports transition frequencies, eventual success or
+failure probabilities, expected steps, and a history-dependence diagnostic.
+Natural-policy and randomized-policy traces are analyzed separately. This is a
+model of recorded behavior, not private reasoning, network traffic, or a claim
+that the entire agent is truly Markovian. See
+[`phase14_stochastic_process_plan.md`](docs/planning/phase14_stochastic_process_plan.md)
+and [`phase14_stochastic_process_spec.md`](docs/specs/phase14_stochastic_process_spec.md).
+
 The permanent branches are `demo` for tested integration and `main` for released work.

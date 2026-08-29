@@ -1,6 +1,6 @@
 # Code Flow
 
-This document follows one active experiment from the browser to the saved statistical artifact. The repository contains the Phase 3 incident agent, Phase 4 task-structure experiment, and Phase 5 stochastic-trace study.
+This document follows one active experiment from the browser to the saved statistical artifact. The repository contains the Phase 3 incident agent, Phase 4 task-structure experiment, Phase 5 stochastic-trace study, and Phase 14 process analysis.
 
 For a screen-by-screen explanation of what the user sees and what each number means, read [`UI_GUIDE.md`](UI_GUIDE.md).
 
@@ -12,6 +12,11 @@ repeated runs form the sample. Scalar run outcomes are the first random
 variables; the ordered, variable-length path is a richer random object. Every
 analysis is registered with a question, estimand, unit, uncertainty rule, and
 limitation in `docs/specs/analysis_contracts.md`.
+
+Phase 14 reads complete state paths from the trace artifact and fits a small
+absorbing-process summary. It makes no model calls: the analysis layer counts
+state movements and solves the transient system when possible, producing
+`q17_absorbing_process.json` for the API and UI.
 
 ## One-run overview
 

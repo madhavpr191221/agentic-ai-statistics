@@ -409,4 +409,40 @@ export interface TraceStudyAnalysis {
     fisher_exact_two_sided_p: number | null
   }
   causal_interpretation_limit?: string
+  stochastic_process?: {
+    schema_version: string
+    analysis: string
+    unit: string
+    state_definition: string
+    measurement_status: string
+    timing_status: string
+    subsets: Array<{
+      arm: string
+      n_runs: number
+      states: string[]
+      transient_states: string[]
+      absorbing_states: string[]
+      transition_summary: Array<{
+        source_state: string
+        target_state: string
+        count: number
+        probability: number
+      }>
+      absorption: {
+        success_probability: number | null
+        failure_probability: number | null
+        expected_steps_to_absorption: number | null
+        expected_visits_from_start: Record<string, number>
+      }
+      history_diagnostic: {
+        method: string
+        comparisons: number
+        weighted_absolute_difference: number | null
+        interpretation: string
+      }
+      holding_times: { available: boolean; reason: string }
+      uncertainty: { available: boolean; reason: string }
+      limitations: string[]
+    }>
+  }
 }

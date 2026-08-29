@@ -45,6 +45,19 @@ from agentic_ai_statistics.trace_study.campaigns import (
     quarantine_incomplete_run,
     run_campaign,
 )
+from agentic_ai_statistics.trace_study.stochastic import fit_absorbing_process
+
+
+def test_absorbing_process_uses_weighted_transition_totals() -> None:
+    rows = [
+        {"state_sequence": "START > inspect|observed > END_SUCCESS"},
+        {"state_sequence": "START > inspect|observed > END_FAILURE"},
+    ]
+    result = fit_absorbing_process(rows, arm=None)
+    start = next(row for row in result["transition_summary"] if row["source_state"] == "START")
+    assert start["probability"] == 1.0
+    assert result["absorption"]["success_probability"] == 0.5
+    assert result["absorption"]["expected_steps_to_absorption"] == 2.0
 
 
 def _detail(*, success: bool, read_runbook_first: bool) -> IncidentRunDetail:
