@@ -96,6 +96,19 @@ export function TraceDynamicsWorkbench() {
         <div><strong>{campaign.study_stage === 'exploratory' ? 'Reused Phase 4 evidence' : `New Phase 5 ${campaign.study_stage} evidence`}</strong><span>{campaign.study_stage === 'exploratory' ? 'No new model calls' : campaign.campaign_complete ? 'Complete campaign' : 'Incomplete campaign'}</span></div>
       </section>
 
+      {campaign.stochastic_process ? <section className="panel" data-testid="stochastic-process">
+        <p className="eyebrow">Phase 14 · stochastic process</p>
+        <h2>How does the observable execution move toward success or failure?</h2>
+        <p>Each row summarizes a small absorbing-process model fitted to complete recorded traces. It describes observable states; it does not reveal private model reasoning.</p>
+        {campaign.stochastic_process.subsets.map((subset) => <div className="process-subset" key={subset.arm}>
+          <h3>{subset.arm === 'observational' ? 'Natural-policy traces' : `Assigned policy: ${subset.arm.replaceAll('_', ' ')}`}</h3>
+          <div className="study-facts"><span><strong>{subset.n_runs}</strong> runs</span><span><strong>{percentage(subset.absorption.success_probability)}</strong> eventual success</span><span><strong>{percentage(subset.absorption.failure_probability)}</strong> eventual failure</span><span><strong>{measured(subset.absorption.expected_steps_to_absorption, 2)}</strong> expected steps</span></div>
+          <div className="table-scroll"><table className="data-table"><thead><tr><th>From</th><th>To</th><th>Observed transitions</th><th>Row percentage</th></tr></thead><tbody>{subset.transition_summary.slice(0, 12).map((row) => <tr key={`${subset.arm}-${row.source_state}-${row.target_state}`}><td>{shortState(row.source_state)}</td><td>{shortState(row.target_state)}</td><td>{row.count}</td><td>{percentage(row.probability)}</td></tr>)}</tbody></table></div>
+          <p className="method-note">{subset.history_diagnostic.interpretation} Holding times: {subset.holding_times.available ? 'available' : 'unavailable in this artifact'}.</p>
+        </div>)}
+        <div className="download-row"><a href={`/api/trace-study/campaigns/${campaign.campaign_id}/artifacts/q17_absorbing_process.json`}>Download Phase 14 process artifact</a></div>
+      </section> : null}
+
       {campaign.primary_intervention_result && campaign.intervention_arms ? <section className="panel primary-result" data-testid="intervention-result">
         <p className="eyebrow">Phase 13 · randomized policy intervention</p>
         <h2>Does assigning runbook-first recovery improve success?</h2>

@@ -96,6 +96,8 @@ select:focus { outline: 3px solid rgba(34,87,122,.16); border-color: #22577a; }
 .transition-grid div { display: grid; grid-template-columns: 80px minmax(0, 1fr) 38px; gap: 8px; padding: 7px 9px; border-radius: 6px; font-size: .68rem; }
 .transition-grid strong { text-transform: uppercase; }
 .transition-grid b { text-align: right; }
+.process-subset { border-top: 1px solid #d9e2df; margin-top: 16px; padding-top: 12px; }
+.process-subset h3 { margin: 0 0 8px; }
 @media (max-width: 900px) { .control-grid, .trace-comparison { grid-template-columns: 1fr; } }
 
 .trace-workbench { display: grid; gap: 18px; }

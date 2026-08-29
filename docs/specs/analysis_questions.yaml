@@ -161,3 +161,12 @@ questions:
     uncertainty: newcombe_interval_for_risk_difference_and_wilson_arm_intervals
     outputs: [q16_randomized_intervention.json, intervention_arms.csv, intervention_primary.csv]
     acceptance: [assignment precedes outcome, arms are balanced, causal wording is limited to the tested policy and setup]
+  - id: Q17
+    question: Can observable agent traces be summarized by a small absorbing process?
+    unit: run_with_nested_state_events
+    variables: [state_sequence, intervention_arm, task_success]
+    estimand: transition frequencies, absorption probabilities, expected steps, and state visits
+    method: [compact_state_mapping, absorbing_chain, history_diagnostic]
+    uncertainty: exploratory_model_status_and_sparse_cell_warnings
+    outputs: [q17_absorbing_process.json]
+    acceptance: [observational_and_assigned_policy_subsets_are_separate, no_universal_markov_claim, holding_times_marked_unavailable_without_timestamps]
