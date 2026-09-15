@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from agentic_ai_statistics.analysis.scalar_summary import ScalarSummary, summarize_runs
 from agentic_ai_statistics.behavior.repository import BehaviorRepository
 from agentic_ai_statistics.incidents.models import (
     BehaviorRunRequest,
@@ -272,6 +273,11 @@ def create_app(
     @api.get("/api/agent/runs", response_model=list[IncidentRunDetail])
     async def list_agent_runs() -> list[IncidentRunDetail]:
         return incident_repository.list_runs()
+
+    @api.get("/api/agent/scalar-summary", response_model=list[ScalarSummary])
+    async def scalar_summary() -> list[ScalarSummary]:
+        """Describe saved complete runs; nested calls are not separate rows."""
+        return summarize_runs(incident_repository.list_runs())
 
     @api.get("/api/agent/runs/{run_id}", response_model=IncidentRunDetail)
     async def get_agent_run(run_id: UUID) -> IncidentRunDetail:

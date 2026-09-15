@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
-import type { IncidentCampaignSummary, IncidentRunDetail, IncidentScenarioDescriptor, IncidentScenarioId } from '../types'
+import type { IncidentCampaignSummary, IncidentRunDetail, IncidentScenarioDescriptor, IncidentScenarioId, ScalarSummary } from '../types'
 
 function ms(value: number) { return `${value.toFixed(1)} ms` }
 
@@ -13,14 +13,15 @@ export function IncidentWorkbench() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [campaigns, setCampaigns] = useState<IncidentCampaignSummary[]>([])
+  const [summary, setSummary] = useState<ScalarSummary[]>([])
 
-  useEffect(() => { Promise.all([api.listIncidentScenarios(), api.listIncidentRuns(), api.listIncidentCampaigns()]).then(([s, r, c]) => {
-    setScenarios(s); setRuns(r); setActive(r[0] ?? null); setCampaigns(c)
+  useEffect(() => { Promise.all([api.listIncidentScenarios(), api.listIncidentRuns(), api.listIncidentCampaigns(), api.getScalarSummary()]).then(([s, r, c, summary]) => {
+    setScenarios(s); setRuns(r); setActive(r[0] ?? null); setCampaigns(c); setSummary(summary)
   }).catch((reason: unknown) => setError(String(reason))) }, [])
 
   async function run() {
     setBusy(true); setError(null)
-    try { const result = await api.createIncidentRun(scenario, mode); setActive(result); setRuns(current => [result, ...current]) }
+    try { const result = await api.createIncidentRun(scenario, mode); setActive(result); setRuns(current => [result, ...current]); setSummary(await api.getScalarSummary()) }
     catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)) }
     finally { setBusy(false) }
   }
@@ -44,6 +45,7 @@ export function IncidentWorkbench() {
         <div className="run-list">{runs.map(item => <button key={item.run_id} onClick={() => setActive(item)}>{item.scenario_id}<small>{item.score.task_success ? 'success' : 'failure'}</small></button>)}</div>
       </section>
       <section className="panel"><p className="eyebrow">Saved study material</p><h2>{campaigns.length} campaigns</h2><p className="field-note">Campaigns are collections of fresh runs; interpret them only with their documented condition and estimand.</p>{campaigns.map(item => <div key={item.campaign_id} className="campaign-mini"><strong>{item.campaign_id}</strong><span>{item.successes}/{item.n_runs} successes · ${item.total_estimated_cost_usd.toFixed(3)}</span><a href={`/api/agent/campaigns/${item.campaign_id}/tables/runs.csv`}>download runs</a></div>)}</section>
+      <section className="panel"><p className="eyebrow">Scalar baseline</p><h2>{summary.length ? `${summary[0].n} complete-run observations` : 'No observations yet'}</h2><p className="field-note">These summaries describe saved runs. Calls inside a run are nested measurements, not independent observations.</p><div className="summary-table"><div className="summary-row summary-header"><span>Measure</span><span>Type</span><span>Median</span><span>Range</span></div>{summary.map(item => <div className="summary-row" key={item.field}><span>{item.label}</span><span>{item.kind} · {item.unit}</span><span>{item.proportion != null ? `${(item.proportion * 100).toFixed(1)}%` : item.median == null ? '—' : item.median.toFixed(item.kind === 'continuous' ? 1 : 0)}</span><span>{item.minimum == null ? '—' : `${item.minimum.toFixed(item.kind === 'continuous' ? 1 : 0)}–${item.maximum?.toFixed(item.kind === 'continuous' ? 1 : 0)}`}</span></div>)}</div></section>
     </aside>
     <div className="main-column">{!active ? <section className="panel welcome-panel"><p className="eyebrow">Start here</p><h2>Measure a real decision trace</h2><p>The agent gathers evidence through MCP, chooses a simulated action, and is scored against known ground truth.</p></section> : <>
       <section className="metric-grid">

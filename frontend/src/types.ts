@@ -82,6 +82,23 @@ export interface IncidentCampaignSummary {
   total_estimated_cost_usd: number
 }
 
+export interface ScalarSummary {
+  field: string
+  label: string
+  kind: 'count' | 'continuous' | 'binary'
+  unit: string
+  status: string
+  n: number
+  missing: number
+  mean: number | null
+  median: number | null
+  q1: number | null
+  q3: number | null
+  minimum: number | null
+  maximum: number | null
+  proportion?: number | null
+}
+
 export type TaskStructure = 'sequential' | 'branching' | 'recovery'
 
 export interface BehaviorCondition {
