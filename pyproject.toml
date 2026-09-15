@@ -1,7 +1,7 @@
 [project]
 name = "agentic-ai-statistics"
-version = "0.9.0"
-description = "Empirical performance analysis of agentic AI systems and MCP communication"
+version = "0.1.0"
+description = "Statistical case study of stochastic agent behavior and system performance"
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
 dependencies = [
