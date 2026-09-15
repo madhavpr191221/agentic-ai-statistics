@@ -26,6 +26,7 @@ data/raw/
 data/processed/
 results/
 artifacts/
+artifacts-archive-*/
 
 # Curated result memos are documentation, not generated experiment output.
 !docs/results/
