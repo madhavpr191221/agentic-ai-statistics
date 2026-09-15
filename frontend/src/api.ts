@@ -7,6 +7,7 @@ import type {
   IncidentScenarioId,
   TaskStructure,
   TraceStudyAnalysis,
+  ScalarSummary,
 } from './types'
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
@@ -34,6 +35,7 @@ export const api = {
       body: JSON.stringify({ scenario, mode }),
     }),
   listIncidentCampaigns: () => request<IncidentCampaignSummary[]>('/api/agent/campaigns'),
+  getScalarSummary: () => request<ScalarSummary[]>('/api/agent/scalar-summary'),
   listBehaviorConditions: () => request<BehaviorCondition[]>('/api/behavior/conditions'),
   listBehaviorRuns: () => request<IncidentRunDetail[]>('/api/behavior/runs'),
   createBehaviorRun: (
