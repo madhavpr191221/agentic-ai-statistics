@@ -1,293 +1,61 @@
 # Agentic AI Statistics
 
-A specification-driven statistical study of repeated agent executions. MCP is
-the first measurement adapter; the scientific focus is distributions,
-uncertainty, trajectory variability, reliability, and controlled effects.
+An empirical statistical study of how a stochastic AI agent behaves while solving controlled IT incidents.
 
-Observability asks what happened in one run. This project asks how the
-distribution of runs changes, how variable the paths are, and which controlled
-conditions or observable histories explain that variation.
+## The goal
 
-Read the [main results report](docs/results/agent_execution_study_results.md)
-for the concise combined findings from the completed studies.
+We repeat the same incident task under controlled conditions and learn the distribution of what happens:
 
-## What does this repository study?
+\[
+\text{condition} \longrightarrow \text{agent trajectory} \longrightarrow
+\text{work, time, cost, reliability}.
+\]
 
-The repository measures how a real AI agent communicates and behaves while resolving controlled, synthetic IT incidents.
+The project is not trying to build a general-purpose agent or to claim that a local MCP measurement is an Internet packet capture. MCP/JSON-RPC is the application measurement boundary. The scientific object is the repeated execution of an agent.
 
-The agent receives an incident ticket, investigates through local MCP tools, attempts a simulated remediation, and returns a structured answer. The system records:
+For run \(r\), the primary scalar observations are
 
-- model and MCP call counts;
-- exact local stdio request and response frame bytes;
-- model, MCP, handler, orchestration, and total latency;
-- tokens and estimated model cost;
-- ordered tool traces and rejected actions; and
-- objective task success against known ground truth.
+\[
+N_r,\; L_r,\; B_r,\; T_r,\; C_r,\; Y_r,
+\]
 
-No real infrastructure is changed. The incident world is an isolated JSON state machine.
+where these mean MCP-call count, total latency, measured frame bytes, token usage, estimated cost, and objective success. The complete ordered action sequence is also retained:
 
-## Active studies
+\[
+\mathbf X_r=(X_{r1},\ldots,X_{rN_r}).
+\]
 
-### Phase 3: measured incident agent
+Scalar outcomes are the first/basic analysis. Trajectories are richer random objects studied only after the run-level data are understood.
 
-Phase 3 asks what one complete model-driven agent trace looks like. It provides three incident families:
+## Two linked study layers
 
-| Incident | Hidden cause | Required action |
-|---|---|---|
-| Checkout failures | defective deployment | roll back the identified deployment |
-| Image-worker degradation | memory saturation on one worker | restart the affected worker |
-| Orders API outage | identity-service dependency outage | escalate to the recorded owner |
+1. **Single-run stochastic behavior.** Describe and explain variation in incident executions: workload, latency, cost, success, and action paths. Use a progressive model ladder: empirical distributions first, then justified dependence or state-process models.
+2. **System performance under load.** Deliberately generate incident arrivals to a shared fixed-worker system. Measure queue waiting, service time, throughput, utilization, reliability, and cost. This is where queueing theory becomes relevant; no queueing claim is made without actual arrivals and waiting measurements.
 
-The corrected 30-run pilot succeeded 30/30 times. Its action ledger still exposed inefficient behavior: every orders run attempted an invalid restart before escalating correctly.
+The primary trade-off is reliability versus performance: how much time, work, and cost are required to achieve a given probability of resolving the incident.
 
-### Phase 4: task-structure experiment
+## Current implementation
 
-Phase 4 asks whether hidden task structure changes agent workload and reliability. Each incident appears as a sequential, branching, or recovery task while the visible ticket, model, tools, prompt policy, and transport remain fixed.
+The repository contains a controlled synthetic incident world, a real OpenAI Agents SDK incident agent, a FastMCP server, stdio MCP frame instrumentation, objective scoring, and a React/TypeScript UI. A deterministic mode is available for measurement smoke tests without model spend; live mode requires `OPENAI_API_KEY` in `.env`.
 
-The completed main campaign contains
+The active branch is a clean restart of the study. Earlier phase work is preserved in the Git branch `archive/pre-reset-2026-09-15` and is not treated as current evidence.
 
-$$
-3\ \text{incidents}\times3\ \text{structures}\times10\ \text{repetitions}=90\ \text{runs}.
-$$
-
-Recovery structure increased expected MCP calls by about 20.5% relative to sequential structure. Branching showed no detectable call-count difference. Overall success was 85/90; all five failures occurred in the orders recovery condition.
-
-Read [the single Phase 4 results document](docs/results/phase4_task_structure_results.md) for the model, covariates, uncertainty, trace variability, limitations, and artifact checksums.
-
-### Phase 5: stochastic trace and failure-path study
-
-Phase 5 asks a practical question about the Orders recovery condition:
-
-> After escalation is rejected, does the agent read the runbook before trying another action, and how is that observable choice associated with failure?
-
-The credit-free Stage 5A reanalysis uses the 90 saved Phase 4 runs. In its ten focused Orders-recovery observations, the five agents that read the runbook first succeeded and the five that retried first failed. The separate Stage 5B campaign is now complete with 100 valid runs; 17 earlier provider-error attempts remain visible for audit but are excluded from the scientific analysis.
-
-Phase 5 also reports complete path frequencies, entropy, one-step transition counts, oracle divergence, and excess calls. It does not infer private model reasoning or claim that the traces form a Markov chain. See [the Phase 5 study guide](docs/phase5_stochastic_traces.md) and [single Phase 5 result document](docs/results/phase5_stochastic_trace_results.md).
-
-Phase 6A performs credit-free secondary analysis of those 100 saved runs: partial-history failure tables, tool usage, runtime decomposition, oracle divergence, and path concentration. It makes no new model calls and keeps run-level summaries primary.
-
-For the step-by-step statistical learning sequence, see the [Phase 6A statistical analysis roadmap](docs/planning/phase6_statistical_analysis_roadmap.md).
-
-Phase 8 begins the executable statistical baseline without new model calls. It treats scalar run-level quantitiesâ€”calls, latency, tokens, cost, and successâ€”as the first objects, exposes their distributions and batch-stability diagnostics in the Scalar Baseline view, and provides downloadable Q01â€“Q03 artifacts.
-
-Phase 10 reuses the 90-run Phase 4 campaign for workload analysis. It compares scalar MCP-call distributions across sequential, branching, and recovery task structures, then reports the pre-specified count model with incident and block adjustment. No new model calls are required.
-
-The complete specification-driven statistical program is defined in the [statistical analysis specification](docs/specs/statistical_analysis_spec.md), [question registry](docs/specs/analysis_questions.yaml), [data dictionary](docs/specs/data_dictionary.md), and [traceability matrix](docs/specs/analysis_traceability.md).
-
-Phase 12 defines the statistical study layer and reporting rules. Read the
-[Phase 12 plan](docs/planning/phase12_statistical_study_layer_plan.md) and
-[analysis contracts](docs/specs/analysis_contracts.md) to see how each number
-maps to a question, estimand, data unit, uncertainty method, and limitation.
-
-Phase 12B adds uncertainty intervals to the scalar baseline and expands the
-batch-stability diagnostic, still using saved data only.
-
-Phase 12C packages the trajectory analyses—complete paths, concentration,
-descriptive transitions, divergence, excess work, and tool coverage—without
-assuming a Markov process or making causal claims from observed paths.
-
-Phase 13 ran the first randomized recovery-policy intervention: 60 fresh runs,
-30 normal-policy controls and 30 runbook-first assignments. Success was 20/30
-under the normal policy and 30/30 under the assigned runbook-first policy. The
-estimated success difference was 33.3 percentage points (Newcombe 95% interval
-15.2–51.2 points). This result is causal only for the tested policy and
-synthetic incident configuration.
-
-For a complete explanation of every UI tab, number, chart, artifact, and measurement limitation, read the [UI guide](docs/UI_GUIDE.md).
-
-## What crosses the measurement boundary?
-
-```mermaid
-flowchart LR
-    User[React workbench] --> API[FastAPI runner]
-    API --> Model[OpenAI model]
-    Model --> Relay[Measured stdio relay]
-    Relay --> MCP[FastMCP incident server]
-    MCP --> World[Synthetic incident state]
-    World --> MCP
-    MCP --> Relay
-    Relay --> Model
-    API --> Score[Deterministic scorer]
-    API --> Artifacts[Run and campaign artifacts]
-```
-
-The relay records newline-delimited MCP/JSON-RPC frames and forwards the same bytes unchanged. These are application-layer framesâ€”not HTTP, TLS, TCP, or IP packets.
-
-For run $r$, the main recorded quantities include
-
-$$
-N_{\mathrm{model},r},\quad
-N_{\mathrm{MCP},r},\quad
-L_{\mathrm{total},r},\quad
-L_{\mathrm{model},r},\quad
-L_{\mathrm{MCP},r},\quad
-B_{\mathrm{request},r},\quad
-B_{\mathrm{response},r},\quad
-C_r,\quad
-Y_r.
-$$
-
-Server-handler time is nested inside MCP time and is reported separately rather than added twice.
-
-## Run the workbench
-
-Requirements:
-
-- Python 3.13;
-- Node.js and npm;
-- `uv`; and
-- an ignored `.env` containing `OPENAI_API_KEY` for live model runs.
-
-Install and start:
+## Run locally
 
 ```powershell
-uv --cache-dir .uv-cache python install 3.13
-uv --cache-dir .uv-cache sync --locked --all-groups
+uv sync
 npm install
-npm run demo
+npm run dev
 ```
 
-Open `http://127.0.0.1:8000`.
+Open the UI at `http://127.0.0.1:5173`. Choose an incident and run it. The UI reports measured values and explicitly labels quantities that are unavailable at the current instrumentation boundary.
 
-The UI has three active surfaces:
+## Scientific guardrails
 
-- **Trace dynamics** â€” connect the rejected-action story to counts, probabilities, uncertainty, paths, and efficiency;
-- **Behavior study** â€” compare sequential, branching, and recovery tasks;
-- **Incident Agent** â€” run and inspect one measured agent trace.
+- A fresh complete run is the experimental unit; tool calls nested inside a run are not independent replicates.
+- Descriptive associations are not causal effects. Causal claims require randomized interventions.
+- We do not infer private model reasoning.
+- We do not report TCP/IP/TLS packet quantities, Internet RTT, queue waiting, or independent-arrival results unless those quantities are actually instrumented.
+- Expensive campaigns are specified before execution and reported with uncertainty and limitations.
 
-Scripted validation spends no model credit. Live mode uses the hosted model and measured stdio transport. Repeated paid campaigns remain CLI-only.
-
-## Run the campaigns
-
-Phase 3:
-
-```powershell
-uv --cache-dir .uv-cache run --all-groups python -m agentic_ai_statistics.agent_campaigns incident-pilot-v2
-```
-
-Phase 4 credit-free design validation:
-
-```powershell
-uv --cache-dir .uv-cache run --all-groups python -m agentic_ai_statistics.behavior.campaigns task-structure-pilot-check --stage pilot --mode deterministic
-```
-
-Phase 4 live pilot or main campaign:
-
-```powershell
-uv --cache-dir .uv-cache run --all-groups python -m agentic_ai_statistics.behavior.campaigns task-structure-pilot-v2 --stage pilot
-uv --cache-dir .uv-cache run --all-groups python -m agentic_ai_statistics.behavior.campaigns task-structure-main-v1 --stage main
-```
-
-Use `--resume` after interruption or `--analyze-only` to rebuild derived tables without model calls.
-
-Phase 5 credit-free reanalysis:
-
-```powershell
-uv --cache-dir .uv-cache run --all-groups python -m agentic_ai_statistics.trace_study.campaigns reanalyze-phase4
-```
-
-Phase 5 smoke and main collection are intentionally CLI-only:
-
-```powershell
-uv --cache-dir .uv-cache run --all-groups python -m agentic_ai_statistics.trace_study.campaigns collect trace-orders-recovery-smoke-v1 --stage smoke
-uv --cache-dir .uv-cache run --all-groups python -m agentic_ai_statistics.trace_study.campaigns collect trace-orders-recovery-main-v2 --stage main --analyze-only
-```
-
-Use `--resume` after an interruption. Collection freezes a configuration fingerprint and applies a USD 5 estimated-cost guard by default.
-
-## Active API
-
-| Endpoint | Purpose |
-|---|---|
-| `GET /api/health` | Report application readiness and model availability. |
-| `GET /api/agent/scenarios` | List the three incident families. |
-| `POST /api/agent/runs` | Run one Phase 3 incident. |
-| `GET /api/agent/runs` | List saved Phase 3 runs. |
-| `GET /api/agent/campaigns` | List saved Phase 3 campaigns. |
-| `GET /api/behavior/conditions` | List the nine Phase 4 conditions. |
-| `POST /api/behavior/runs` | Run one Phase 4 condition. |
-| `GET /api/behavior/runs` | List saved Phase 4 runs. |
-| `GET /api/behavior/campaigns` | List saved Phase 4 analyses. |
-| `GET /api/trace-study/campaigns` | List Phase 5 exploratory, smoke, and main analyses. |
-
-Run and campaign detail endpoints and allow-listed CSV/Parquet downloads are also available below the corresponding prefixes.
-
-## Project structure
-
-```text
-frontend/src/components/IncidentWorkbench.tsx  Phase 3 UI
-frontend/src/components/BehaviorWorkbench.tsx  Phase 4 UI and analysis
-frontend/src/components/TraceDynamicsWorkbench.tsx  Phase 5 practical statistics UI
-src/agentic_ai_statistics/api/app.py            active HTTP API
-src/agentic_ai_statistics/incidents/             agent, MCP server, and task world
-src/agentic_ai_statistics/behavior/              Phase 4 campaigns and models
-src/agentic_ai_statistics/trace_study/           Phase 5 paths and reliability analysis
-src/agentic_ai_statistics/transport/             exact stdio frame recorder
-```
-
-Read [CODE_FLOW.md](docs/CODE_FLOW.md) for the execution path and [DEMO_WORKFLOW.md](docs/DEMO_WORKFLOW.md) for the branch and release process.
-
-## Validation
-
-The release gate is:
-
-```powershell
-uv --cache-dir .uv-cache lock --check
-uv --cache-dir .uv-cache sync --locked --all-groups --check
-uv --cache-dir .uv-cache run pytest -q
-uv --cache-dir .uv-cache run ruff check .
-uv --cache-dir .uv-cache run mypy src
-npm test
-npm run build
-npm run test:e2e
-git diff --check
-```
-
-## Documentation
-
-- [Code flow](docs/CODE_FLOW.md)
-- [Implementation status](docs/IMPLEMENTATION_STATUS.md)
-- [Demo and release workflow](docs/DEMO_WORKFLOW.md)
-- [Phase 3 method](docs/phase3_it_incident_agent.md)
-- [Phase 3 pilot result](docs/results/phase3_incident_pilot_results.md)
-- [Phase 4 method](docs/phase4_task_structure.md)
-- [Phase 4 frozen plan](docs/planning/phase4_task_structure_plan.md)
-- [Phase 4 pilot and main results](docs/results/phase4_task_structure_results.md)
-- [Phase 5 method](docs/phase5_stochastic_traces.md)
-- [Phase 5 frozen plan](docs/planning/phase5_stochastic_trace_plan.md)
-- [Phase 5 results](docs/results/phase5_stochastic_trace_results.md)
-- [Combined agent-execution study results](docs/results/agent_execution_study_results.md)
-- [Phase 6A plan](docs/planning/phase6_credit_free_analysis_plan.md)
-
-## Current limits
-
-The project does not yet measure:
-
-- HTTP, TLS, TCP, or IP behavior;
-- Internet round-trip time;
-- queue length, queue waiting, arrival processes, or utilization;
-- multi-agent orchestration;
-- production incident-response reliability.
-
-Empirical path entropy and transition frequencies describe the observed traces. They do not by themselves establish a Markov or queueing model.
-
-### Phase 14: small stochastic-process model
-
-Phase 14 uses saved traces to fit an exploratory absorbing process over compact
-observable states. It reports transition frequencies, eventual success or
-failure probabilities, expected steps, and a history-dependence diagnostic.
-Natural-policy and randomized-policy traces are analyzed separately. This is a
-model of recorded behavior, not private reasoning, network traffic, or a claim
-that the entire agent is truly Markovian. See
-[`phase14_stochastic_process_plan.md`](docs/planning/phase14_stochastic_process_plan.md)
-and [`phase14_stochastic_process_spec.md`](docs/specs/phase14_stochastic_process_spec.md).
-
-### Phase 15: held-out trajectory prediction
-
-Phase 15 tests whether stochastic models predict observable actions on new
-runs. It compares a global baseline, a current-state model, and a short-history
-model using held-out log loss, accuracy, and Brier score. Existing runs train
-the models; a separate same-configuration campaign tests them. This measures
-predictability of recorded paths, not private reasoning or general AI behavior.
-
-The permanent branches are `demo` for tested integration and `main` for released work.
+See [`docs/STATISTICAL_STUDY_PROTOCOL.md`](docs/STATISTICAL_STUDY_PROTOCOL.md) for the complete protocol and [`docs/CODE_FLOW.md`](docs/CODE_FLOW.md) for the implementation map.

@@ -20,7 +20,7 @@ test('runs and renders a scored incident observation', async () => {
   })
   render(<IncidentWorkbench />)
   await waitFor(() => expect(screen.getByText('Checkout')).toBeInTheDocument())
-  fireEvent.click(screen.getByRole('button', { name: 'Run real agent' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Run observation' }))
   await waitFor(() => expect(screen.getByText('bad deployment')).toBeInTheDocument())
   expect(screen.getByText('3 ordered MCP calls')).toBeInTheDocument()
 })

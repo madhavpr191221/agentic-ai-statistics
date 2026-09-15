@@ -236,6 +236,9 @@ async def run_incident(
             )
         else:
             result = _deterministic_result(scenario, state_path)
+            # The baseline smoke test follows the ordinary sequential oracle so that
+            # it exercises a visible, ordered trajectory as well as final scoring.
+            scripted_sequence = oracle_sequence(scenario, TaskStructure.SEQUENTIAL)
     else:
         if not os.getenv("OPENAI_API_KEY"):
             raise RuntimeError(
@@ -344,13 +347,13 @@ async def run_incident(
     ) / 1_000_000
     tool_sequence = (
         scripted_sequence
-        if mode == "deterministic" and task_structure
+        if mode == "deterministic"
         else [str(item["tool_name"]) for item in mcp_events]
     )
     sdk_tool_sequence = [item.tool_name or "unknown" for item in tool_events]
     correlation_consistent = (
         True
-        if mode == "deterministic" and task_structure
+        if mode == "deterministic"
         else sdk_tool_sequence == tool_sequence
     )
     measurement = IncidentRunMeasurement(
