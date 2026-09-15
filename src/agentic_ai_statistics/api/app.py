@@ -115,8 +115,10 @@ def create_app(
     agent_available = bool(os.getenv("OPENAI_API_KEY") or Path(".env").is_file())
     api = FastAPI(
         title="Agentic AI Statistics",
-        version="0.9.0",
-        description="Local API for measured IT-incident agent experiments.",
+        version="0.1.0",
+        description=(
+            "API for a statistical case study of stochastic agents solving controlled IT incidents."
+        ),
     )
     api.state.incident_repository = incident_repository
     api.state.behavior_repository = behavior_repository
@@ -133,7 +135,7 @@ def create_app(
     async def health() -> dict[str, object]:
         return {
             "status": "ok",
-            "phase": "10",
+            "study": "single-run stochastic behavior and performance under load",
             "measurement_boundary": "agent_model_and_stdio_mcp",
             "agent_available": agent_available,
         }
