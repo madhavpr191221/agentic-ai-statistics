@@ -1,0 +1,15 @@
+.env
+.env.*
+!.env.example
+.venv/
+.uv-cache/
+__pycache__/
+*.py[cod]
+.mypy_cache/
+.ruff_cache/
+node_modules/
+dist/
+build/
+artifacts/
+data/private/
+data/generated/
