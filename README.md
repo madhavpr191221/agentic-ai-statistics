@@ -33,4 +33,6 @@ The initial workload will be a controlled synthetic IT-incident system with know
 
 The repository is being rebuilt using Scientific Spec-Driven Development. Each feature has a specification, an implementation plan, tests, and a validation record. No feature is considered complete merely because its code runs.
 
+See [`WORKING_WITH_CHATGPT_AND_CODEX.md`](WORKING_WITH_CHATGPT_AND_CODEX.md) for the collaboration boundary between learning/research design and repository implementation.
+
 Current status: Feature 0, the research constitution and workflow, is being established. No agent implementation or live campaign is part of this stage.
